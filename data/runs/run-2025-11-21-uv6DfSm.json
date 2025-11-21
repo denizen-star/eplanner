@@ -1,0 +1,55 @@
+{
+  "id": "uv6DfSm",
+  "uuid": "8543707f-6ff2-4a1b-a32e-0a8f0589609c",
+  "location": "Gaythering, 1409, Lincoln Road, Miami Beach, Miami-Dade County, Florida, 33139, United States",
+  "pacerName": "Kervin Leacock",
+  "dateTime": "2025-11-20T23:30",
+  "maxParticipants": 5,
+  "createdAt": "2025-11-19T04:12:33.947Z",
+  "signups": [
+    {
+      "name": "Peter John",
+      "phone": "3053050003",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T04:13:22.535Z"
+    },
+    {
+      "name": "Peter John",
+      "phone": "9176700693",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T04:14:55.756Z"
+    },
+    {
+      "name": "Kervin Leacock",
+      "phone": "9176700693",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T04:15:04.482Z"
+    },
+    {
+      "name": "Kervin Leacock",
+      "phone": "9176700693",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T04:15:16.497Z"
+    },
+    {
+      "name": "Kervin Leacock",
+      "phone": "3053050003",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T04:15:30.761Z"
+    }
+  ],
+  "coordinates": [
+    25.7905644,
+    -80.1438276
+  ]
+}

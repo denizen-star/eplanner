@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide for Planners: Creating an Event - Event Planner</title>
+    <style>
+        :root {
+            --primary-green: #6b8e5a;
+            --primary-rainbow: #2563eb;
+            --dark-gray-1: #1a1a1a;
+            --dark-gray-2: #2d2d2d;
+            --light-gray-1: #f5f5f5;
+            --light-gray-2: #e0e0e0;
+            --white: #ffffff;
+            --text-dark: #3a3a2a;
+            --text-gray: #5a5a4a;
+            --border-gray: #d4d4c4;
+            --card-bg: #faf9f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f0ede8;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 24px;
+            margin-bottom: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            background: var(--primary-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .intro {
+            color: var(--text-gray);
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            background: var(--primary-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        p {
+            color: var(--text-gray);
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-gray);
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.8;
+        }
+
+        .screenshot-placeholder {
+            background: var(--light-gray-1);
+            border: 2px dashed var(--border-gray);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-gray);
+            font-style: italic;
+        }
+
+        .highlight-box {
+            background: rgba(117, 7, 135, 0.1);
+            border-left: 4px solid #750787;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: #750787;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .tip-box {
+            background: rgba(0, 128, 38, 0.1);
+            border-left: 4px solid #008026;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .tip-box strong {
+            color: #008026;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .whatsapp-section {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+
+        .whatsapp-section h2 {
+            color: white;
+            -webkit-text-fill-color: white;
+            background: none;
+            margin-bottom: 20px;
+        }
+
+        .whatsapp-section p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 16px 0;
+            padding: 10px 20px;
+            background: var(--primary-rainbow);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(117, 7, 135, 0.4);
+        }
+
+        code {
+            background: var(--light-gray-1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .section {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:void(0);" onclick="goBack()" class="back-link">← Back</a>
+        <div class="header">
+            <h1>Guide for Pacers: Creating a Run</h1>
+            <p class="intro">Welcome to the Gay Run Club platform! This guide will walk you through the process of creating and managing a run event. As a pacer, you'll coordinate runs for our community, and this platform makes it easy to organize, share, and manage your events.</p>
+        </div>
+
+        <div class="section">
+            <h2>Overview</h2>
+            <p>When you create a run, you'll receive two important links:</p>
+            <ul>
+                <li><strong>Signup Link</strong>: Share this with runners so they can register for your run</li>
+                <li><strong>Management Link</strong>: Keep this private - use it to view who has signed up</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Step-by-Step Instructions</h2>
+
+            <h3>Step 1: Navigate to the Coordinate a Run Page</h3>
+            <ol>
+                <li>Open your web browser and go to the Gay Run Club website</li>
+                <li>On desktop: Click on <strong>"Coordinate a Run"</strong> in the navigation menu at the top of the page</li>
+                <li>On mobile: Tap the hamburger menu (☰) icon, then tap <strong>"Coordinate a Run"</strong></li>
+            </ol>
+            <div class="tip-box">
+                <strong>Note</strong>
+                The platform is fully mobile-friendly. On mobile devices, you'll see a hamburger menu icon (☰) in the top right corner. Tap it to access the navigation menu.
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Homepage showing the navigation menu with "Coordinate a Run" option highlighted]
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Mobile view showing hamburger menu icon]
+            </div>
+
+            <h3>Step 2: Fill Out the Run Details Form</h3>
+            <p>You'll see a form with several fields to complete. Here's what each field means:</p>
+
+            <h4>Pacer Name *</h4>
+            <ul>
+                <li>Enter your full name as you'd like it to appear to runners</li>
+                <li>Example: "John Smith" or "Alex Martinez"</li>
+                <li>This field is required</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Form showing the Pacer Name field]
+            </div>
+
+            <h4>Run Title (Optional)</h4>
+            <ul>
+                <li>Give your run a descriptive name if you'd like</li>
+                <li>Examples: "Morning Beach Run", "Sunset Run", "Weekly Group Run"</li>
+                <li>This field is optional - you can leave it blank</li>
+                <li>If provided, the title will appear in the signup page and help runners identify your run</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Run Title field showing example title]
+            </div>
+
+            <h4>Date and Time *</h4>
+            <ul>
+                <li>Click on the date/time field to open a calendar picker</li>
+                <li>Select the date and time for your run</li>
+                <li>The default is set to tomorrow at 6:30 PM, but you can change it</li>
+                <li>This field is required</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Date/time picker showing how to select a date and time]
+            </div>
+
+            <h4>Max Number of Participants *</h4>
+            <ul>
+                <li>Enter the maximum number of runners you want to allow for this run</li>
+                <li>The default is 10 participants</li>
+                <li>You can increase or decrease this number based on your preference</li>
+                <li>This field is required</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Max Participants field with default value of 10]
+            </div>
+
+            <h4>Location *</h4>
+            <ul>
+                <li>Enter the address or location name where the run will start</li>
+                <li>You can enter:
+                    <ul>
+                        <li>A full address (e.g., "1664 Lincoln Rd, Miami Beach, FL 33139")</li>
+                        <li>A location name (e.g., "Gaythering")</li>
+                        <li>Any recognizable location description</li>
+                    </ul>
+                </li>
+                <li>As you type, the system will validate the location and show a map</li>
+                <li>This field is required</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Location field with example address entered]
+            </div>
+
+            <h3>Step 3: Verify Location on Map</h3>
+            <p>After entering the location, a map will appear below the location field showing:</p>
+            <ul>
+                <li>A pin marking the exact location</li>
+                <li>The validated address (which may differ slightly from what you typed)</li>
+                <li>A confirmation box showing the validated address</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Important</strong>
+                Review the map and validated address to ensure it's correct. If the location is wrong, you can edit the location field and try again.
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Map display showing the location pin and validated address confirmation]
+            </div>
+
+            <h3>Step 4: Submit the Form and Receive Your Links</h3>
+            <ol>
+                <li>Once all fields are filled out correctly, click the <strong>"Create Run"</strong> button</li>
+                <li>The form will process your submission (this may take a few seconds)</li>
+                <li>After successful submission, you'll see a success message with two important links</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Success message showing "Run Created Successfully!" with the two links displayed]
+            </div>
+
+            <h4>Your Links:</h4>
+            <div class="highlight-box">
+                <strong>Signup Link:</strong>
+                <ul style="margin-top: 8px;">
+                    <li>This is the link you'll share with runners</li>
+                    <li>Copy this link and share it via WhatsApp, email, social media, or any other method</li>
+                    <li>Runners will use this link to register for your run</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <strong>Management Link:</strong>
+                <ul style="margin-top: 8px;">
+                    <li>This is your private link to manage the run</li>
+                    <li>Keep this link secure and don't share it publicly</li>
+                    <li>Use this link to view who has signed up, check the number of spots remaining, and see run details</li>
+                </ul>
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Close-up of the two links with Copy buttons visible]
+            </div>
+
+            <h3>Step 5: Share the Signup Link with Runners</h3>
+            <p>Now that you have your signup link, share it with potential participants:</p>
+            <ol>
+                <li>Click the <strong>"Copy"</strong> button next to the Signup Link</li>
+                <li>The link will be copied to your clipboard</li>
+                <li>Share it through:
+                    <ul>
+                        <li>WhatsApp groups</li>
+                        <li>Instagram stories or posts</li>
+                        <li>Email</li>
+                        <li>Facebook events</li>
+                        <li>Any other communication channel your community uses</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="tip-box">
+                <strong>Tip</strong>
+                You can also click directly on the link to open it in a new tab and verify it works correctly.
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Example of sharing the link via WhatsApp or social media]
+            </div>
+
+            <h3>Step 6: Access Quick Guides</h3>
+            <p>On the Coordinate a Run page, you'll find a collapsible <strong>"User Guides"</strong> section at the bottom. This provides a quick reference guide for creating runs. Click on it to expand and see the step-by-step summary.</p>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: User Guides collapsible section on the coordinate page]
+            </div>
+
+            <h3>Step 7: Use the Management Link to View Signups</h3>
+            <p>To check who has signed up for your run:</p>
+            <ol>
+                <li>Click on your <strong>Management Link</strong> (or copy and paste it into your browser)</li>
+                <li>You'll see a page showing:
+                    <ul>
+                        <li>Run details (location, date/time, pacer name)</li>
+                        <li>Current number of signups vs. maximum participants</li>
+                        <li>A map showing the run location</li>
+                        <li>A collapsible list of all runners who have signed up</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Management page showing run details and signups list]
+            </div>
+
+            <h4>Viewing Signups:</h4>
+            <ol>
+                <li>Click on the <strong>"Signups"</strong> section to expand it</li>
+                <li>You'll see a list of all registered runners with:
+                    <ul>
+                        <li>Their name</li>
+                        <li>Phone number (clickable to call)</li>
+                        <li>Email address (if provided)</li>
+                        <li>Instagram handle (if provided)</li>
+                        <li>Signup date and time</li>
+                        <li>Waiver acceptance status</li>
+                    </ul>
+                </li>
+                <li>Click the <strong>"Refresh"</strong> button to update the list with the latest signups</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Expanded signups list showing runner details]
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Additional Features</h2>
+
+            <h3>Mobile Navigation</h3>
+            <p>The platform includes a mobile-friendly navigation system:</p>
+            <ul>
+                <li><strong>Hamburger Menu</strong>: On mobile devices, tap the ☰ icon in the top right to access the menu</li>
+                <li><strong>User Guides Dropdown</strong>: Access instruction guides directly from the navigation menu</li>
+                <li><strong>Touch-Friendly</strong>: All buttons and links are optimized for touch interaction</li>
+            </ul>
+
+            <h3>Quick Guides on Page</h3>
+            <p>Each page includes inline quick guides in a collapsible section:</p>
+            <ul>
+                <li>Click the <strong>"User Guides"</strong> section to expand it</li>
+                <li>View a condensed version of the instructions without leaving the page</li>
+                <li>Perfect for quick reference while filling out forms</li>
+            </ul>
+
+            <h3>Run Title Feature</h3>
+            <p>The optional Run Title field allows you to:</p>
+            <ul>
+                <li>Give your run a memorable name</li>
+                <li>Help runners identify your run when sharing</li>
+                <li>Make your run stand out in lists and reports</li>
+                <li>Examples: "Morning Beach Run", "Sunset Social Run", "Weekly Group Run"</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Tips for Successful Run Coordination</h2>
+
+            <h3>Before Creating Your Run</h3>
+            <ul>
+                <li><strong>Plan ahead</strong>: Create your run at least a few days in advance to give runners time to sign up</li>
+                <li><strong>Choose a good location</strong>: Pick a location that's easy to find and safe for running</li>
+                <li><strong>Set realistic limits</strong>: Consider your ability to manage the group when setting max participants</li>
+                <li><strong>Check the weather</strong>: While you can't control it, be aware of forecasted conditions</li>
+            </ul>
+
+            <h3>After Creating Your Run</h3>
+            <ul>
+                <li><strong>Share early and often</strong>: Post your signup link multiple times as the run date approaches</li>
+                <li><strong>Monitor signups</strong>: Check your management link regularly to see how many people have signed up</li>
+                <li><strong>Communicate with runners</strong>: Consider creating a WhatsApp group for the run to coordinate details</li>
+                <li><strong>Be prepared</strong>: Arrive early to the location and be ready to welcome runners</li>
+            </ul>
+
+            <h3>Best Practices</h3>
+            <ul>
+                <li><strong>Be inclusive</strong>: Welcome runners of all skill levels</li>
+                <li><strong>Safety first</strong>: Ensure the route is safe and well-lit if running in the evening</li>
+                <li><strong>Have a backup plan</strong>: Know what to do if weather conditions are unsafe</li>
+                <li><strong>Stay organized</strong>: Keep track of who's coming using your management link</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Troubleshooting</h2>
+
+            <h3>The map isn't showing my location correctly</h3>
+            <ul>
+                <li>Try entering a more specific address</li>
+                <li>Include city and state in your location description</li>
+                <li>Check the validated address shown - it may be more accurate than what you typed</li>
+            </ul>
+
+            <h3>I can't find my management link</h3>
+            <ul>
+                <li>Check your browser history - the link should be there after you create the run</li>
+                <li>If you're an administrator, you can also find your run in the Admin Dashboard and access the management link from there</li>
+            </ul>
+
+            <h3>The form won't submit</h3>
+            <ul>
+                <li>Make sure all required fields (marked with *) are filled out</li>
+                <li>Check that your date/time is in the future</li>
+                <li>Ensure your max participants is a number greater than 0</li>
+                <li>Verify your location is valid (the map should show it)</li>
+            </ul>
+
+            <h3>I need to change run details after creating it</h3>
+            <ul>
+                <li>If you're an administrator, you can edit runs through the Admin Dashboard</li>
+                <li>Otherwise, you may need to create a new run with the corrected information</li>
+            </ul>
+        </div>
+
+        <div class="whatsapp-section">
+            <h2>WhatsApp Quick Guide</h2>
+            <p><strong>📱 Quick Guide: Creating a Run</strong></p>
+            <p>1️⃣ Go to "Coordinate a Run" page</p>
+            <p>2️⃣ Fill in:<br>
+               &nbsp;&nbsp;&nbsp;• Your name (Pacer Name)<br>
+               &nbsp;&nbsp;&nbsp;• Date & time<br>
+               &nbsp;&nbsp;&nbsp;• Max participants<br>
+               &nbsp;&nbsp;&nbsp;• Location (address or name)</p>
+            <p>3️⃣ Check the map shows correct location</p>
+            <p>4️⃣ Click "Create Run"</p>
+            <p>5️⃣ Copy the Signup Link & share with runners</p>
+            <p>6️⃣ Keep Management Link private to view signups</p>
+            <p><strong>💡 Tip:</strong> Share signup link early so runners can plan ahead!</p>
+            <p style="margin-top: 20px; font-size: 14px; opacity: 0.9;"><em>Need help? Contact the admin team or check the full guide for detailed instructions.</em></p>
+        </div>
+        <a href="javascript:void(0);" onclick="goBack()" class="back-link" style="margin-top: 32px;">← Back</a>
+    </div>
+    <script>
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '../../index.html';
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Layout Options - Event Planner</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 32px;
+        }
+        .demo-section {
+            margin-bottom: 60px;
+        }
+        .demo-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-gray);
+            color: var(--primary-rainbow);
+        }
+        
+        /* Option 1: Compact Table Layout */
+        .table-layout {
+            overflow-x: auto;
+        }
+        .runs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-gray);
+        }
+        .runs-table thead {
+            background: var(--light-gray-1);
+        }
+        .runs-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border-gray);
+            font-size: 14px;
+        }
+        .runs-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-gray);
+            color: var(--text-gray);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        .runs-table tbody tr:hover {
+            background: var(--light-gray-1);
+        }
+        .runs-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-open {
+            background: rgba(0, 128, 38, 0.1);
+            color: #008026;
+        }
+        .status-full {
+            background: rgba(228, 3, 3, 0.1);
+            color: #e40303;
+        }
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .table-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Option 2: Card Grid with Summary */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+        .compact-card {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 16px;
+            transition: box-shadow 0.2s ease;
+        }
+        .compact-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .compact-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .compact-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+            flex: 1;
+        }
+        .compact-card-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+        .compact-card-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .compact-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-gray);
+        }
+        .compact-card-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
+        /* Option 3: Compact List with Inline Details */
+        .compact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-gray);
+        }
+        .list-item {
+            background: var(--white);
+            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 120px 100px auto;
+            gap: 16px;
+            align-items: center;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+        .list-item:hover {
+            background: var(--light-gray-1);
+        }
+        .list-item-location {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .list-item-date {
+            color: var(--text-gray);
+        }
+        .list-item-signups {
+            color: var(--text-gray);
+            text-align: center;
+        }
+        .list-item-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+        .list-item-actions button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        /* Option 4: Feed/Timeline View */
+        .timeline-view {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-gray);
+        }
+        .timeline-date-group {
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .timeline-date-header {
+            position: absolute;
+            left: -28px;
+            top: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-rainbow);
+            border-radius: 50%;
+            border: 3px solid var(--white);
+            box-shadow: 0 0 0 2px var(--border-gray);
+        }
+        .timeline-date-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            padding-left: 12px;
+        }
+        .timeline-item {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            position: relative;
+            margin-left: 12px;
+        }
+        .timeline-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .timeline-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        .timeline-item-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+        .timeline-item-actions {
+            display: flex;
+            gap: 6px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        .timeline-item:hover .timeline-item-actions {
+            opacity: 1;
+        }
+        .timeline-item-actions button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        /* Date Grouping Styles */
+        .runs-with-dates {
+            margin-top: 24px;
+        }
+        .date-group {
+            margin-bottom: 32px;
+        }
+        .date-group-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        /* Mobile Preview Styles */
+        .mobile-preview-section {
+            border-top: 3px dashed var(--border-gray);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .mobile-preview-container {
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 16px;
+            background: #f0ede8;
+        }
+        .mobile-list .list-item {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            padding: 16px;
+        }
+        .mobile-list .list-item > div {
+            width: 100%;
+        }
+        .mobile-list .list-item-location {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .mobile-list .list-item-date::before {
+            content: "Time: ";
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .mobile-list .list-item-signups::before {
+            content: "Signups: ";
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .mobile-list .list-item-signups {
+            text-align: left;
+        }
+        .mobile-list .list-item-actions {
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-gray);
+            justify-content: stretch;
+        }
+        .mobile-list .list-item-actions button {
+            flex: 1;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            .list-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 16px;
+            }
+            .list-item > div {
+                width: 100%;
+            }
+            .list-item-location {
+                font-size: 15px;
+                margin-bottom: 4px;
+            }
+            .list-item-date::before {
+                content: "Time: ";
+                font-weight: 600;
+                color: var(--text-dark);
+            }
+            .list-item-signups::before {
+                content: "Signups: ";
+                font-weight: 600;
+                color: var(--text-dark);
+            }
+            .list-item-signups {
+                text-align: left;
+            }
+            .list-item-actions {
+                margin-top: 8px;
+                padding-top: 12px;
+                border-top: 1px solid var(--border-gray);
+                justify-content: stretch;
+            }
+            .list-item-actions button {
+                flex: 1;
+                width: 100%;
+            }
+            .timeline-view {
+                padding-left: 30px;
+            }
+            .runs-table {
+                font-size: 12px;
+            }
+            .runs-table th,
+            .runs-table td {
+                padding: 8px;
+            }
+            .date-group-header {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">EP</div>
+                Event Planner
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="demo-container">
+        <div class="card">
+            <h1>Admin Runs Layout Options</h1>
+            <p style="color: var(--text-gray); margin-bottom: 32px;">
+                Four compact layout options for displaying runs on the Admin page. Each option uses the same mock data below.
+            </p>
+
+            <!-- Option 1: Compact Table Layout -->
+            <div class="demo-section">
+                <h2>Option 1: Compact Table Layout</h2>
+                <div class="table-layout">
+                    <table class="runs-table">
+                        <thead>
+                            <tr>
+                                <th>Location / Pacer</th>
+                                <th>Date & Time</th>
+                                <th>Signups</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>1664 Lincoln Road, Miami Beach</strong><br>
+                                    <span style="color: var(--text-gray); font-size: 12px;">John Doe</span>
+                                </td>
+                                <td>11/20/2025, 6:30 PM</td>
+                                <td>5 / 10</td>
+                                <td><span class="status-badge status-open">Open</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Central Park, NYC</strong><br>
+                                    <span style="color: var(--text-gray); font-size: 12px;">Jane Smith</span>
+                                </td>
+                                <td>11/21/2025, 7:00 AM</td>
+                                <td>15 / 15</td>
+                                <td><span class="status-badge status-full">Full</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Golden Gate Park, San Francisco</strong><br>
+                                    <span style="color: var(--text-gray); font-size: 12px;">Mike Johnson</span>
+                                </td>
+                                <td>11/21/2025, 8:00 AM</td>
+                                <td>3 / 12</td>
+                                <td><span class="status-badge status-open">Open</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Option 2: Card Grid with Summary -->
+            <div class="demo-section">
+                <h2>Option 2: Card Grid with Summary</h2>
+                <div class="card-grid">
+                    <div class="compact-card">
+                        <div class="compact-card-header">
+                            <h3 class="compact-card-title">1664 Lincoln Road, Miami Beach</h3>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px;">John Doe</div>
+                        <div class="compact-card-meta">
+                            <div class="compact-card-meta-item">
+                                <strong>Date:</strong> 11/20/2025, 6:30 PM
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <strong>Signups:</strong> 5 / 10
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <span class="status-badge status-open">Open</span>
+                            </div>
+                        </div>
+                        <div class="compact-card-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                    <div class="compact-card">
+                        <div class="compact-card-header">
+                            <h3 class="compact-card-title">Central Park, NYC</h3>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px;">Jane Smith</div>
+                        <div class="compact-card-meta">
+                            <div class="compact-card-meta-item">
+                                <strong>Date:</strong> 11/21/2025, 7:00 AM
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <strong>Signups:</strong> 15 / 15
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <span class="status-badge status-full">Full</span>
+                            </div>
+                        </div>
+                        <div class="compact-card-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                    <div class="compact-card">
+                        <div class="compact-card-header">
+                            <h3 class="compact-card-title">Golden Gate Park, San Francisco</h3>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px;">Mike Johnson</div>
+                        <div class="compact-card-meta">
+                            <div class="compact-card-meta-item">
+                                <strong>Date:</strong> 11/21/2025, 8:00 AM
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <strong>Signups:</strong> 3 / 12
+                            </div>
+                            <div class="compact-card-meta-item">
+                                <span class="status-badge status-open">Open</span>
+                            </div>
+                        </div>
+                        <div class="compact-card-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 3: Compact List with Inline Details -->
+            <div class="demo-section">
+                <h2>Option 3: Compact List with Inline Details</h2>
+                <div class="compact-list">
+                    <div class="list-item">
+                        <div class="list-item-location">
+                            1664 Lincoln Road, Miami Beach<br>
+                            <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">John Doe</span>
+                        </div>
+                        <div class="list-item-date">11/20/2025, 6:30 PM</div>
+                        <div class="list-item-signups">5 / 10</div>
+                        <div><span class="status-badge status-open">Open</span></div>
+                        <div class="list-item-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div class="list-item-location">
+                            Central Park, NYC<br>
+                            <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Jane Smith</span>
+                        </div>
+                        <div class="list-item-date">11/21/2025, 7:00 AM</div>
+                        <div class="list-item-signups">15 / 15</div>
+                        <div><span class="status-badge status-full">Full</span></div>
+                        <div class="list-item-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div class="list-item-location">
+                            Golden Gate Park, San Francisco<br>
+                            <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Mike Johnson</span>
+                        </div>
+                        <div class="list-item-date">11/21/2025, 8:00 AM</div>
+                        <div class="list-item-signups">3 / 12</div>
+                        <div><span class="status-badge status-open">Open</span></div>
+                        <div class="list-item-actions">
+                            <button class="button button-secondary">Edit</button>
+                            <button class="button button-secondary">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hybrid: Option 3 + Option 4 Date Grouping (Selected Design) -->
+            <div class="demo-section">
+                <h2>Selected Design: Compact List + Date Grouping (Desktop View)</h2>
+                <div class="runs-with-dates">
+                    <div class="date-group">
+                        <div class="date-group-header">November 21, 2025</div>
+                        <div class="compact-list">
+                            <div class="list-item">
+                                <div class="list-item-location">
+                                    Golden Gate Park, San Francisco<br>
+                                    <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Mike Johnson</span>
+                                </div>
+                                <div class="list-item-date">8:00 AM</div>
+                                <div class="list-item-signups">3 / 12</div>
+                                <div><span class="status-badge status-open">Open</span></div>
+                                <div class="list-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-location">
+                                    Central Park, NYC<br>
+                                    <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Jane Smith</span>
+                                </div>
+                                <div class="list-item-date">7:00 AM</div>
+                                <div class="list-item-signups">15 / 15</div>
+                                <div><span class="status-badge status-full">Full</span></div>
+                                <div class="list-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="date-group">
+                        <div class="date-group-header">November 20, 2025</div>
+                        <div class="compact-list">
+                            <div class="list-item">
+                                <div class="list-item-location">
+                                    1664 Lincoln Road, Miami Beach<br>
+                                    <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">John Doe</span>
+                                </div>
+                                <div class="list-item-date">6:30 PM</div>
+                                <div class="list-item-signups">5 / 10</div>
+                                <div><span class="status-badge status-open">Open</span></div>
+                                <div class="list-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Preview -->
+            <div class="demo-section mobile-preview-section">
+                <h2>Mobile View (< 768px)</h2>
+                <p style="color: var(--text-gray); margin-bottom: 16px; font-size: 14px;">
+                    On mobile devices, the 5-column grid stacks vertically into a single column. Each field appears on its own line with labels.
+                </p>
+                <div class="mobile-preview-container">
+                    <div class="runs-with-dates">
+                        <div class="date-group">
+                            <div class="date-group-header">November 21, 2025</div>
+                            <div class="compact-list mobile-list">
+                                <div class="list-item mobile-list-item">
+                                    <div class="list-item-location">
+                                        Golden Gate Park, San Francisco<br>
+                                        <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Mike Johnson</span>
+                                    </div>
+                                    <div class="list-item-date">8:00 AM</div>
+                                    <div class="list-item-signups">3 / 12</div>
+                                    <div><span class="status-badge status-open">Open</span></div>
+                                    <div class="list-item-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </div>
+                                <div class="list-item mobile-list-item">
+                                    <div class="list-item-location">
+                                        Central Park, NYC<br>
+                                        <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">Jane Smith</span>
+                                    </div>
+                                    <div class="list-item-date">7:00 AM</div>
+                                    <div class="list-item-signups">15 / 15</div>
+                                    <div><span class="status-badge status-full">Full</span></div>
+                                    <div class="list-item-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="date-group">
+                            <div class="date-group-header">November 20, 2025</div>
+                            <div class="compact-list mobile-list">
+                                <div class="list-item mobile-list-item">
+                                    <div class="list-item-location">
+                                        1664 Lincoln Road, Miami Beach<br>
+                                        <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">John Doe</span>
+                                    </div>
+                                    <div class="list-item-date">6:30 PM</div>
+                                    <div class="list-item-signups">5 / 10</div>
+                                    <div><span class="status-badge status-open">Open</span></div>
+                                    <div class="list-item-actions">
+                                        <button class="button button-secondary">Edit</button>
+                                        <button class="button button-secondary">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 4: Feed/Timeline View -->
+            <div class="demo-section">
+                <h2>Option 4: Feed/Timeline View</h2>
+                <div class="timeline-view">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-date-group">
+                        <div class="timeline-date-header"></div>
+                        <div class="timeline-date-label">November 20, 2025</div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-header">
+                                <h3 class="timeline-item-title">1664 Lincoln Road, Miami Beach</h3>
+                                <div class="timeline-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 8px;">John Doe</div>
+                            <div class="timeline-item-meta">
+                                <span><strong>Time:</strong> 6:30 PM</span>
+                                <span><strong>Signups:</strong> 5 / 10</span>
+                                <span class="status-badge status-open">Open</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-date-group">
+                        <div class="timeline-date-header"></div>
+                        <div class="timeline-date-label">November 21, 2025</div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-header">
+                                <h3 class="timeline-item-title">Central Park, NYC</h3>
+                                <div class="timeline-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 8px;">Jane Smith</div>
+                            <div class="timeline-item-meta">
+                                <span><strong>Time:</strong> 7:00 AM</span>
+                                <span><strong>Signups:</strong> 15 / 15</span>
+                                <span class="status-badge status-full">Full</span>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-header">
+                                <h3 class="timeline-item-title">Golden Gate Park, San Francisco</h3>
+                                <div class="timeline-item-actions">
+                                    <button class="button button-secondary">Edit</button>
+                                    <button class="button button-secondary">Delete</button>
+                                </div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 8px;">Mike Johnson</div>
+                            <div class="timeline-item-meta">
+                                <span><strong>Time:</strong> 8:00 AM</span>
+                                <span><strong>Signups:</strong> 3 / 12</span>
+                                <span class="status-badge status-open">Open</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

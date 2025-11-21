@@ -1,0 +1,32 @@
+{
+  "name": "eplanner",
+  "version": "3.0.0",
+  "description": "Community event management platform for coordinating and managing events",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "events",
+    "event-planning",
+    "community",
+    "event-management"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@planetscale/database": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Scheme Preview - Gay Run Club</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #1a1a1a;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: #f5f5f5;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #e0e0e0;
+        }
+
+        .schemes-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .scheme {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 24px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .scheme:hover {
+            border-color: #00A86B;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .scheme-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .scheme-description {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .preview-card {
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .preview-card h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .preview-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+
+        .preview-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .preview-signup {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border: 1px solid;
+        }
+
+        /* Scheme 1: Zen - Peaceful & Natural */
+        .scheme-1 .preview-card {
+            background: #faf9f6;
+            color: #3a3a2a;
+        }
+
+        .scheme-1 .preview-card h3 {
+            color: #6b8e5a;
+        }
+
+        .scheme-1 .preview-button-primary {
+            background: #6b8e5a;
+            color: #ffffff;
+        }
+
+        .scheme-1 .preview-button-secondary {
+            background: #ffffff;
+            color: #3a3a2a;
+            border: 1px solid #d4d4c4;
+        }
+
+        .scheme-1 .preview-input {
+            background: #ffffff;
+            color: #3a3a2a;
+            border-color: #d4d4c4;
+        }
+
+        .scheme-1 .preview-signup {
+            background: #ffffff;
+            color: #5a5a4a;
+            border-color: #d4d4c4;
+        }
+
+        /* Scheme 2: Minimalist - Clean & Simple */
+        .scheme-2 .preview-card {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .scheme-2 .preview-card h3 {
+            color: #000000;
+        }
+
+        .scheme-2 .preview-button-primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .scheme-2 .preview-button-secondary {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+        }
+
+        .scheme-2 .preview-input {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 2px solid #e0e0e0;
+        }
+
+        .scheme-2 .preview-signup {
+            background: #fafafa;
+            color: #1a1a1a;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Scheme 3: Gay Pride - Vibrant Rainbow */
+        .scheme-3 .preview-card {
+            background: #fff9f0;
+            color: #1a0a2e;
+        }
+
+        .scheme-3 .preview-card h3 {
+            background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scheme-3 .preview-button-primary {
+            background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
+            color: #ffffff;
+        }
+
+        .scheme-3 .preview-button-secondary {
+            background: #ffffff;
+            color: #750787;
+            border: 2px solid #750787;
+        }
+
+        .scheme-3 .preview-input {
+            background: #ffffff;
+            color: #1a0a2e;
+            border: 2px solid #ff8c00;
+        }
+
+        .scheme-3 .preview-signup {
+            background: linear-gradient(90deg, rgba(228,3,3,0.1), rgba(255,140,0,0.1), rgba(255,237,0,0.1), rgba(0,128,38,0.1), rgba(0,77,255,0.1), rgba(117,7,135,0.1));
+            color: #1a0a2e;
+            border: 1px solid #ff8c00;
+        }
+
+        /* Scheme 4: Powerful Surprise - Bold Neon */
+        .scheme-4 .preview-card {
+            background: #0a0a0a;
+            color: #00ff88;
+        }
+
+        .scheme-4 .preview-card h3 {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .scheme-4 .preview-button-primary {
+            background: #00ff88;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+
+        .scheme-4 .preview-button-secondary {
+            background: transparent;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .scheme-4 .preview-input {
+            background: #1a1a1a;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+        }
+
+        .scheme-4 .preview-signup {
+            background: #1a1a1a;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .select-button {
+            width: 100%;
+            padding: 16px;
+            margin-top: 16px;
+            border: 2px solid;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scheme-1 .select-button {
+            background: #6b8e5a;
+            color: #ffffff;
+            border-color: #6b8e5a;
+        }
+
+        .scheme-2 .select-button {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        .scheme-3 .select-button {
+            background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
+            color: #ffffff;
+            border: none;
+        }
+
+        .scheme-4 .select-button {
+            background: #00ff88;
+            color: #0a0a0a;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+
+        .select-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Color Scheme Preview</h1>
+        <p>Choose a color scheme to rebrand the application</p>
+    </div>
+
+    <div class="schemes-container">
+        <!-- Scheme 1: Zen -->
+        <div class="scheme scheme-1">
+            <h2 class="scheme-title">Scheme 1: Zen</h2>
+            <p class="scheme-description">Peaceful & natural - calm earth tones</p>
+            <div class="color-palette">
+                <div class="color-swatch" style="background: #6b8e5a;"></div>
+                <div class="color-swatch" style="background: #faf9f6;"></div>
+                <div class="color-swatch" style="background: #3a3a2a;"></div>
+                <div class="color-swatch" style="background: #d4d4c4;"></div>
+            </div>
+            <div class="preview-card">
+                <h3>Run Management</h3>
+                <button class="preview-button preview-button-primary">Create Run</button>
+                <button class="preview-button preview-button-secondary">View Signups</button>
+                <input type="text" class="preview-input" placeholder="Location" value="Central Park">
+                <div class="preview-signup">John Doe - 555-123-4567 - 11/19/2025, 2:30:00 PM - Waiver: Yes</div>
+                <div class="preview-signup">Jane Smith - 555-987-6543 - 11/19/2025, 3:15:00 PM - Waiver: Yes</div>
+            </div>
+            <button class="select-button" onclick="selectScheme(1)">Select This Scheme</button>
+        </div>
+
+        <!-- Scheme 2: Minimalist -->
+        <div class="scheme scheme-2">
+            <h2 class="scheme-title">Scheme 2: Minimalist</h2>
+            <p class="scheme-description">Clean & simple - pure black and white</p>
+            <div class="color-palette">
+                <div class="color-swatch" style="background: #000000;"></div>
+                <div class="color-swatch" style="background: #ffffff;"></div>
+                <div class="color-swatch" style="background: #1a1a1a;"></div>
+                <div class="color-swatch" style="background: #e0e0e0;"></div>
+            </div>
+            <div class="preview-card">
+                <h3>Run Management</h3>
+                <button class="preview-button preview-button-primary">Create Run</button>
+                <button class="preview-button preview-button-secondary">View Signups</button>
+                <input type="text" class="preview-input" placeholder="Location" value="Central Park">
+                <div class="preview-signup">John Doe - 555-123-4567 - 11/19/2025, 2:30:00 PM - Waiver: Yes</div>
+                <div class="preview-signup">Jane Smith - 555-987-6543 - 11/19/2025, 3:15:00 PM - Waiver: Yes</div>
+            </div>
+            <button class="select-button" onclick="selectScheme(2)">Select This Scheme</button>
+        </div>
+
+        <!-- Scheme 3: Gay Pride -->
+        <div class="scheme scheme-3">
+            <h2 class="scheme-title">Scheme 3: Gay Pride</h2>
+            <p class="scheme-description">Vibrant rainbow - bold LGBTQ+ colors</p>
+            <div class="color-palette">
+                <div class="color-swatch" style="background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);"></div>
+                <div class="color-swatch" style="background: #fff9f0;"></div>
+                <div class="color-swatch" style="background: #750787;"></div>
+                <div class="color-swatch" style="background: #ff8c00;"></div>
+            </div>
+            <div class="preview-card">
+                <h3>Run Management</h3>
+                <button class="preview-button preview-button-primary">Create Run</button>
+                <button class="preview-button preview-button-secondary">View Signups</button>
+                <input type="text" class="preview-input" placeholder="Location" value="Central Park">
+                <div class="preview-signup">John Doe - 555-123-4567 - 11/19/2025, 2:30:00 PM - Waiver: Yes</div>
+                <div class="preview-signup">Jane Smith - 555-987-6543 - 11/19/2025, 3:15:00 PM - Waiver: Yes</div>
+            </div>
+            <button class="select-button" onclick="selectScheme(3)">Select This Scheme</button>
+        </div>
+
+        <!-- Scheme 4: Powerful Surprise -->
+        <div class="scheme scheme-4">
+            <h2 class="scheme-title">Scheme 4: Powerful Surprise</h2>
+            <p class="scheme-description">Bold neon - cyberpunk energy</p>
+            <div class="color-palette">
+                <div class="color-swatch" style="background: #00ff88;"></div>
+                <div class="color-swatch" style="background: #0a0a0a;"></div>
+                <div class="color-swatch" style="background: #1a1a1a;"></div>
+                <div class="color-swatch" style="background: #003322;"></div>
+            </div>
+            <div class="preview-card">
+                <h3>Run Management</h3>
+                <button class="preview-button preview-button-primary">Create Run</button>
+                <button class="preview-button preview-button-secondary">View Signups</button>
+                <input type="text" class="preview-input" placeholder="Location" value="Central Park">
+                <div class="preview-signup">John Doe - 555-123-4567 - 11/19/2025, 2:30:00 PM - Waiver: Yes</div>
+                <div class="preview-signup">Jane Smith - 555-987-6543 - 11/19/2025, 3:15:00 PM - Waiver: Yes</div>
+            </div>
+            <button class="select-button" onclick="selectScheme(4)">Select This Scheme</button>
+        </div>
+    </div>
+
+    <script>
+        function selectScheme(schemeNumber) {
+            const schemes = {
+                1: {
+                    name: 'Zen',
+                    primary: '#6b8e5a',
+                    cardBg: '#faf9f6',
+                    textDark: '#3a3a2a',
+                    textGray: '#5a5a4a',
+                    border: '#d4d4c4'
+                },
+                2: {
+                    name: 'Minimalist',
+                    primary: '#000000',
+                    cardBg: '#ffffff',
+                    textDark: '#1a1a1a',
+                    textGray: '#1a1a1a',
+                    border: '#e0e0e0'
+                },
+                3: {
+                    name: 'Gay Pride',
+                    primary: '#750787',
+                    cardBg: '#fff9f0',
+                    textDark: '#1a0a2e',
+                    textGray: '#1a0a2e',
+                    border: '#ff8c00',
+                    gradient: 'linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787)'
+                },
+                4: {
+                    name: 'Powerful Surprise',
+                    primary: '#00ff88',
+                    cardBg: '#0a0a0a',
+                    textDark: '#00ff88',
+                    textGray: '#00ff88',
+                    border: '#00ff88',
+                    darkBg: true
+                }
+            };
+
+            const selected = schemes[schemeNumber];
+            if (confirm(`Apply the "${selected.name}" color scheme to the application?`)) {
+                alert(`You selected: ${selected.name}\n\nPrimary Color: ${selected.primary}\nCard Background: ${selected.cardBg}\n\nI'll update the CSS with these colors.`);
+                // In a real implementation, this would update the CSS file
+                console.log('Selected scheme:', selected);
+            }
+        }
+    </script>
+</body>
+</html>
+

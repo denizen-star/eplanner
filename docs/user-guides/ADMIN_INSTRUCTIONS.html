@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide for Administrators: Managing Events - Event Planner</title>
+    <style>
+        :root {
+            --primary-green: #6b8e5a;
+            --primary-rainbow: #2563eb;
+            --dark-gray-1: #1a1a1a;
+            --dark-gray-2: #2d2d2d;
+            --light-gray-1: #f5f5f5;
+            --light-gray-2: #e0e0e0;
+            --white: #ffffff;
+            --text-dark: #3a3a2a;
+            --text-gray: #5a5a4a;
+            --border-gray: #d4d4c4;
+            --card-bg: #faf9f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f0ede8;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 24px;
+            margin-bottom: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            background: var(--primary-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .intro {
+            color: var(--text-gray);
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            background: var(--primary-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        h4 {
+            font-size: 18px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        p {
+            color: var(--text-gray);
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-gray);
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.8;
+        }
+
+        .screenshot-placeholder {
+            background: var(--light-gray-1);
+            border: 2px dashed var(--border-gray);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-gray);
+            font-style: italic;
+        }
+
+        .highlight-box {
+            background: rgba(117, 7, 135, 0.1);
+            border-left: 4px solid #750787;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: #750787;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .warning-box {
+            background: rgba(228, 3, 3, 0.1);
+            border-left: 4px solid #e40303;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box strong {
+            color: #e40303;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .tip-box {
+            background: rgba(0, 128, 38, 0.1);
+            border-left: 4px solid #008026;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .tip-box strong {
+            color: #008026;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .whatsapp-section {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+
+        .whatsapp-section h2 {
+            color: white;
+            -webkit-text-fill-color: white;
+            background: none;
+            margin-bottom: 20px;
+        }
+
+        .whatsapp-section p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        code {
+            background: var(--light-gray-1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .section {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Guide for Administrators: Managing Runs</h1>
+            <p class="intro">Welcome to the Gay Run Club Admin Dashboard! This comprehensive guide will help you manage all aspects of runs, from creating new events to viewing signups and managing participants. As an administrator, you have full access to all runs and can perform administrative tasks to keep the platform running smoothly.</p>
+        </div>
+
+        <div class="section">
+            <h2>Overview</h2>
+            <p>The Admin Dashboard provides you with:</p>
+            <ul>
+                <li>A complete view of all runs (past and future) in collapsible sections</li>
+                <li>Ability to create new runs</li>
+                <li>Edit existing run details</li>
+                <li>View signups for any run</li>
+                <li>Copy signup and management links</li>
+                <li>Delete runs</li>
+                <li>Remove individual signups</li>
+                <li><strong>Run Report</strong>: View and sort all runs with detailed statistics</li>
+                <li><strong>Runners Report</strong>: View runner participation statistics and engagement metrics</li>
+            </ul>
+            <p>This guide will walk you through each of these features in detail.</p>
+        </div>
+
+        <div class="section">
+            <h2>Accessing the Admin Dashboard</h2>
+            <ol>
+                <li>Navigate to the Gay Run Club website</li>
+                <li>On desktop: Click on <strong>"Admin"</strong> in the navigation menu at the top of the page</li>
+                <li>On mobile: Tap the hamburger menu (☰) icon, then tap <strong>"Admin"</strong></li>
+                <li>You'll see the Admin Dashboard with collapsible sections</li>
+            </ol>
+            <div class="tip-box">
+                <strong>Note</strong>
+                The Admin Dashboard is organized into collapsible sections that you can expand or collapse as needed:
+                <ul style="margin-top: 8px;">
+                    <li><strong>Admin Dashboard</strong>: Main run management interface</li>
+                    <li><strong>Run Report</strong>: Detailed report of all runs with sorting capabilities</li>
+                    <li><strong>Runners Report</strong>: Statistics about runner participation</li>
+                </ul>
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Admin Dashboard showing collapsible sections]
+            </div>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Mobile view showing hamburger menu]
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Admin Dashboard Section</h2>
+            <p>The main Admin Dashboard section contains the run management interface. Click on the <strong>"Admin Dashboard"</strong> section header to expand it.</p>
+
+            <h3>Viewing All Runs</h3>
+            <p>The Admin Dashboard displays all runs in a compact list format. Each run shows:</p>
+            <ul>
+                <li><strong>Location</strong>: Where the run is taking place</li>
+                <li><strong>Run Title</strong>: The optional title given to the run (if provided by the pacer)</li>
+                <li><strong>Pacer Name</strong>: The person organizing the run</li>
+                <li><strong>Date & Time</strong>: When the run is scheduled</li>
+                <li><strong>Signups</strong>: Current number of signups vs. maximum participants (e.g., "5 / 10")</li>
+                <li><strong>Status</strong>: "Open" (spots available) or "Full" (no spots remaining)</li>
+            </ul>
+            <p>Runs are sorted by date/time, with the newest runs appearing first.</p>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: List of runs showing all the information columns]
+            </div>
+
+            <h3>Understanding the Run List</h3>
+            <ul>
+                <li><strong>Green "Open" badge</strong>: The run still has spots available</li>
+                <li><strong>Red "Full" badge</strong>: The run has reached its maximum capacity</li>
+                <li>Each row is clickable and contains action buttons</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Creating a New Run</h2>
+            <p>You can create a new run directly from the Admin Dashboard:</p>
+            <ol>
+                <li>Expand the <strong>"Admin Dashboard"</strong> section if it's collapsed</li>
+                <li>Click the <strong>"Create New Run"</strong> button at the top of the dashboard</li>
+                <li>This will take you to the "Coordinate a Run" page</li>
+                <li>Follow the same process as pacers (see the Pacer Instructions guide for detailed steps)</li>
+                <li>After creating the run, you'll be returned to the Admin Dashboard where you can see your new run</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: "Create New Run" button in the Admin Dashboard section]
+            </div>
+            <div class="tip-box">
+                <strong>Note</strong>
+                Creating a run from the Admin Dashboard works exactly the same as when pacers create runs. You'll receive signup and management links just like any other pacer.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Viewing Run Details and Signups</h2>
+            <p>For each run in the list, you can view detailed information and signups:</p>
+
+            <h3>Viewing Links</h3>
+            <ol>
+                <li>Click the <strong>"Links"</strong> button on any run row</li>
+                <li>A dropdown will expand showing:
+                    <ul>
+                        <li><strong>Signup Link</strong>: The public link for runners to register</li>
+                        <li><strong>Management Link</strong>: The private link for the pacer to manage signups</li>
+                    </ul>
+                </li>
+                <li>You can click on either link to open it, or click the <strong>"Copy"</strong> button to copy the link to your clipboard</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Links dropdown showing both signup and management links with copy buttons]
+            </div>
+
+            <h3>Viewing Signups</h3>
+            <ol>
+                <li>Click the <strong>"Signups"</strong> button on any run row</li>
+                <li>A dropdown will expand showing a list of all registered runners</li>
+                <li>Each signup displays:
+                    <ul>
+                        <li>Runner's name</li>
+                        <li>Phone number (clickable to call)</li>
+                        <li>Email address (if provided)</li>
+                        <li>Instagram handle (if provided, clickable to view profile)</li>
+                        <li>Signup date and time</li>
+                        <li>Waiver acceptance status</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Signups dropdown showing list of registered runners with all their information]
+            </div>
+            <div class="tip-box">
+                <strong>Tip</strong>
+                Use the "Links" and "Signups" buttons to quickly access information without leaving the dashboard.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Editing a Run</h2>
+            <p>You can edit any run's details directly from the Admin Dashboard:</p>
+            <ol>
+                <li>Click the <strong>"Edit"</strong> button on the run you want to modify</li>
+                <li>The run row will expand to show an edit form</li>
+                <li>You'll see a map showing the current location (if available)</li>
+                <li>Fill in or modify the following fields:
+                    <ul>
+                        <li><strong>Location</strong>: Update the run location (the map will update as you type)</li>
+                        <li><strong>Pacer Name</strong>: Change the pacer's name</li>
+                        <li><strong>Date and Time</strong>: Modify the scheduled date and time</li>
+                        <li><strong>Max Participants</strong>: Adjust the maximum number of participants</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Edit form expanded showing all editable fields and the map]
+            </div>
+            <ol start="5">
+                <li>Review the changes, especially the location on the map</li>
+                <li>Click <strong>"Save Changes"</strong> to update the run</li>
+                <li>Or click <strong>"Cancel"</strong> to discard your changes</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Save Changes and Cancel buttons in the edit form]
+            </div>
+            <div class="highlight-box">
+                <strong>Important Notes</strong>
+                <ul style="margin-top: 8px;">
+                    <li>Editing a run does not affect existing signups</li>
+                    <li>If you reduce the max participants below the current number of signups, the run will show as "Full" but existing signups remain</li>
+                    <li>The signup and management links remain the same after editing</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Copying Links</h2>
+            <p>You can easily copy links for any run:</p>
+            <ol>
+                <li>Click the <strong>"Links"</strong> button on a run</li>
+                <li>In the dropdown, you'll see both the Signup Link and Management Link</li>
+                <li>Click the <strong>"Copy"</strong> button next to the link you want to copy</li>
+                <li>A confirmation will appear that the link has been copied to your clipboard</li>
+                <li>You can now paste the link wherever you need it (WhatsApp, email, etc.)</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Copy button being clicked with confirmation message]
+            </div>
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Share the signup link with runners if the pacer needs help distributing it</li>
+                <li>Provide the management link to a pacer who lost their original link</li>
+                <li>Copy links for documentation or communication purposes</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Deleting a Run</h2>
+            <p>If you need to remove a run from the system:</p>
+            <ol>
+                <li>Click the <strong>"Delete"</strong> button on the run you want to remove</li>
+                <li>A confirmation dialog will appear asking: "Are you sure you want to delete this run? This action cannot be undone."</li>
+                <li>Click <strong>"OK"</strong> to confirm deletion, or <strong>"Cancel"</strong> to keep the run</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Delete confirmation dialog]
+            </div>
+            <div class="warning-box">
+                <strong>Warning</strong>
+                Deleting a run is permanent and cannot be undone. All signups associated with that run will also be deleted.
+            </div>
+            <h3>When to Delete</h3>
+            <ul>
+                <li>A run was created by mistake</li>
+                <li>A run needs to be cancelled and removed from the system</li>
+                <li>Cleaning up old or expired runs</li>
+            </ul>
+            <div class="tip-box">
+                <strong>Alternative</strong>
+                Instead of deleting, you could edit the run to change the date or other details if you just need to modify it.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Managing Individual Signups</h2>
+            <p>While you can view signups from the Admin Dashboard, to delete individual signups you'll need to:</p>
+            <ol>
+                <li>Click the <strong>"Signups"</strong> button to view the list of signups</li>
+                <li>Click on the <strong>Management Link</strong> for that run (or use the "Links" button to get it)</li>
+                <li>This will take you to the run management page</li>
+                <li>Expand the "Signups" section</li>
+                <li>Click the <strong>"Delete"</strong> button next to the runner you want to remove</li>
+                <li>Confirm the deletion</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Management page showing delete button next to a signup]
+            </div>
+            <div class="highlight-box">
+                <strong>Note</strong>
+                The Admin Dashboard shows signups in read-only mode. To delete individual signups, use the management link for that specific run.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Run Report Section</h2>
+            <p>The Run Report provides a comprehensive view of all runs with advanced sorting and filtering capabilities.</p>
+
+            <h3>Accessing the Run Report</h3>
+            <ol>
+                <li>Click on the <strong>"Run Report"</strong> section header to expand it</li>
+                <li>The report will load and display all runs in a table format</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Run Report section expanded]
+            </div>
+
+            <h3>Run Report Features</h3>
+            <p>The Run Report table includes the following columns:</p>
+            <ul>
+                <li><strong>City</strong>: The city where the run is located</li>
+                <li><strong>Created (EST)</strong>: When the run was created</li>
+                <li><strong>Scheduled Date</strong>: When the run is scheduled to occur</li>
+                <li><strong>Pacer</strong>: The name of the pacer organizing the run</li>
+                <li><strong>Status</strong>: Whether the run is "Open" or "Full"</li>
+                <li><strong>Title</strong>: The optional run title (if provided)</li>
+                <li><strong>Location</strong>: The full location address</li>
+                <li><strong>Manage</strong>: Link to manage the run</li>
+            </ul>
+
+            <h3>Sorting the Run Report</h3>
+            <p>You can sort the report by clicking on any column header:</p>
+            <ul>
+                <li>Click <strong>"City"</strong> to sort by location</li>
+                <li>Click <strong>"Created (EST)"</strong> to sort by creation date</li>
+                <li>Click <strong>"Scheduled Date"</strong> to sort by run date</li>
+                <li>Click <strong>"Pacer"</strong> to sort by pacer name</li>
+                <li>Click <strong>"Status"</strong> to sort by availability</li>
+            </ul>
+            <p>Click the same header again to reverse the sort order. An arrow indicator (↑ or ↓) shows the current sort direction.</p>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Run Report table with sortable column headers]
+            </div>
+
+            <h2>Runners Report Section</h2>
+            <p>The Runners Report provides detailed statistics about runner participation and engagement.</p>
+
+            <h3>Accessing the Runners Report</h3>
+            <ol>
+                <li>Click on the <strong>"Runners Report"</strong> section header to expand it</li>
+                <li>The report will load and display all runners with their participation statistics</li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Runners Report section expanded]
+            </div>
+
+            <h3>Runners Report Features</h3>
+            <p>The Runners Report shows:</p>
+            <ul>
+                <li><strong>Runner Name</strong>: The name of the runner</li>
+                <li><strong>Email</strong>: The runner's email address (if provided)</li>
+                <li><strong>Phone Number</strong>: The runner's phone number (used as unique identifier)</li>
+                <li><strong># of Runs</strong>: Total number of runs the runner has signed up for</li>
+                <li><strong># of Pacers</strong>: Number of different pacers the runner has run with</li>
+            </ul>
+
+            <h3>Sorting the Runners Report</h3>
+            <p>You can sort the report by clicking on any column header:</p>
+            <ul>
+                <li>Click <strong>"Runner Name"</strong> to sort alphabetically by name</li>
+                <li>Click <strong>"Email"</strong> to sort by email address</li>
+                <li>Click <strong>"Phone Number"</strong> to sort by phone</li>
+                <li>Click <strong>"# of Runs"</strong> to sort by participation (most active runners first)</li>
+                <li>Click <strong>"# of Pacers"</strong> to sort by diversity of pacers</li>
+            </ul>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Runners Report table showing runner statistics]
+            </div>
+            <div class="highlight-box">
+                <strong>Note</strong>
+                Phone number is used as the unique identifier for tracking runner participation across multiple runs.
+            </div>
+
+            <h2>Refreshing the Dashboard</h2>
+            <p>To see the latest updates:</p>
+            <ol>
+                <li>Expand the <strong>"Admin Dashboard"</strong> section</li>
+                <li>Click the <strong>"Refresh"</strong> button at the top of the dashboard</li>
+                <li>The page will reload and show the most current information</li>
+                <li>This is useful if:
+                    <ul>
+                        <li>New runs have been created</li>
+                        <li>Signups have been added to runs</li>
+                        <li>You want to see updated status badges</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="screenshot-placeholder">
+                [SCREENSHOT: Refresh button location in Admin Dashboard section]
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Additional Features</h2>
+
+            <h3>Collapsible Sections</h3>
+            <p>The Admin Dashboard uses collapsible sections to organize information:</p>
+            <ul>
+                <li><strong>Expand/Collapse</strong>: Click on any section header to expand or collapse it</li>
+                <li><strong>Multiple Sections</strong>: You can have multiple sections open at once</li>
+                <li><strong>Organized Layout</strong>: Keeps the interface clean and easy to navigate</li>
+                <li><strong>Section Icons</strong>: Arrow icons (▶/▼) indicate whether a section is expanded or collapsed</li>
+            </ul>
+
+            <h3>Mobile Navigation</h3>
+            <p>The platform is fully mobile-friendly:</p>
+            <ul>
+                <li><strong>Hamburger Menu</strong>: On mobile devices, tap the ☰ icon to access the navigation menu</li>
+                <li><strong>User Guides</strong>: Access all instruction guides directly from the navigation menu</li>
+                <li><strong>Touch-Optimized</strong>: All buttons and tables are optimized for mobile interaction</li>
+            </ul>
+
+            <h3>Run Title Display</h3>
+            <p>Runs may now include an optional title:</p>
+            <ul>
+                <li>Titles appear in the run list and reports</li>
+                <li>Help identify runs more easily</li>
+                <li>Displayed prominently in the signup pages</li>
+                <li>Useful for organizing and finding specific runs</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Tips for Administrators</h2>
+
+            <h3>Daily Management</h3>
+            <ul>
+                <li><strong>Check regularly</strong>: Review the dashboard daily to monitor run activity</li>
+                <li><strong>Monitor capacity</strong>: Keep an eye on runs that are getting full</li>
+                <li><strong>Verify information</strong>: Ensure run details (location, time) are accurate</li>
+                <li><strong>Stay organized</strong>: Use the dashboard to keep track of all upcoming runs</li>
+            </ul>
+
+            <h3>Best Practices</h3>
+            <ul>
+                <li><strong>Verify locations</strong>: When editing runs, always check that the map shows the correct location</li>
+                <li><strong>Communicate changes</strong>: If you edit a run, consider notifying the pacer and registered runners</li>
+                <li><strong>Backup important data</strong>: Before deleting runs, ensure you have any needed information saved</li>
+                <li><strong>Help pacers</strong>: Be ready to assist pacers who need help accessing their management links</li>
+            </ul>
+
+            <h3>Working with Pacers</h3>
+            <ul>
+                <li><strong>Respect pacer autonomy</strong>: Pacers manage their own runs through their management links</li>
+                <li><strong>Provide support</strong>: Help pacers who have lost their management links by providing them from the dashboard</li>
+                <li><strong>Coordinate when needed</strong>: Use the dashboard to coordinate between multiple pacers and runs</li>
+            </ul>
+
+            <h3>Data Management</h3>
+            <ul>
+                <li><strong>Regular cleanup</strong>: Periodically review and delete old or cancelled runs</li>
+                <li><strong>Monitor signups</strong>: Keep an eye on signup patterns to help plan future runs</li>
+                <li><strong>Track capacity</strong>: Use the dashboard to understand which runs are popular and adjust accordingly</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Troubleshooting</h2>
+
+            <h3>I can't see any runs in the dashboard</h3>
+            <ul>
+                <li>Click the <strong>"Refresh"</strong> button to reload the data</li>
+                <li>Check your internet connection</li>
+                <li>Verify you're logged in as an administrator</li>
+                <li>Contact technical support if the issue persists</li>
+            </ul>
+
+            <h3>The edit form won't save changes</h3>
+            <ul>
+                <li>Make sure all required fields are filled out</li>
+                <li>Verify the date/time is in the future</li>
+                <li>Check that max participants is a number greater than 0</li>
+                <li>Ensure the location is valid (the map should display it)</li>
+                <li>Try refreshing the page and editing again</li>
+            </ul>
+
+            <h3>I can't delete a run</h3>
+            <ul>
+                <li>Make sure you clicked "OK" in the confirmation dialog</li>
+                <li>Check your internet connection</li>
+                <li>Try refreshing the page and attempting again</li>
+                <li>Some runs may be protected from deletion (contact technical support if needed)</li>
+            </ul>
+
+            <h3>The map isn't showing in the edit form</h3>
+            <ul>
+                <li>Make sure you've entered a valid location</li>
+                <li>Wait a moment for the map to load</li>
+                <li>Try refreshing the page</li>
+                <li>Check your internet connection</li>
+            </ul>
+
+            <h3>Links aren't copying</h3>
+            <ul>
+                <li>Make sure you clicked the "Copy" button (not just the link itself)</li>
+                <li>Check if your browser allows clipboard access</li>
+                <li>Try a different browser if the issue persists</li>
+                <li>You can always manually select and copy the link text</li>
+            </ul>
+
+            <h3>Signups aren't updating</h3>
+            <ul>
+                <li>Click the <strong>"Refresh"</strong> button to reload the latest data</li>
+                <li>Signups update in real-time, but you may need to refresh to see changes</li>
+                <li>Check the individual run's management link for the most up-to-date signup count</li>
+            </ul>
+        </div>
+
+        <div class="whatsapp-section">
+            <h2>WhatsApp Quick Guide</h2>
+            <p><strong>👨‍💼 Quick Guide: Admin Dashboard</strong></p>
+            <p><strong>Viewing Runs:</strong><br>
+               📋 See all runs with status (Open/Full)<br>
+               🔄 Click "Refresh" for latest updates</p>
+            <p><strong>Creating Runs:</strong><br>
+               ➕ Click "Create New Run" button<br>
+               📝 Fill form & get signup/management links</p>
+            <p><strong>Managing Runs:</strong><br>
+               🔗 Click "Links" to view/copy signup & management links<br>
+               👥 Click "Signups" to see registered runners<br>
+               ✏️ Click "Edit" to modify run details<br>
+               🗑️ Click "Delete" to remove a run</p>
+            <p><strong>Quick Actions:</strong><br>
+               📋 Copy links to share with pacers/runners<br>
+               👀 Monitor signup counts & capacity<br>
+               ✅ Verify run details are accurate</p>
+            <p><strong>💡 Tip:</strong> Use "Links" button to quickly help pacers who lost their management link!</p>
+            <p style="margin-top: 20px; font-size: 14px; opacity: 0.9;"><em>Need help? Contact technical support or refer to the full guide for detailed instructions.</em></p>
+        </div>
+    </div>
+</body>
+</html>
+

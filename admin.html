@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Event Planner</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">EP</div>
+                Event Planner
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="coordinate.html">Coordinate an Event</a></li>
+                <li><a href="admin.html" class="active">Admin</a></li>
+                <li class="nav-dropdown">
+                    <button class="nav-dropdown-toggle" type="button">User Guides</button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="docs/user-guides/ADMIN_INSTRUCTIONS.html">Admin Guide</a></li>
+                        <li><a href="docs/user-guides/RUNNER_INSTRUCTIONS.html">Participant Guide</a></li>
+                        <li><a href="docs/user-guides/PACER_INSTRUCTIONS.html">Planner Guide</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <div class="card">
+            <div class="collapsible-section">
+                <button class="collapsible-toggle" onclick="toggleSection('dashboard')" id="dashboardToggle">
+                    <span>Admin Dashboard</span>
+                    <span class="collapsible-icon collapsed" id="dashboardIcon">▶</span>
+                </button>
+                <div class="collapsible-content" id="dashboardContent" style="display: none;">
+                    <div style="margin-bottom: 24px; padding-top: 20px;">
+                        <a href="coordinate.html" class="button button-primary">Create New Event</a>
+                        <button class="button button-secondary" onclick="loadRuns()" style="margin-left: 12px;">Refresh</button>
+                    </div>
+
+                    <div id="loading" style="text-align: center; padding: 40px;">
+                        <p>Loading events...</p>
+                    </div>
+
+                    <div id="runsList" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <div class="collapsible-section">
+                <button class="collapsible-toggle" onclick="toggleSection('runReport')" id="runReportToggle">
+                    <span>Event Report</span>
+                    <span class="collapsible-icon collapsed" id="runReportIcon">▶</span>
+                </button>
+                <div class="collapsible-content" id="runReportContent" style="display: none;">
+                    <p style="margin-bottom: 16px; color: var(--text-gray); padding-top: 20px;">View all events sorted by planner. Click column headers to sort by different criteria.</p>
+                    <div id="reportLoading" style="text-align: center; padding: 40px; display: none;">
+                        <p>Loading report...</p>
+                    </div>
+                    <div id="reportTableContainer" style="display: none; overflow-x: auto;">
+                        <table id="reportTable" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--light-gray-1);">
+                                    <th onclick="sortReport('city')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        City <span id="sortIcon-city"></span>
+                                    </th>
+                                    <th onclick="sortReport('created')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Created (EST) <span id="sortIcon-created"></span>
+                                    </th>
+                                    <th onclick="sortReport('scheduled')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Scheduled Date <span id="sortIcon-scheduled"></span>
+                                    </th>
+                                    <th onclick="sortReport('pacer')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Planner <span id="sortIcon-pacer"></span>
+                                    </th>
+                                    <th onclick="sortReport('status')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Status <span id="sortIcon-status"></span>
+                                    </th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-gray);">Title</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-gray);">Location</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-gray);">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <div class="collapsible-section">
+                <button class="collapsible-toggle" onclick="toggleSection('runnersReport')" id="runnersReportToggle">
+                    <span>Participants Report</span>
+                    <span class="collapsible-icon collapsed" id="runnersReportIcon">▶</span>
+                </button>
+                <div class="collapsible-content" id="runnersReportContent" style="display: none;">
+                    <p style="margin-bottom: 16px; color: var(--text-gray); padding-top: 20px;">View all participants with their participation statistics. Phone number is used as the unique identifier.</p>
+                    <div id="runnersReportLoading" style="text-align: center; padding: 40px; display: none;">
+                        <p>Loading participants report...</p>
+                    </div>
+                    <div id="runnersReportTableContainer" style="display: none; overflow-x: auto;">
+                        <table id="runnersReportTable" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--light-gray-1);">
+                                    <th onclick="sortRunnersReport('name')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Participant Name <span id="sortIcon-runners-name"></span>
+                                    </th>
+                                    <th onclick="sortRunnersReport('email')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Email <span id="sortIcon-runners-email"></span>
+                                    </th>
+                                    <th onclick="sortRunnersReport('phone')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        Phone Number <span id="sortIcon-runners-phone"></span>
+                                    </th>
+                                    <th onclick="sortRunnersReport('runs')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        # of Events <span id="sortIcon-runners-runs"></span>
+                                    </th>
+                                    <th onclick="sortRunnersReport('pacers')" style="padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid var(--border-gray);">
+                                        # of Planners <span id="sortIcon-runners-pacers"></span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="runnersReportTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="assets/js/map-utils.js"></script>
+    <script src="assets/js/dropdown.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>
+

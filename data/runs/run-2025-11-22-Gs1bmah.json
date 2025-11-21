@@ -1,0 +1,23 @@
+{
+  "id": "Gs1bmah",
+  "uuid": "d09f79e7-41b9-48e2-9e59-3b4b00e746da",
+  "location": "Gaythering, 1409, Lincoln Road, Miami Beach, Miami-Dade County, Florida, 33139, United States",
+  "pacerName": "Pacer Kerv",
+  "dateTime": "2025-11-21T23:30",
+  "maxParticipants": 3,
+  "createdAt": "2025-11-19T05:05:34.631Z",
+  "signups": [
+    {
+      "name": "Kervin Leacock",
+      "phone": "9176700693",
+      "email": "leacock.kervin@gmail.com",
+      "instagram": "MiamiGayRunClub",
+      "waiverAccepted": true,
+      "signedAt": "2025-11-19T05:06:21.934Z"
+    }
+  ],
+  "coordinates": [
+    25.7905644,
+    -80.1438276
+  ]
+}

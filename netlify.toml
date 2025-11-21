@@ -1,0 +1,106 @@
+[build]
+  command = "npm install"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "18"
+  # GS_DATA_PIPELINE_URL should be set in Netlify dashboard under Site settings → Environment variables
+  # Add: GS_DATA_PIPELINE_URL = https://script.google.com/macros/s/AKfycbxbam43rprSCE5oEgYXKV-YvaqWG_saWkWopaC-1-hQ3nociWVvsuhCbdeq1v6EWsqLkw/exec
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["server.js", "lib/**", "package.json"]
+
+[[redirects]]
+  from = "/api/runs/create"
+  to = "/.netlify/functions/runs-create"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/runs"
+  to = "/.netlify/functions/runs-get"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/runs/:runId"
+  to = "/.netlify/functions/run-get"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/runs/:runId/signup"
+  to = "/.netlify/functions/runs-signup"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/runs/:runId/signups"
+  to = "/.netlify/functions/runs-signups"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/runs/complete"
+  to = "/.netlify/functions/runs-complete"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/test-sheets-read"
+  to = "/.netlify/functions/test-sheets-read"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.html"
+  to = "/:splat.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+    Pragma = "no-cache"
+
