@@ -1,8 +1,9 @@
 -- PlanetScale Database Schema for Event Planner
+-- Database: kervapps
 -- Run this in PlanetScale development branch first, then promote to main
 
--- Runs table: Stores event information
-CREATE TABLE runs (
+-- Events table: Stores event information
+CREATE TABLE ep_events (
   id VARCHAR(7) PRIMARY KEY,
   uuid VARCHAR(36) UNIQUE NOT NULL,
   location TEXT NOT NULL,
@@ -22,7 +23,7 @@ CREATE TABLE runs (
 -- Signups table: Stores participant signups for events
 -- Note: Foreign keys removed due to PlanetScale limitations
 -- Application code handles referential integrity
-CREATE TABLE signups (
+CREATE TABLE ep_signups (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   run_id VARCHAR(7) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -34,14 +35,14 @@ CREATE TABLE signups (
   metadata JSON,
   INDEX idx_run_id (run_id),
   INDEX idx_signed_at (signed_at)
-  -- FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
+  -- FOREIGN KEY (run_id) REFERENCES ep_events(id) ON DELETE CASCADE
   -- Removed: PlanetScale may have restrictions on foreign keys
 );
 
 -- Waivers table: Stores waiver signatures and text
 -- Note: Foreign keys removed due to PlanetScale limitations
 -- Application code handles referential integrity
-CREATE TABLE waivers (
+CREATE TABLE ep_waivers (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   run_id VARCHAR(7) NOT NULL,
   signup_id BIGINT NOT NULL,
@@ -53,8 +54,9 @@ CREATE TABLE waivers (
   INDEX idx_run_id (run_id),
   INDEX idx_signup_id (signup_id),
   INDEX idx_timestamp (timestamp)
-  -- FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE,
-  -- FOREIGN KEY (signup_id) REFERENCES signups(id) ON DELETE CASCADE
+  -- FOREIGN KEY (run_id) REFERENCES ep_events(id) ON DELETE CASCADE,
+  -- FOREIGN KEY (signup_id) REFERENCES ep_signups(id) ON DELETE CASCADE
   -- Removed: PlanetScale may have restrictions on foreign keys
 );
+
 

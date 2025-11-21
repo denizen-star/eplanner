@@ -63,7 +63,7 @@ You can create a new run directly from the Admin Dashboard:
 
 1. Expand the **"Admin Dashboard"** section if it's collapsed
 2. Click the **"Create New Run"** button at the top of the dashboard
-3. This will take you to the "Coordinate a Run" page
+3. This will take you to the "Coordinate an Event" page
 4. Follow the same process as pacers (see the Pacer Instructions guide for detailed steps)
 5. After creating the run, you'll be returned to the Admin Dashboard where you can see your new run
 
@@ -366,7 +366,7 @@ Runs may now include an optional title:
 📋 See all runs with status (Open/Full)
 🔄 Click "Refresh" for latest updates
 
-**Creating Runs:**
+**Creating Events:**
 ➕ Click "Create New Run" button
 📝 Fill form & get signup/management links
 

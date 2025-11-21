@@ -6,7 +6,7 @@ Creating a run is now super quick and simple! Here's how it works:
 
 ✨ *HOW TO CREATE A RUN (Takes Just 2 Minutes!):*
 
-1️⃣ Go to "Coordinate a Run" page
+1️⃣ Go to "Coordinate an Event" page
 2️⃣ Fill in your name, date/time, max participants, and location
 3️⃣ Give it a cool title (optional but fun!)
 4️⃣ Check the map shows the right spot

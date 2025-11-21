@@ -107,7 +107,7 @@ You can add these properties for additional SSL configuration:
 
 #### View All Runs
 ```sql
-SELECT * FROM runs ORDER BY created_at DESC;
+SELECT * FROM ep_events ORDER BY created_at DESC;
 ```
 
 #### View Signups for a Run
@@ -122,7 +122,7 @@ SELECT
   r.location, 
   r.date_time, 
   COUNT(s.id) as signup_count
-FROM runs r
+FROM ep_events r
 LEFT JOIN signups s ON r.id = s.run_id
 GROUP BY r.id
 ORDER BY r.date_time DESC;
@@ -258,7 +258,7 @@ Breakdown:
 - Network latency
 
 **Solutions:**
-1. Add LIMIT to queries: `SELECT * FROM runs LIMIT 100;`
+1. Add LIMIT to queries: `SELECT * FROM ep_events LIMIT 100;`
 2. Use specific WHERE clauses instead of scanning all rows
 3. Check indexes on frequently queried columns
 

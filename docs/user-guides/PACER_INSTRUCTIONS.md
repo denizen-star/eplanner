@@ -18,7 +18,7 @@ When you create an event, you'll receive two important links:
 
 **Note**: The platform is fully mobile-friendly. On mobile devices, you'll see a hamburger menu icon (☰) in the top right corner. Tap it to access the navigation menu.
 
-[SCREENSHOT: Homepage showing the navigation menu with "Coordinate a Run" option highlighted]
+[SCREENSHOT: Homepage showing the navigation menu with "Coordinate an Event" option highlighted]
 [SCREENSHOT: Mobile view showing hamburger menu icon]
 
 ### Step 2: Fill Out the Run Details Form
@@ -119,7 +119,7 @@ Now that you have your signup link, share it with potential participants:
 
 ### Step 6: Access Quick Guides
 
-On the Coordinate a Run page, you'll find a collapsible **"User Guides"** section at the bottom. This provides a quick reference guide for creating runs. Click on it to expand and see the step-by-step summary.
+On the Coordinate an Event page, you'll find a collapsible **"User Guides"** section at the bottom. This provides a quick reference guide for creating events. Click on it to expand and see the step-by-step summary.
 
 [SCREENSHOT: User Guides collapsible section on the coordinate page]
 
@@ -227,7 +227,7 @@ The optional Run Title field allows you to:
 
 📱 **Quick Guide: Creating a Run**
 
-1️⃣ Go to "Coordinate a Run" page
+1️⃣ Go to "Coordinate an Event" page
 2️⃣ Fill in:
    • Your name (Pacer Name)
    • Date & time

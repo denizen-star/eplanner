@@ -15,16 +15,10 @@ This document outlines all the steps you need to complete **before** implementin
 2. Organization name: e.g., "Event Planner" or your personal name
 3. This will be used to group your databases
 
-### 1.3 Create Database
-1. Click "Create database" or "New database"
-2. Database name: `eplanner` (or your preferred name)
-3. Choose region closest to your users:
-   - US East (Virginia)
-   - US West (Oregon)
-   - EU (Frankfurt)
-   - Asia Pacific (Singapore)
-4. Select plan: **Free** (suitable for <100 events/month)
-5. Click "Create database"
+### 1.3 Use Existing Database
+1. **Database name: `kervapps`** (already exists)
+2. No need to create a new database - we'll use the existing `kervapps` database
+3. The tables will be created with prefixes: `ep_events`, `ep_signups`, `ep_waivers`
 
 ### 1.4 Get Connection Strings
 1. Once database is created, go to the database dashboard
@@ -68,7 +62,7 @@ This document outlines all the steps you need to complete **before** implementin
      - Value: Your password from connection string
      - Mark as: Sensitive/Encrypted
    - Variable: `PLANETSCALE_DATABASE`
-     - Value: `eplanner` (or your database name)
+     - Value: `kervapps` (existing database)
 
 4. Click "Save" after adding each variable
 
@@ -85,7 +79,7 @@ PLANETSCALE_DATABASE_URL=mysql://username:password@host:port/database?sslmode=re
 PLANETSCALE_HOST=aws.connect.psdb.cloud
 PLANETSCALE_USERNAME=your_username
 PLANETSCALE_PASSWORD=your_password
-PLANETSCALE_DATABASE=eplanner
+PLANETSCALE_DATABASE=kervapps
 
 # Server Configuration
 PORT=3000
@@ -174,14 +168,14 @@ NODE_ENV=development
 6. Click "Execute SQL Script" (or press Ctrl+Enter / Cmd+Enter)
 7. Verify tables are created:
    - Refresh the database tree
-   - You should see: `runs`, `signups`, `waivers` tables
+   - You should see: `ep_events`, `ep_signups`, `ep_waivers` tables
 
 ### 4.4 Verify Schema
 1. In DBeaver, expand your database → Tables
 2. Verify all three tables exist:
-   - `runs`
-   - `signups`
-   - `waivers`
+   - `ep_events` (stores event information)
+   - `ep_signups` (stores participant signups)
+   - `ep_waivers` (stores waiver signatures)
 3. Right-click each table → "View Data" to see structure
 4. Verify indexes are created (check table properties)
 
@@ -225,7 +219,7 @@ Before deploying, test the following:
 - [ ] Environment variables are set in Netlify dashboard
 - [ ] Local `.env` file is configured correctly
 - [ ] Schema has been created in PlanetScale
-- [ ] All three tables (runs, signups, waivers) exist
+- [ ] All three tables (ep_events, ep_signups, ep_waivers) exist in kervapps database
 - [ ] Dependencies installed (`npm install` completed)
 - [ ] No syntax errors in updated code files
 

@@ -143,7 +143,7 @@ exports.handler = async (event) => {
         uuid: uuid,
         location: trimmedLocation,
         coordinates: coordinates || null,
-        pacerName: trimmedPacerName,
+        plannerName: trimmedPlannerName,
         title: title ? title.trim() : null,
         dateTime: dateTime,
         maxParticipants: parseInt(maxParticipants),

@@ -45,8 +45,8 @@ If you're getting a 500 Internal Server Error when trying to create a run, follo
 
 In DBeaver, try inserting a test record:
 ```sql
-INSERT INTO runs (id, uuid, location, pacer_name, date_time, max_participants, status, created_at)
-VALUES ('test123', 'test-uuid-123', 'Test Location', 'Test Pacer', '2025-11-22 12:00:00', 10, 'active', NOW());
+INSERT INTO ep_events (id, uuid, location, planner_name, date_time, max_participants, status, created_at)
+VALUES ('test123', 'test-uuid-123', 'Test Location', 'Test Planner', '2025-11-22 12:00:00', 10, 'active', NOW());
 ```
 
 If this fails, check:
@@ -57,7 +57,7 @@ If this fails, check:
 ### Step 5: Check Common Issues
 
 #### Issue: "Table doesn't exist"
-**Solution:** Run the schema SQL from `lib/schema.sql` in your PlanetScale database
+**Solution:** Run the schema SQL from `lib/schema.sql` in your PlanetScale database (kervapps). Tables should be: `ep_events`, `ep_signups`, `ep_waivers`
 
 #### Issue: "Access denied"
 **Solution:** 
@@ -102,8 +102,8 @@ If this fails, check:
 |--------------|----------|
 | `Connection configuration is missing` | Add `DATABASE_URL` to Netlify env vars |
 | `Access denied for user` | Check credentials, update `DATABASE_URL` |
-| `Table 'runs' doesn't exist` | Run schema SQL to create tables |
-| `Unknown column 'pacer_name'` | Table structure mismatch, recreate table |
+| `Table 'ep_events' doesn't exist` | Run schema SQL to create tables in kervapps database |
+| `Unknown column 'planner_name'` | Table structure mismatch, ensure using `ep_events` table |
 | `Column count doesn't match value count` | Check INSERT query matches table structure |
 
 ## Testing the Fix
