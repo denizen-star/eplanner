@@ -73,7 +73,11 @@ exports.handler = async (event) => {
 
   try {
     const body = parseBody(event);
-    const { location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo } = body;
+    const { 
+      location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo,
+      house_number, road, suburb, city, county, state, postcode, country, country_code,
+      neighbourhood, city_district, village, town, municipality
+    } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
 
@@ -149,6 +153,21 @@ exports.handler = async (event) => {
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         createdAt: createdAt,
+        // Address component fields
+        house_number: house_number || null,
+        road: road || null,
+        suburb: suburb || null,
+        city: city || null,
+        county: county || null,
+        state: state || null,
+        postcode: postcode || null,
+        country: country || null,
+        country_code: country_code || null,
+        neighbourhood: neighbourhood || null,
+        city_district: city_district || null,
+        village: village || null,
+        town: town || null,
+        municipality: municipality || null
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {

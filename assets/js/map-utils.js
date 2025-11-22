@@ -8,7 +8,7 @@ async function geocodeLocation(locationText) {
 
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationText)}&limit=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationText)}&limit=1&addressdetails=1`,
       {
         headers: {
           'User-Agent': 'EventPlanner/1.0'
@@ -77,7 +77,9 @@ async function geocodeLocation(locationText) {
 
     return {
       coordinates: [lat, lon],
-      address: fullAddress
+      address: fullAddress,
+      addressComponents: result.address || {},
+      rawResult: result
     };
   } catch (error) {
     console.error('Geocoding error:', error);

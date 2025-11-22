@@ -1,3 +1,22 @@
+function displayAddressDetails(run) {
+  // Build street address
+  const streetParts = [];
+  if (run.houseNumber || run.house_number) {
+    streetParts.push(run.houseNumber || run.house_number);
+  }
+  if (run.road) {
+    streetParts.push(run.road);
+  }
+  document.getElementById('displayStreet').textContent = streetParts.join(' ') || run.location || '-';
+  
+  // Display other address fields
+  document.getElementById('displayCity').textContent = 
+    run.city || run.town || run.village || run.municipality || '-';
+  document.getElementById('displayState').textContent = run.state || '-';
+  document.getElementById('displayPostcode').textContent = run.postcode || '-';
+  document.getElementById('displayCountry').textContent = run.country || '-';
+}
+
 function formatPhoneNumber(phone) {
   const digits = phone.replace(/\D/g, '');
   if (digits.length === 10) {
@@ -78,6 +97,30 @@ async function loadRun() {
     }
     const run = await response.json();
 
+    // Log all address component fields for debugging
+    console.log('=== RUN ADDRESS COMPONENT FIELDS ===');
+    console.log('Run ID:', run.id);
+    console.log('Full Location:', run.location);
+    console.log('');
+    console.log('Address Component Fields:');
+    console.log('  house_number:', run.houseNumber || run.house_number || '(not set)');
+    console.log('  road:', run.road || '(not set)');
+    console.log('  suburb:', run.suburb || '(not set)');
+    console.log('  city:', run.city || '(not set)');
+    console.log('  county:', run.county || '(not set)');
+    console.log('  state:', run.state || '(not set)');
+    console.log('  postcode:', run.postcode || '(not set)');
+    console.log('  country:', run.country || '(not set)');
+    console.log('  country_code:', run.countryCode || run.country_code || '(not set)');
+    console.log('  neighbourhood:', run.neighbourhood || '(not set)');
+    console.log('  city_district:', run.cityDistrict || run.city_district || '(not set)');
+    console.log('  village:', run.village || '(not set)');
+    console.log('  town:', run.town || '(not set)');
+    console.log('  municipality:', run.municipality || '(not set)');
+    console.log('');
+    console.log('Full Run Object:', run);
+    console.log('====================================');
+
     document.getElementById('runLocation').textContent = run.location;
     
     const runTitleElement = document.getElementById('runTitle');
@@ -120,6 +163,9 @@ async function loadRun() {
     if (run.location) {
       updateMapForLocation('locationMap', run.location, true);
     }
+
+    // Display address details
+    displayAddressDetails(run);
 
     const signupList = document.getElementById('signupList');
     if (run.signups.length === 0) {

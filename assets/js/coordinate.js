@@ -6,6 +6,7 @@ console.log('[COORDINATE] Timestamp:', new Date().toISOString());
 let locationUpdateTimeout;
 let validatedAddress = null;
 let validatedCoordinates = null;
+let validatedAddressComponents = null;
 
 // Initialize session manager and device collector
 let sessionManager = null;
@@ -34,6 +35,7 @@ document.getElementById('location').addEventListener('input', (e) => {
   // Clear validation when location changes
   validatedAddress = null;
   validatedCoordinates = null;
+  validatedAddressComponents = null;
   document.getElementById('locationValidation').style.display = 'none';
   
   if (locationText.length > 3) {
@@ -60,6 +62,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     }
     validatedAddress = null;
     validatedCoordinates = null;
+    validatedAddressComponents = null;
     document.getElementById('locationValidation').style.display = 'none';
     return;
   }
@@ -72,6 +75,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     const geocodeResult = await geocodeLocation(locationText);
     validatedAddress = geocodeResult.address;
     validatedCoordinates = geocodeResult.coordinates;
+    validatedAddressComponents = geocodeResult.addressComponents;
     
     const map = initMap(mapId, geocodeResult.coordinates, geocodeResult.address, staticMode, defaultCenter);
 
@@ -79,6 +83,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
       mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Unable to display map</div>';
       validatedAddress = null;
       validatedCoordinates = null;
+      validatedAddressComponents = null;
     } else {
       // Show validated address
       document.getElementById('validatedAddress').textContent = validatedAddress;
@@ -90,6 +95,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     mapContainer.style.display = 'block';
     validatedAddress = null;
     validatedCoordinates = null;
+    validatedAddressComponents = null;
     document.getElementById('locationValidation').style.display = 'none';
   }
 }
@@ -114,6 +120,11 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please enter a valid location');
     }
 
+    // Validate that address has been successfully geocoded
+    if (!validatedAddress) {
+      throw new Error('Please wait for the address to be validated or enter a valid location');
+    }
+
     const plannerName = document.getElementById('pacerName').value.trim();
     if (!plannerName) {
       throw new Error('Please enter a planner name');
@@ -131,6 +142,27 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       sessionInfo = sessionManager.getSessionData();
     }
 
+    // Extract address components from validated address
+    const addr = validatedAddressComponents || {};
+    
+    console.log('=== SENDING ADDRESS COMPONENTS TO SERVER ===');
+    console.log('Validated Address Components Object:', addr);
+    console.log('Extracted fields:');
+    console.log('  house_number:', addr.house_number || '(not in addressComponents)');
+    console.log('  road:', addr.road || addr.street || addr.pedestrian || '(not in addressComponents)');
+    console.log('  suburb:', addr.suburb || '(not in addressComponents)');
+    console.log('  city:', addr.city || addr.town || addr.village || addr.municipality || '(not in addressComponents)');
+    console.log('  county:', addr.county || '(not in addressComponents)');
+    console.log('  state:', addr.state || '(not in addressComponents)');
+    console.log('  postcode:', addr.postcode || '(not in addressComponents)');
+    console.log('  country:', addr.country || '(not in addressComponents)');
+    console.log('  country_code:', addr.country_code || '(not in addressComponents)');
+    console.log('  neighbourhood:', addr.neighbourhood || '(not in addressComponents)');
+    console.log('  city_district:', addr.city_district || '(not in addressComponents)');
+    console.log('  village:', addr.village || '(not in addressComponents)');
+    console.log('  town:', addr.town || '(not in addressComponents)');
+    console.log('  municipality:', addr.municipality || '(not in addressComponents)');
+
     const formData = {
       location: locationToSave,
       coordinates: validatedCoordinates,
@@ -139,8 +171,25 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       dateTime: document.getElementById('dateTime').value,
       maxParticipants: parseInt(document.getElementById('maxParticipants').value),
       deviceInfo: deviceInfo,
-      sessionInfo: sessionInfo
+      sessionInfo: sessionInfo,
+      // Address component fields
+      house_number: addr.house_number || null,
+      road: addr.road || addr.street || addr.pedestrian || null,
+      suburb: addr.suburb || null,
+      city: addr.city || addr.town || addr.village || addr.municipality || null,
+      county: addr.county || null,
+      state: addr.state || null,
+      postcode: addr.postcode || null,
+      country: addr.country || null,
+      country_code: addr.country_code || null,
+      neighbourhood: addr.neighbourhood || null,
+      city_district: addr.city_district || null,
+      village: addr.village || null,
+      town: addr.town || null,
+      municipality: addr.municipality || null
     };
+    
+    console.log('Form Data being sent (with address fields):', formData);
 
     const response = await fetch('/api/runs/create', {
       method: 'POST',
@@ -259,6 +308,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     // Reset validation
     validatedAddress = null;
     validatedCoordinates = null;
+    validatedAddressComponents = null;
     document.getElementById('locationValidation').style.display = 'none';
     
     // Reset map to Miami

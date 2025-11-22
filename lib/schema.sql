@@ -13,11 +13,29 @@ CREATE TABLE ep_events (
   date_time DATETIME NOT NULL,
   max_participants INT NOT NULL,
   status VARCHAR(20) DEFAULT 'active',
+  -- Address component fields from Nominatim geocoding
+  house_number VARCHAR(50),
+  road VARCHAR(255),
+  suburb VARCHAR(255),
+  city VARCHAR(255),
+  county VARCHAR(255),
+  state VARCHAR(255),
+  postcode VARCHAR(20),
+  country VARCHAR(255),
+  country_code VARCHAR(5),
+  neighbourhood VARCHAR(255),
+  city_district VARCHAR(255),
+  village VARCHAR(255),
+  town VARCHAR(255),
+  municipality VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_date_time (date_time),
   INDEX idx_status (status),
-  INDEX idx_created_at (created_at)
+  INDEX idx_created_at (created_at),
+  INDEX idx_city (city),
+  INDEX idx_state (state),
+  INDEX idx_postcode (postcode)
 );
 
 -- Signups table: Stores participant signups for events
