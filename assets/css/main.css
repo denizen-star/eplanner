@@ -394,7 +394,7 @@ body {
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: var(--space-xl);
@@ -533,7 +533,7 @@ body {
 }
 
 .link-display {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   padding: var(--space-md);
   border-radius: 6px;
   margin: var(--space-md) 0;
@@ -555,7 +555,7 @@ body {
 .waiver-container {
   max-height: 400px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   padding: 20px;
   border-radius: 6px;
   margin: var(--space-md) 0;
@@ -600,7 +600,7 @@ body {
 }
 
 .signup-item {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: var(--space-sm);
@@ -654,7 +654,7 @@ body {
 }
 
 .run-item {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   padding: var(--space-lg);
   border-radius: 6px;
   border: 1px solid var(--border-primary);
@@ -709,7 +709,7 @@ body {
 }
 
 .list-item {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   padding: 12px 16px;
   display: grid;
   grid-template-columns: 2fr 1.5fr 120px 100px auto;
@@ -872,14 +872,14 @@ body {
 .collapsible-section {
   border: 1px solid var(--border-primary);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   overflow: hidden;
 }
 
 .collapsible-toggle {
   width: 100%;
   padding: var(--space-md) 20px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.6);
   border: none;
   border-bottom: 1px solid var(--border-primary);
   cursor: pointer;
@@ -921,6 +921,7 @@ body {
   padding: var(--space-lg);
   display: block;
   transition: max-height 0.2s ease, padding 0.2s ease;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .collapsible-content[style*="display: none"] {
@@ -1123,5 +1124,26 @@ body {
 .card {
   position: relative;
   z-index: 10;
+}
+
+/* Make table elements semi-transparent */
+table {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+thead tr {
+  background: rgba(249, 250, 251, 0.6) !important;
+}
+
+tbody tr {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+tbody tr:hover {
+  background: rgba(249, 250, 251, 0.6);
+}
+
+td, th {
+  background: transparent;
 }
 
