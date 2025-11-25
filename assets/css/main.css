@@ -1069,12 +1069,11 @@ body {
   }
 }
 
-/* Abstract Background Shapes - Slow moving animation */
+/* Abstract Background Shapes - Erratic circular/star movement */
 .abstract-shape {
   position: absolute;
   border-radius: 50%;
   opacity: 0.2;
-  animation: float 10s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -1085,6 +1084,7 @@ body {
   background: #00D4D4;
   top: 10%;
   right: 5%;
+  animation: erraticMove1 11s ease-in-out infinite;
   animation-delay: 0s;
 }
 
@@ -1094,6 +1094,7 @@ body {
   background: #FF0033;
   bottom: 10%;
   left: 5%;
+  animation: erraticMove2 11s ease-in-out infinite;
   animation-delay: 2s;
 }
 
@@ -1103,15 +1104,76 @@ body {
   background: #FFD700;
   top: 50%;
   right: 15%;
+  animation: erraticMove3 11s ease-in-out infinite;
   animation-delay: 4s;
 }
 
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) translateX(0px);
+/* Erratic circular/star movement for shape 1 */
+@keyframes erraticMove1 {
+  0% { 
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% { 
+    transform: translate(400px, -300px) rotate(90deg);
+  }
+  40% { 
+    transform: translate(600px, 200px) rotate(180deg);
+  }
+  60% { 
+    transform: translate(200px, 500px) rotate(270deg);
+  }
+  80% { 
+    transform: translate(-300px, 100px) rotate(360deg);
+  }
+  100% { 
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+/* Erratic circular/star movement for shape 2 */
+@keyframes erraticMove2 {
+  0% { 
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% { 
+    transform: translate(-500px, -400px) rotate(-90deg);
   }
   50% { 
-    transform: translateY(-800px) translateX(900px);
+    transform: translate(-200px, 600px) rotate(-180deg);
+  }
+  75% { 
+    transform: translate(400px, -200px) rotate(-270deg);
+  }
+  100% { 
+    transform: translate(0, 0) rotate(-360deg);
+  }
+}
+
+/* Erratic circular/star movement for shape 3 */
+@keyframes erraticMove3 {
+  0% { 
+    transform: translate(0, 0) rotate(0deg);
+  }
+  15% { 
+    transform: translate(300px, 400px) rotate(120deg);
+  }
+  30% { 
+    transform: translate(-400px, 300px) rotate(240deg);
+  }
+  45% { 
+    transform: translate(500px, -300px) rotate(360deg);
+  }
+  60% { 
+    transform: translate(-200px, -500px) rotate(480deg);
+  }
+  75% { 
+    transform: translate(300px, 200px) rotate(600deg);
+  }
+  90% { 
+    transform: translate(-100px, 400px) rotate(720deg);
+  }
+  100% { 
+    transform: translate(0, 0) rotate(720deg);
   }
 }
 
