@@ -1084,7 +1084,7 @@ body {
   background: #00D4D4;
   top: 10%;
   right: 5%;
-  animation: erraticMove1 13s ease-in-out infinite, blobMorph 8s ease-in-out infinite;
+  animation: erraticMove1 15s ease-in-out infinite, blobMorph 8s ease-in-out infinite;
   animation-delay: 0s;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
@@ -1097,7 +1097,7 @@ body {
   background: #FF0033;
   bottom: 10%;
   left: 5%;
-  animation: erraticMove2 13s ease-in-out infinite, morphShape 13s ease-in-out infinite;
+  animation: erraticMove2 15s ease-in-out infinite, morphShape 15s ease-in-out infinite;
   animation-delay: 2s;
   border-radius: 50%;
 }
@@ -1108,7 +1108,7 @@ body {
   height: 100px;
   top: 50%;
   right: 15%;
-  animation: erraticMove3 13s ease-in-out infinite, particleMain 13s ease-in-out infinite;
+  animation: erraticMove3 15s ease-in-out infinite, particleMain 15s ease-in-out infinite;
   animation-delay: 4s;
   background: #FFD700;
   opacity: 0.2;
@@ -1126,7 +1126,7 @@ body {
   top: 0;
   left: 0;
   transform: translate(-200px, -150px);
-  animation: erraticMove3 13s ease-in-out infinite, particleBreak1 13s ease-in-out infinite;
+  animation: erraticMove3 15s ease-in-out infinite, particleBreak1 15s ease-in-out infinite;
   animation-delay: 4.2s;
 }
 
@@ -1141,7 +1141,7 @@ body {
   top: 0;
   left: 0;
   transform: translate(180px, 160px);
-  animation: erraticMove3 13s ease-in-out infinite, particleBreak2 13s ease-in-out infinite;
+  animation: erraticMove3 15s ease-in-out infinite, particleBreak2 15s ease-in-out infinite;
   animation-delay: 4.5s;
 }
 
