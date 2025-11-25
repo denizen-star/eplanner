@@ -1108,7 +1108,7 @@ body {
   height: 300px;
   top: 50%;
   right: 15%;
-  animation: erraticMove3 20s ease-in-out infinite, particleMain 20s ease-in-out infinite;
+  animation: erraticMove3 15s ease-in-out infinite, particleMain 15s ease-in-out infinite;
   animation-delay: 4s;
   background: #FFD700;
   opacity: 0.25;
@@ -1126,7 +1126,7 @@ body {
   top: 0;
   left: 0;
   transform: translate(-600px, -500px);
-  animation: erraticMove3 20s ease-in-out infinite, particleBreak1 20s ease-in-out infinite;
+  animation: erraticMove3 15s ease-in-out infinite, particleBreak1 15s ease-in-out infinite;
   animation-delay: 4.2s;
 }
 
