@@ -1084,7 +1084,7 @@ body {
   background: #00D4D4;
   top: 10%;
   right: 5%;
-  animation: erraticMove1 11s ease-in-out infinite;
+  animation: erraticMove1 13s ease-in-out infinite;
   animation-delay: 0s;
 }
 
@@ -1094,7 +1094,7 @@ body {
   background: #FF0033;
   bottom: 10%;
   left: 5%;
-  animation: erraticMove2 11s ease-in-out infinite;
+  animation: erraticMove2 13s ease-in-out infinite;
   animation-delay: 2s;
 }
 
@@ -1104,7 +1104,7 @@ body {
   background: #FFD700;
   top: 50%;
   right: 15%;
-  animation: erraticMove3 11s ease-in-out infinite;
+  animation: erraticMove3 13s ease-in-out infinite;
   animation-delay: 4s;
 }
 
