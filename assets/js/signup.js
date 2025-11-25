@@ -244,11 +244,16 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Failed to sign up');
     }
 
-    successDiv.textContent = 'Successfully signed up for the run!';
+    successDiv.textContent = 'Successfully signed up for the event!';
     successDiv.style.display = 'block';
     document.getElementById('signupForm').reset();
     document.getElementById('submitButton').disabled = true;
-    loadRun();
+    
+    // Redirect to event page with success parameter
+    const eventLink = `${window.location.origin}/event.html?id=${runId}&success=true`;
+    setTimeout(() => {
+      window.location.href = eventLink;
+    }, 1500);
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';

@@ -1042,3 +1042,60 @@ body {
   }
 }
 
+/* Abstract Background Shapes - Slow moving animation */
+.abstract-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: float 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shape-1 {
+  width: 700px;
+  height: 400px;
+  background: #00D4D4;
+  top: 10%;
+  right: 5%;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  width: 250px;
+  height: 650px;
+  background: #FF0033;
+  bottom: 10%;
+  left: 5%;
+  animation-delay: 2s;
+}
+
+.shape-3 {
+  width: 300px;
+  height: 300px;
+  background: #FFD700;
+  top: 50%;
+  right: 15%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px);
+  }
+  50% { 
+    transform: translateY(-30px) translateX(15px);
+  }
+}
+
+/* Ensure main content is above background shapes */
+.main-container {
+  position: relative;
+  z-index: 10;
+}
+
+.card {
+  position: relative;
+  z-index: 10;
+}
+

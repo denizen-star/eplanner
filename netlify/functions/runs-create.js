@@ -1,4 +1,5 @@
-const { runs } = require('../../lib/databaseClient');
+const { runs, telemetry } = require('../../lib/databaseClient');
+const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -76,7 +77,7 @@ exports.handler = async (event) => {
     const { 
       location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
-      neighbourhood, city_district, village, town, municipality
+      neighbourhood, city_district, village, town, municipality, pageUrl, referrer
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -181,6 +182,44 @@ exports.handler = async (event) => {
     const baseUrl = `${protocol}://${host}`;
     const signupLink = `${baseUrl}/signup.html?id=${shortId}`;
     const manageLink = `${baseUrl}/manage.html?id=${shortId}`;
+
+    // Create telemetry record (non-blocking, don't fail if this fails)
+    console.log('[RUNS CREATE] Creating telemetry record...');
+    try {
+      // Extract session ID from sessionInfo
+      const sessionId = sessionInfo?.sessionId || null;
+      
+      // Get IP geolocation
+      let ipGeolocation = null;
+      if (ipAddress && ipAddress !== 'unknown') {
+        try {
+          console.log('[RUNS CREATE] Fetching geolocation for IP:', ipAddress);
+          ipGeolocation = await getGeolocationFromIP(ipAddress);
+          console.log('[RUNS CREATE] Geolocation result:', ipGeolocation ? 'success' : 'null');
+        } catch (geoError) {
+          console.warn('[RUNS CREATE] IP geolocation failed:', geoError.message);
+        }
+      } else {
+        console.log('[RUNS CREATE] Skipping geolocation - invalid IP:', ipAddress);
+      }
+
+      await telemetry.create({
+        eventType: 'event_create',
+        runId: shortId,
+        signupId: null,
+        sessionId: sessionId,
+        ipAddress: ipAddress,
+        ipGeolocation: ipGeolocation,
+        deviceInfo: deviceInfo || null,
+        sessionInfo: sessionInfo || null,
+        pageUrl: pageUrl || null,
+        referrer: referrer || null,
+      });
+      console.log('[RUNS CREATE] Telemetry record created successfully');
+    } catch (telemetryError) {
+      console.error('[RUNS CREATE] Database error creating telemetry:', telemetryError.message);
+      // Don't fail the event creation if telemetry creation fails, but log it
+    }
 
     console.log('[RUNS CREATE] Success! Run created:', { shortId, signupLink, manageLink });
 

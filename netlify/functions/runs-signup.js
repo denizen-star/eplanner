@@ -1,4 +1,5 @@
-const { runs, signups, waivers } = require('../../lib/databaseClient');
+const { runs, signups, waivers, telemetry } = require('../../lib/databaseClient');
+const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -147,6 +148,44 @@ exports.handler = async (event) => {
     } catch (waiverError) {
       console.error('[RUNS SIGNUP] Database error creating waiver:', waiverError.message);
       // Don't fail the signup if waiver creation fails, but log it
+    }
+
+    // Create telemetry record (non-blocking, don't fail if this fails)
+    console.log('[RUNS SIGNUP] Creating telemetry record...');
+    try {
+      // Extract session ID from sessionInfo
+      const sessionId = sessionInfo?.sessionId || null;
+      
+      // Get IP geolocation
+      let ipGeolocation = null;
+      if (ipAddress && ipAddress !== 'unknown') {
+        try {
+          console.log('[RUNS SIGNUP] Fetching geolocation for IP:', ipAddress);
+          ipGeolocation = await getGeolocationFromIP(ipAddress);
+          console.log('[RUNS SIGNUP] Geolocation result:', ipGeolocation ? 'success' : 'null');
+        } catch (geoError) {
+          console.warn('[RUNS SIGNUP] IP geolocation failed:', geoError.message);
+        }
+      } else {
+        console.log('[RUNS SIGNUP] Skipping geolocation - invalid IP:', ipAddress);
+      }
+
+      await telemetry.create({
+        eventType: 'signup',
+        runId: runId,
+        signupId: createdSignup.id,
+        sessionId: sessionId,
+        ipAddress: ipAddress,
+        ipGeolocation: ipGeolocation,
+        deviceInfo: deviceInfo || null,
+        sessionInfo: sessionInfo || null,
+        pageUrl: pageUrl || null,
+        referrer: referrer || null,
+      });
+      console.log('[RUNS SIGNUP] Telemetry record created successfully');
+    } catch (telemetryError) {
+      console.error('[RUNS SIGNUP] Database error creating telemetry:', telemetryError.message);
+      // Don't fail the signup if telemetry creation fails, but log it
     }
 
     console.log('[RUNS SIGNUP] Success! Signup completed for:', name);

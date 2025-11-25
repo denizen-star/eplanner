@@ -17,6 +17,11 @@ function displayAddressDetails(run) {
   document.getElementById('displayCountry').textContent = run.country || '-';
 }
 
+// Load calendar utilities
+if (typeof generateGoogleCalendarLink === 'undefined') {
+  console.warn('calendar-utils.js not loaded. Calendar features may not work.');
+}
+
 function formatPhoneNumber(phone) {
   const digits = phone.replace(/\D/g, '');
   if (digits.length === 10) {
@@ -167,6 +172,11 @@ async function loadRun() {
     // Display address details
     displayAddressDetails(run);
 
+    // Add calendar links section (after map is loaded)
+    setTimeout(() => {
+      addCalendarLinksSection(run);
+    }, 500);
+
     const signupList = document.getElementById('signupList');
     if (run.signups.length === 0) {
       signupList.innerHTML = '<li style="padding: 16px; text-align: center; color: #2f3b52;">No signups yet</li>';
@@ -293,6 +303,60 @@ function copySignupLink() {
       console.error('Failed to copy:', err);
       alert('Failed to copy signup link');
     });
+  }
+}
+
+// Store run data globally for calendar functions to access
+let currentRun = null;
+window.currentRun = currentRun; // Make available for inline handlers
+
+/**
+ * Add calendar links section below event details
+ */
+function addCalendarLinksSection(run) {
+  const runInfoDiv = document.getElementById('runInfo');
+  if (!runInfoDiv) return;
+  
+  // Check if calendar section already exists, if so remove it
+  const existingCalendarSection = document.getElementById('calendarLinksSection');
+  if (existingCalendarSection) {
+    existingCalendarSection.remove();
+  }
+  
+  // Store run globally for calendar functions
+  currentRun = run;
+  window.currentRun = run; // Make available for inline handlers
+  
+  try {
+    const googleCalendarLink = generateGoogleCalendarLink(run);
+    
+    // Find where to insert (after map)
+    const mapElement = document.getElementById('locationMap');
+    
+    const calendarSection = document.createElement('div');
+    calendarSection.id = 'calendarLinksSection';
+    calendarSection.style.cssText = 'margin-top: 24px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border-gray);';
+    calendarSection.innerHTML = `
+      <h2 style="margin-bottom: 16px;">Add to Calendar</h2>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button onclick="window.downloadICalFile(window.currentRun)" class="button button-primary" style="flex: 1; min-width: 120px;">
+          Download iCal
+        </button>
+        <a href="${googleCalendarLink}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
+          Google Calendar
+        </a>
+      </div>
+    `;
+    
+    // Insert after map
+    if (mapElement && mapElement.parentNode) {
+      mapElement.parentNode.insertBefore(calendarSection, mapElement.nextSibling);
+    } else {
+      // Fallback: append to runInfo div
+      runInfoDiv.appendChild(calendarSection);
+    }
+  } catch (error) {
+    console.error('Error adding calendar links section:', error);
   }
 }
 

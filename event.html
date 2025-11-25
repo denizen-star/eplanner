@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Event - Event Planner</title>
+    <title>Event - Event Planner</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,48 +49,29 @@
         </nav>
     </header>
 
-    <main class="main-container" style="position: relative; overflow-x: hidden;">
+    <main class="main-container fade-in" style="position: relative; overflow-x: hidden;">
         <!-- Abstract Background Shapes -->
         <div class="abstract-shape shape-1"></div>
         <div class="abstract-shape shape-2"></div>
         <div class="abstract-shape shape-3"></div>
-        <div class="card">
+        <div class="card hero-background fade-in-up">
+            <div id="successMessage" class="message message-success" style="display: none; margin-bottom: 24px;"></div>
+            
             <div id="loading" style="text-align: center; padding: 40px;">
                 <p>Loading event details...</p>
             </div>
 
-            <div id="runInfo" style="display: none;">
-                <h1 id="runTitle">Event Management</h1>
+            <div id="eventInfo" style="display: none;">
+                <h1 id="eventTitle">Event</h1>
                 <div style="margin-bottom: 24px;">
-                    <p><strong>Location:</strong> <span id="runLocation"></span></p>
-                    <p><strong>Planner:</strong> <span id="runPacerName">-</span></p>
-                    <p><strong>Date & Time:</strong> <span id="runDateTime"></span></p>
-                    <p><strong>Max Participants:</strong> <span id="runMax"></span></p>
-                    <p><strong>Current Signups:</strong> <span id="runCurrent"></span></p>
-                    <p><strong>Created:</strong> <span id="runCreated">-</span></p>
-                </div>
-
-                <div id="addressDetails" style="margin-bottom: 24px;">
-                    <h3>Address Details</h3>
-                    <p><strong>Street:</strong> <span id="displayStreet">-</span></p>
-                    <p><strong>City:</strong> <span id="displayCity">-</span></p>
-                    <p><strong>State:</strong> <span id="displayState">-</span></p>
-                    <p><strong>Zip Code:</strong> <span id="displayPostcode">-</span></p>
-                    <p><strong>Country:</strong> <span id="displayCountry">-</span></p>
+                    <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+                    <p><strong>Event Planner:</strong> <span id="eventPlannerName">-</span></p>
+                    <p><strong>Date & Time:</strong> <span id="eventDateTime"></span></p>
+                    <p><strong>Max Participants:</strong> <span id="eventMax"></span></p>
+                    <p><strong>Created:</strong> <span id="eventCreated">-</span></p>
                 </div>
 
                 <div id="locationMap" class="location-map" style="display: none; margin-bottom: 24px;"></div>
-
-                <div class="collapsible-section" style="margin-bottom: 24px;">
-                    <button class="collapsible-toggle" onclick="toggleSignups()" id="signupsToggle">
-                        <span>Signups</span>
-                        <span class="collapsible-icon expanded" id="signupsIcon">▼</span>
-                    </button>
-                    <div class="collapsible-content" id="signupsContent">
-                        <button class="button button-secondary" onclick="loadRun()" style="margin-bottom: 16px; margin-top: 16px;">Refresh</button>
-                        <ul class="signup-list" id="signupList"></ul>
-                    </div>
-                </div>
             </div>
 
             <div id="notFound" style="display: none;">
@@ -105,7 +86,7 @@
     <script src="assets/js/map-utils.js"></script>
     <script src="assets/js/calendar-utils.js"></script>
     <script src="assets/js/dropdown.js"></script>
-    <script src="assets/js/manage.js"></script>
+    <script src="assets/js/event.js"></script>
 </body>
 </html>
 
