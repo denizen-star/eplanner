@@ -1074,7 +1074,7 @@ body {
   position: absolute;
   border-radius: 50%;
   opacity: 0.2;
-  animation: float 12s ease-in-out infinite;
+  animation: float 10s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -1111,7 +1111,7 @@ body {
     transform: translateY(0px) translateX(0px);
   }
   50% { 
-    transform: translateY(-30px) translateX(15px);
+    transform: translateY(-800px) translateX(900px);
   }
 }
 
