@@ -90,13 +90,9 @@ function formatCalendarDescription(event) {
   // Replace last 3 lines with new format
   description += `\nMeeting at: ${location}\n`;
   description += `🔗 ${confirmationLink}\n`;
-  description += '\nReminders:\n';
-  description += '1. Get to the location 5-10 minutes before the start \n';
-  description += '2. Stay Hydrated\n';
-  description += '3. Be respectful of your fellow participants\n';
-  description += '4. Bring a smile and come ready to have fun\n';
   description += '\n';
-  description += `Can't wait to see you,\n${plannerName}`;
+  description += 'Looking forward,\n';
+  description += `${plannerName}`;
   
   return description;
 }
