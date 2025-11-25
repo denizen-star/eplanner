@@ -131,7 +131,6 @@ function escapeICalText(text) {
 /**
  * Generate iCal (.ics) file content
  * Returns: String containing iCal file content
- * Includes reminders: 2 hours before and 1 day before the event
  */
 function generateICalEvent(event) {
   const title = formatCalendarTitle(event);
@@ -167,16 +166,6 @@ function generateICalEvent(event) {
     `LOCATION:${escapeICalText(location)}`,
     'STATUS:CONFIRMED',
     'SEQUENCE:0',
-    'BEGIN:VALARM',
-    'TRIGGER:-PT2H',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Reminder: Event in 2 hours',
-    'END:VALARM',
-    'BEGIN:VALARM',
-    'TRIGGER:-P1D',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Reminder: Event tomorrow',
-    'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR'
   ].join('\r\n');
