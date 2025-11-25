@@ -21,3 +21,5 @@ ADD INDEX idx_city (city),
 ADD INDEX idx_state (state),
 ADD INDEX idx_postcode (postcode);
 
+
+

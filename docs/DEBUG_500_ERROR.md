@@ -176,3 +176,5 @@ If you're still stuck:
    - Whether tables exist in database
    - The connection string format (without actual password)
 
+
+
