@@ -1111,7 +1111,7 @@ body {
   animation: erraticMove3 15s ease-in-out infinite, particleMain 15s ease-in-out infinite;
   animation-delay: 4s;
   background: #FFD700;
-  opacity: 0.2;
+  opacity: 0.25;
   border-radius: 50%;
 }
 
@@ -1120,7 +1120,7 @@ body {
   position: absolute;
   width: 280px;
   height: 280px;
-  background: #FFD700;
+  background: #FFA500;
   opacity: 0.2;
   border-radius: 50%;
   top: 0;
@@ -1135,7 +1135,7 @@ body {
   position: absolute;
   width: 220px;
   height: 220px;
-  background: #FFD700;
+  background: #FFE44D;
   opacity: 0.2;
   border-radius: 50%;
   top: 0;
