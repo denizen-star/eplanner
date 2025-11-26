@@ -62,11 +62,19 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   font-family: var(--font-family);
   background: var(--bg-secondary);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .main-container {
@@ -391,6 +399,8 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 48px 32px;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .card {
@@ -1071,10 +1081,12 @@ body {
 
 /* Abstract Background Shapes - Erratic circular/star movement */
 .abstract-shape {
-  position: absolute;
+  position: fixed;
   opacity: 0.2;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
+  contain: layout style paint;
 }
 
 /* Shape 1: Non-circular blobs/polygons */
