@@ -77,7 +77,7 @@ exports.handler = async (event) => {
     const { 
       location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
-      neighbourhood, city_district, village, town, municipality, pageUrl, referrer
+      neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -168,12 +168,19 @@ exports.handler = async (event) => {
         city_district: city_district || null,
         village: village || null,
         town: town || null,
-        municipality: municipality || null
+        municipality: municipality || null,
+        picture: picture || null,
+        description: description || null
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {
       console.error('[RUNS CREATE] Database save failed:', dbError.message);
-      throw new Error('Failed to save event to database');
+      console.error('[RUNS CREATE] Database error stack:', dbError.stack);
+      // Check if it's a column error (database migration not run)
+      if (dbError.message && (dbError.message.includes('Unknown column') || dbError.message.includes('picture') || dbError.message.includes('description'))) {
+        throw new Error('Database migration required: Please add picture and description columns. See migration-add-picture-description.sql file.');
+      }
+      throw new Error(`Failed to save event to database: ${dbError.message}`);
     }
 
     // Get base URL from event

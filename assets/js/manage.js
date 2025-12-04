@@ -128,6 +128,26 @@ async function loadRun() {
 
     document.getElementById('runLocation').textContent = run.location;
     
+    // Display picture if available
+    const pictureContainer = document.getElementById('eventPictureContainer');
+    const pictureImg = document.getElementById('eventPicture');
+    if (run.picture) {
+      pictureImg.src = 'data:image/jpeg;base64,' + run.picture;
+      pictureContainer.style.display = 'block';
+    } else {
+      pictureContainer.style.display = 'none';
+    }
+    
+    // Display description if available
+    const descriptionContainer = document.getElementById('eventDescriptionContainer');
+    const descriptionText = document.getElementById('eventDescription');
+    if (run.description && run.description.trim()) {
+      descriptionText.textContent = run.description.trim();
+      descriptionContainer.style.display = 'block';
+    } else {
+      descriptionContainer.style.display = 'none';
+    }
+    
     const runTitleElement = document.getElementById('runTitle');
     const pacerNameElement = document.getElementById('runPacerName');
     

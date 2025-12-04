@@ -13,6 +13,7 @@ let currentSortDirection = 'asc';
 let runnersReportData = [];
 let currentRunnersSortColumn = 'name';
 let currentRunnersSortDirection = 'asc';
+let editPictures = {}; // Store base64 picture data for each run being edited
 
 // Toggle collapsible sections
 function toggleSection(sectionId) {
@@ -193,6 +194,26 @@ async function loadRuns() {
                     <label for="editMaxParticipants-${run.id}">Max Participants *</label>
                     <input type="number" id="editMaxParticipants-${run.id}" required min="1">
                   </div>
+                  <div class="form-group">
+                    <label for="editDescription-${run.id}">Event Description (Optional)</label>
+                    <textarea id="editDescription-${run.id}" rows="4" placeholder="Add details about your event..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="editPicture-${run.id}">Event Picture (Optional)</label>
+                    <input type="file" id="editPicture-${run.id}" accept="image/*">
+                    <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Upload a new image or leave empty to keep current</small>
+                    <div id="editPicturePreview-${run.id}" style="margin-top: 12px;">
+                      <div id="editCurrentPicture-${run.id}" style="display: none;">
+                        <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">Current picture:</p>
+                        <img id="editCurrentPictureImg-${run.id}" src="" alt="Current picture" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
+                        <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')">Remove Picture</button>
+                      </div>
+                      <div id="editNewPicturePreview-${run.id}" style="display: none;">
+                        <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">New picture:</p>
+                        <img id="editNewPictureImg-${run.id}" src="" alt="New picture preview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-gray);">
+                      </div>
+                    </div>
+                  </div>
                   <div style="display: flex; gap: 12px;">
                     <button type="submit" class="button button-primary">Save Changes</button>
                     <button type="button" class="button button-secondary" onclick="cancelEdit('${run.id}')">Cancel</button>
@@ -236,6 +257,92 @@ function editRun(runId) {
   document.getElementById(`editPacerName-${runId}`).value = run.pacerName || '';
   document.getElementById(`editDateTime-${runId}`).value = localDateTime;
   document.getElementById(`editMaxParticipants-${runId}`).value = run.maxParticipants;
+  document.getElementById(`editDescription-${runId}`).value = run.description || '';
+  
+  // Handle picture - show existing if present
+  const currentPictureDiv = document.getElementById(`editCurrentPicture-${runId}`);
+  const currentPictureImg = document.getElementById(`editCurrentPictureImg-${runId}`);
+  if (run.picture) {
+    currentPictureImg.src = 'data:image/jpeg;base64,' + run.picture;
+    currentPictureDiv.style.display = 'block';
+    editPictures[runId] = run.picture; // Store existing picture
+  } else {
+    currentPictureDiv.style.display = 'none';
+    editPictures[runId] = null;
+  }
+  
+  // Setup picture file input handler
+  const pictureInput = document.getElementById(`editPicture-${runId}`);
+  pictureInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    const newPreview = document.getElementById(`editNewPicturePreview-${runId}`);
+    const newImg = document.getElementById(`editNewPictureImg-${runId}`);
+    const errorDiv = document.getElementById(`editError-${runId}`);
+    
+    if (!file) {
+      newPreview.style.display = 'none';
+      editPictures[runId] = editPictures[runId] || null; // Keep existing if no new file
+      return;
+    }
+    
+    try {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image file size must be less than 5MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please select a valid image file');
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Calculate new dimensions (max 1200px width, maintain aspect ratio)
+          let width = img.width;
+          let height = img.height;
+          const maxWidth = 1200;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with quality compression (0.8 = 80% quality)
+          const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+          
+          // Check final size (max 2MB after compression)
+          const sizeInMB = (base64.length * 3) / 4 / 1024 / 1024;
+          if (sizeInMB > 2) {
+            throw new Error(`Image is still too large after compression (${sizeInMB.toFixed(2)}MB). Please use a smaller image.`);
+          }
+          
+          editPictures[runId] = base64;
+          newImg.src = 'data:image/jpeg;base64,' + base64;
+          newPreview.style.display = 'block';
+          errorDiv.style.display = 'none';
+        };
+        img.onerror = () => {
+          throw new Error('Failed to load image');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        throw new Error('Failed to read image file');
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      errorDiv.textContent = error.message;
+      errorDiv.style.display = 'block';
+      e.target.value = '';
+    }
+  };
 
   // Show edit form and hide edit button, ensure details are expanded
   const detailsContainer = document.getElementById(`details-${runId}`);
@@ -286,6 +393,21 @@ function cancelEdit(runId) {
   if (mapContainer) {
     mapContainer.style.display = 'none';
   }
+  
+  // Clear picture data
+  editPictures[runId] = undefined;
+}
+
+// Remove picture from edit form
+function removeEditPicture(runId) {
+  editPictures[runId] = null; // Set to null to remove picture
+  const currentPictureDiv = document.getElementById(`editCurrentPicture-${runId}`);
+  const newPreview = document.getElementById(`editNewPicturePreview-${runId}`);
+  const pictureInput = document.getElementById(`editPicture-${runId}`);
+  
+  if (currentPictureDiv) currentPictureDiv.style.display = 'none';
+  if (newPreview) newPreview.style.display = 'none';
+  if (pictureInput) pictureInput.value = '';
 }
 
 // Debounce function for map updates
@@ -317,13 +439,22 @@ function updateEditMap(runId) {
 async function saveRunEdit(event, runId) {
   event.preventDefault();
 
+  const description = document.getElementById(`editDescription-${runId}`)?.value.trim() || null;
+  const picture = editPictures[runId] !== undefined ? editPictures[runId] : undefined;
+  
   const formData = {
     title: document.getElementById(`editTitle-${runId}`).value.trim(),
     location: document.getElementById(`editLocation-${runId}`).value.trim(),
     plannerName: document.getElementById(`editPacerName-${runId}`).value.trim(),
     dateTime: document.getElementById(`editDateTime-${runId}`).value,
-    maxParticipants: parseInt(document.getElementById(`editMaxParticipants-${runId}`).value)
+    maxParticipants: parseInt(document.getElementById(`editMaxParticipants-${runId}`).value),
+    description: description
   };
+  
+  // Only include picture if it was changed
+  if (picture !== undefined) {
+    formData.picture = picture;
+  }
 
   const errorDiv = document.getElementById(`editError-${runId}`);
   errorDiv.style.display = 'none';

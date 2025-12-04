@@ -86,7 +86,18 @@ function updateOpenGraphTags(run, runTitle) {
   }
   
   // Set image URL (absolute URL required for Open Graph)
-  const imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
+  // Use event picture if available, otherwise fallback to default
+  let imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
+  if (run.picture) {
+    // For base64 images, we can't use them directly in og:image, so we keep the default
+    // In production, you might want to upload the image to a CDN
+    imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
+  }
+  
+  // Update description to include event description if available
+  if (run.description && run.description.trim()) {
+    description += ` | ${run.description.substring(0, 100)}${run.description.length > 100 ? '...' : ''}`;
+  }
   
   // Update meta tags
   document.getElementById('og-url').setAttribute('content', currentUrl);
@@ -108,6 +119,26 @@ async function loadRun() {
     const run = await response.json();
 
     document.getElementById('runLocation').textContent = run.location;
+    
+    // Display picture if available
+    const pictureContainer = document.getElementById('eventPictureContainer');
+    const pictureImg = document.getElementById('eventPicture');
+    if (run.picture) {
+      pictureImg.src = 'data:image/jpeg;base64,' + run.picture;
+      pictureContainer.style.display = 'block';
+    } else {
+      pictureContainer.style.display = 'none';
+    }
+    
+    // Display description if available
+    const descriptionContainer = document.getElementById('eventDescriptionContainer');
+    const descriptionText = document.getElementById('eventDescription');
+    if (run.description && run.description.trim()) {
+      descriptionText.textContent = run.description.trim();
+      descriptionContainer.style.display = 'block';
+    } else {
+      descriptionContainer.style.display = 'none';
+    }
     
     const runTitleElement = document.getElementById('runTitle');
     const pacerNameElement = document.getElementById('runPacerName');

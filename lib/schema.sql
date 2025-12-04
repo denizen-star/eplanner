@@ -28,6 +28,8 @@ CREATE TABLE ep_events (
   village VARCHAR(255),
   town VARCHAR(255),
   municipality VARCHAR(255),
+  picture TEXT,
+  description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_date_time (date_time),

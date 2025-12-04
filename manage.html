@@ -61,6 +61,11 @@
 
             <div id="runInfo" style="display: none;">
                 <h1 id="runTitle">Event Management</h1>
+                
+                <div id="eventPictureContainer" style="display: none; margin-bottom: 24px;">
+                    <img id="eventPicture" src="" alt="Event picture" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-gray);">
+                </div>
+                
                 <div style="margin-bottom: 24px;">
                     <p><strong>Location:</strong> <span id="runLocation"></span></p>
                     <p><strong>Planner:</strong> <span id="runPacerName">-</span></p>
@@ -68,6 +73,11 @@
                     <p><strong>Max Participants:</strong> <span id="runMax"></span></p>
                     <p><strong>Current Signups:</strong> <span id="runCurrent"></span></p>
                     <p><strong>Created:</strong> <span id="runCreated">-</span></p>
+                </div>
+
+                <div id="eventDescriptionContainer" style="display: none; margin-bottom: 24px; padding: 16px; background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
+                    <h3 style="margin-bottom: 8px; font-size: 18px;">Event Description</h3>
+                    <p id="eventDescription" style="color: var(--text-gray); line-height: 1.6; white-space: pre-wrap;"></p>
                 </div>
 
                 <div id="addressDetails" style="margin-bottom: 24px;">

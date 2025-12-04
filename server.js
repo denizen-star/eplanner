@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
 
 // Disable caching for API responses
 app.use((req, res, next) => {
@@ -90,16 +90,44 @@ app.post('/api/runs/create', async (req, res) => {
   });
 
   try {
-    const { location, coordinates, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo } = req.body;
+    const { location, coordinates, pacerName, plannerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo, picture, description } = req.body;
+
+    // Support both plannerName (new) and pacerName (legacy) for backward compatibility
+    const nameToUse = plannerName || pacerName;
 
     // Validate and trim all required fields
     const trimmedLocation = location ? location.trim() : '';
-    const trimmedPacerName = pacerName ? pacerName.trim() : '';
+    const trimmedPlannerName = nameToUse ? nameToUse.trim() : '';
 
     console.log('[RUN CREATE] Validating fields...');
-    if (!trimmedLocation || !trimmedPacerName || !dateTime || !maxParticipants) {
-      console.error('[RUN CREATE] Validation failed: Missing required fields');
-      return res.status(400).json({ error: 'Missing required fields' });
+    console.log('[RUN CREATE] Field check:', {
+      hasLocation: !!trimmedLocation,
+      hasPlannerName: !!trimmedPlannerName,
+      hasDateTime: !!dateTime,
+      maxParticipants: maxParticipants,
+      maxParticipantsType: typeof maxParticipants
+    });
+    
+    // Build detailed error message showing which fields are missing
+    const missingFields = [];
+    if (!trimmedLocation) missingFields.push('location');
+    if (!trimmedPlannerName) missingFields.push('plannerName');
+    if (!dateTime) missingFields.push('dateTime');
+    if (!maxParticipants) missingFields.push('maxParticipants');
+    
+    if (missingFields.length > 0) {
+      console.error('[RUN CREATE] Validation failed: Missing required fields', {
+        location: trimmedLocation || 'MISSING',
+        plannerName: trimmedPlannerName || 'MISSING',
+        dateTime: dateTime || 'MISSING',
+        maxParticipants: maxParticipants || 'MISSING',
+        missingFields: missingFields
+      });
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        missingFields: missingFields,
+        details: `Missing: ${missingFields.join(', ')}`
+      });
     }
 
     if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
@@ -118,7 +146,7 @@ app.post('/api/runs/create', async (req, res) => {
       id: shortId,
       uuid: uuid,
       location: trimmedLocation,
-      pacerName: trimmedPacerName,
+      pacerName: trimmedPlannerName,
       title: title ? title.trim() : null,
       dateTime: dateTime,
       maxParticipants: parseInt(maxParticipants),
@@ -141,22 +169,37 @@ app.post('/api/runs/create', async (req, res) => {
     // Save to PlanetScale database
     console.log('[RUN CREATE] Saving to PlanetScale database...');
     try {
-      await runs.create({
-      id: shortId,
-      uuid: uuid,
-      location: trimmedLocation,
+      const createData = {
+        id: shortId,
+        uuid: uuid,
+        location: trimmedLocation,
         coordinates: coordinates || null,
-      pacerName: trimmedPacerName,
-      title: title ? title.trim() : null,
-      dateTime: dateTime,
-      maxParticipants: parseInt(maxParticipants),
+        plannerName: trimmedPlannerName,
+        title: title ? title.trim() : null,
+        dateTime: dateTime,
+        maxParticipants: parseInt(maxParticipants),
         status: 'active',
-      createdAt: createdAt,
+        createdAt: createdAt,
+        picture: picture || null,
+        description: description || null,
+      };
+      
+      console.log('[RUN CREATE] Create data prepared:', {
+        hasPicture: !!createData.picture,
+        hasDescription: !!createData.description,
+        pictureLength: createData.picture ? createData.picture.length : 0
       });
+      
+      await runs.create(createData);
       console.log('[RUN CREATE] Run saved to database successfully');
     } catch (dbError) {
       console.error('[RUN CREATE] Database save failed:', dbError.message);
-      throw new Error('Failed to save run to database');
+      console.error('[RUN CREATE] Database error stack:', dbError.stack);
+      // Check if it's a column error (database migration not run)
+      if (dbError.message && (dbError.message.includes('Unknown column') || dbError.message.includes('picture') || dbError.message.includes('description'))) {
+        throw new Error('Database migration required: Please add picture and description columns. See migration-add-picture-description.sql file.');
+      }
+      throw new Error(`Failed to save event to database: ${dbError.message}`);
     }
 
     console.log('[RUN CREATE] Generating response URLs...');
@@ -175,8 +218,9 @@ app.post('/api/runs/create', async (req, res) => {
   } catch (error) {
     console.error('[RUN CREATE] ERROR:', error);
     console.error('[RUN CREATE] Error stack:', error.stack);
-    res.status(500).json({ 
-      error: 'Failed to create run',
+    const statusCode = error.message.includes('Missing required fields') || error.message.includes('must be a positive integer') ? 400 : 500;
+    res.status(statusCode).json({ 
+      error: error.message || 'Failed to create event',
       message: error.message,
       details: process.env.NETLIFY === 'true' ? 'Netlify Functions environment' : 'Local environment'
     });
@@ -385,7 +429,7 @@ app.delete('/api/runs/:runId/signups/:signupId', async (req, res) => {
 app.put('/api/runs/:runId', async (req, res) => {
   try {
     const { runId } = req.params;
-    const { location, pacerName, title, dateTime, maxParticipants, coordinates } = req.body;
+    const { location, pacerName, title, dateTime, maxParticipants, coordinates, picture, description } = req.body;
 
     // Verify run exists
     const existingRun = await runs.getById(runId);
@@ -400,6 +444,8 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (title !== undefined) updates.title = title ? title.trim() : null;
     if (dateTime !== undefined) updates.dateTime = dateTime;
     if (coordinates !== undefined) updates.coordinates = coordinates;
+    if (picture !== undefined) updates.picture = picture;
+    if (description !== undefined) updates.description = description;
     if (maxParticipants !== undefined) {
       if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
         return res.status(400).json({ error: 'Max participants must be a positive integer' });

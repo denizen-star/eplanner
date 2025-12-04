@@ -7,6 +7,7 @@ let locationUpdateTimeout;
 let validatedAddress = null;
 let validatedCoordinates = null;
 let validatedAddressComponents = null;
+let eventPictureBase64 = null;
 
 // Initialize session manager and device collector
 let sessionManager = null;
@@ -100,6 +101,109 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
   }
 }
 
+// Handle picture upload and conversion to base64 with compression
+function convertImageToBase64(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null);
+      return;
+    }
+
+    // Validate file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error('Image file size must be less than 5MB'));
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Please select a valid image file'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas to resize/compress image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate new dimensions (max 1200px width, maintain aspect ratio)
+        let width = img.width;
+        let height = img.height;
+        const maxWidth = 1200;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress image
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with quality compression (0.8 = 80% quality)
+        const base64String = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        
+        // Check final size (max 2MB after compression)
+        const sizeInMB = (base64String.length * 3) / 4 / 1024 / 1024;
+        if (sizeInMB > 2) {
+          reject(new Error(`Image is still too large after compression (${sizeInMB.toFixed(2)}MB). Please use a smaller image.`));
+          return;
+        }
+        
+        resolve(base64String);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Handle picture file input change
+document.getElementById('eventPicture')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const preview = document.getElementById('picturePreview');
+  const previewImage = document.getElementById('previewImage');
+  const errorDiv = document.getElementById('error');
+
+  if (!file) {
+    if (preview) preview.style.display = 'none';
+    eventPictureBase64 = null;
+    return;
+  }
+
+  try {
+    if (errorDiv) errorDiv.style.display = 'none';
+    const base64 = await convertImageToBase64(file);
+    eventPictureBase64 = base64;
+    if (previewImage) previewImage.src = 'data:image/jpeg;base64,' + base64;
+    if (preview) preview.style.display = 'block';
+  } catch (error) {
+    if (errorDiv) {
+      errorDiv.textContent = error.message;
+      errorDiv.style.display = 'block';
+    }
+    e.target.value = ''; // Clear the file input
+    eventPictureBase64 = null;
+    if (preview) preview.style.display = 'none';
+  }
+});
+
+// Handle remove picture button
+document.getElementById('removePicture')?.addEventListener('click', () => {
+  const fileInput = document.getElementById('eventPicture');
+  const preview = document.getElementById('picturePreview');
+  if (fileInput) fileInput.value = '';
+  eventPictureBase64 = null;
+  if (preview) preview.style.display = 'none';
+});
+
 document.getElementById('coordinateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -130,7 +234,21 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please enter a planner name');
     }
 
+    const dateTimeInput = document.getElementById('dateTime');
+    const dateTime = dateTimeInput ? dateTimeInput.value : null;
+    if (!dateTime) {
+      throw new Error('Please select a date and time for the event');
+    }
+
     const runTitle = document.getElementById('runTitle').value.trim();
+    const eventDescription = document.getElementById('eventDescription')?.value.trim() || null;
+    
+    const maxParticipantsInput = document.getElementById('maxParticipants');
+    const maxParticipantsValue = maxParticipantsInput ? parseInt(maxParticipantsInput.value) : null;
+    
+    if (!maxParticipantsInput || !maxParticipantsValue || isNaN(maxParticipantsValue) || maxParticipantsValue <= 0) {
+      throw new Error('Please enter a valid number of max participants (must be at least 1)');
+    }
 
     // Collect device information (only in production)
     const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
@@ -168,8 +286,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       coordinates: validatedCoordinates,
       plannerName: plannerName,
       title: runTitle || null,
-      dateTime: document.getElementById('dateTime').value,
-      maxParticipants: parseInt(document.getElementById('maxParticipants').value),
+      dateTime: dateTime,
+      maxParticipants: maxParticipantsValue,
       deviceInfo: deviceInfo,
       sessionInfo: sessionInfo,
       // Address component fields
@@ -186,7 +304,9 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       city_district: addr.city_district || null,
       village: addr.village || null,
       town: addr.town || null,
-      municipality: addr.municipality || null
+      municipality: addr.municipality || null,
+      picture: eventPictureBase64 || null,
+      description: eventDescription
     };
     
     console.log('Form Data being sent (with address fields):', formData);
@@ -197,14 +317,26 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       body: JSON.stringify(formData)
     });
 
+    // Read response as text first, then parse as JSON
+    const responseText = await response.text();
     let data;
     try {
-      data = await response.json();
+      data = JSON.parse(responseText);
     } catch (parseError) {
       console.error('[COORDINATE] Failed to parse response:', parseError);
-      const text = await response.text();
-      console.error('[COORDINATE] Response text:', text);
+      console.error('[COORDINATE] Response text:', responseText);
+      if (response.status === 413) {
+        throw new Error('Image file is too large. Please use an image smaller than 2MB or compress it before uploading.');
+      }
+      if (response.status === 500) {
+        throw new Error('Server error. Please check if the database migration has been run (picture and description columns need to be added).');
+      }
       throw new Error('Invalid response from server');
+    }
+    
+    // Check for error in response even if status is 200
+    if (data.error) {
+      throw new Error(data.message || data.error);
     }
     
     console.log('[COORDINATE] API Response:', data);
@@ -217,7 +349,14 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     console.log('[COORDINATE] Response status:', response.status);
 
     if (!response.ok) {
-      throw new Error(data.error || data.message || 'Failed to create event');
+      // Show detailed error message if available
+      if (data.details) {
+        throw new Error(data.details);
+      } else if (data.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error(data.message || 'Failed to create event');
+      }
     }
     
     // Check if response has success flag
@@ -322,6 +461,15 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     
     // Reset max participants to 10
     document.getElementById('maxParticipants').value = '10';
+    
+    // Reset picture and description
+    const fileInput = document.getElementById('eventPicture');
+    const preview = document.getElementById('picturePreview');
+    if (fileInput) fileInput.value = '';
+    if (preview) preview.style.display = 'none';
+    eventPictureBase64 = null;
+    const descriptionInput = document.getElementById('eventDescription');
+    if (descriptionInput) descriptionInput.value = '';
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';
