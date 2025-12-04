@@ -205,12 +205,12 @@ async function loadRuns() {
                     <div id="editPicturePreview-${run.id}" style="margin-top: 12px;">
                       <div id="editCurrentPicture-${run.id}" style="display: none;">
                         <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">Current picture:</p>
-                        <img id="editCurrentPictureImg-${run.id}" src="" alt="Current picture" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
+                        <img id="editCurrentPictureImg-${run.id}" src="" alt="Current picture" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
                         <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')">Remove Picture</button>
                       </div>
                       <div id="editNewPicturePreview-${run.id}" style="display: none;">
                         <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">New picture:</p>
-                        <img id="editNewPictureImg-${run.id}" src="" alt="New picture preview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-gray);">
+                        <img id="editNewPictureImg-${run.id}" src="" alt="New picture preview" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
                       </div>
                     </div>
                   </div>
