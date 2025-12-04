@@ -177,7 +177,7 @@ exports.handler = async (event) => {
       console.error('[RUNS CREATE] Database save failed:', dbError.message);
       console.error('[RUNS CREATE] Database error stack:', dbError.stack);
       // Check if it's a column error (database migration not run)
-      if (dbError.message && (dbError.message.includes('Unknown column') || dbError.message.includes('picture') || dbError.message.includes('description'))) {
+      if (dbError.message && dbError.message.includes('Unknown column') && (dbError.message.includes('picture') || dbError.message.includes('description'))) {
         throw new Error('Database migration required: Please add picture and description columns. See migration-add-picture-description.sql file.');
       }
       throw new Error(`Failed to save event to database: ${dbError.message}`);
