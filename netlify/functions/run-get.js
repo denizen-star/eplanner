@@ -63,10 +63,12 @@ exports.handler = async (event) => {
       }
 
       // Map frontend field names to database field names
+      // Support both plannerName and pacerName for backward compatibility
       const updates = {};
       if (updateData.title !== undefined) updates.title = updateData.title;
       if (updateData.location !== undefined) updates.location = updateData.location;
       if (updateData.plannerName !== undefined) updates.plannerName = updateData.plannerName;
+      if (updateData.pacerName !== undefined) updates.plannerName = updateData.pacerName;
       if (updateData.dateTime !== undefined) updates.dateTime = updateData.dateTime;
       if (updateData.maxParticipants !== undefined) updates.maxParticipants = updateData.maxParticipants;
       if (updateData.description !== undefined) updates.description = updateData.description;
