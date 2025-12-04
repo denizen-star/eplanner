@@ -278,11 +278,9 @@ async function loadRun() {
         <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
           <a href="${signupLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${signupLink}">${signupLink}</a>
           <button onclick="copySignupLink()" class="button" style="white-space: nowrap; min-width: 60px;">Copy</button>
+          <div id="qrCodeContainer" style="width: 45px; height: 45px; flex-shrink: 0;"></div>
         </div>
         <input type="text" id="signupLinkText" value="${signupLink.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
-        <div style="display: flex; justify-content: center; margin-top: 16px;">
-          <div id="qrCodeContainer" style="width: 45px; height: 45px;"></div>
-        </div>
       </div>
     `;
     runInfoDiv.appendChild(whatsappSection);

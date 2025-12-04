@@ -147,13 +147,15 @@ function addCalendarLinksSection(event) {
     calendarSection.id = 'calendarLinksSection';
     calendarSection.style.cssText = 'margin-top: 24px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border-gray);';
     calendarSection.innerHTML = `
-      <h2 style="margin-bottom: 16px;">Add to Calendar</h2>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button onclick="window.downloadICalFile(window.currentEvent)" class="button button-primary" style="flex: 1; min-width: 120px;">
           Download iCal
         </button>
         <a href="${googleCalendarLink}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
           Google Calendar
+        </a>
+        <a href="print-event.html?id=${event.id}" target="_blank" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
+          Print Event
         </a>
       </div>
     `;
@@ -169,4 +171,8 @@ function addCalendarLinksSection(event) {
     console.error('Error adding calendar links section:', error);
   }
 }
+
+
+
+
 
