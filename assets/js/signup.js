@@ -134,7 +134,18 @@ async function loadRun() {
       if (pacerNameElement) pacerNameElement.textContent = '-';
     }
     
-    document.getElementById('runDateTime').textContent = new Date(run.dateTime).toLocaleString();
+    // Format date using stored timezone if available, otherwise use browser timezone
+    const runDate = new Date(run.dateTime);
+    const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('runDateTime').textContent = runDate.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
     const spotsLeft = run.maxParticipants - run.signups.length;
     document.getElementById('runSpots').textContent = `${spotsLeft} of ${run.maxParticipants}`;
 
@@ -258,11 +269,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Failed to sign up');
     }
 
-    successDiv.textContent = 'Successfully signed up for the run!';
-    successDiv.style.display = 'block';
-    document.getElementById('signupForm').reset();
-    document.getElementById('submitButton').disabled = true;
-    loadRun();
+    // Redirect to event page with success parameter
+    window.location.href = `/event.html?id=${runId}&success=true`;
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';
