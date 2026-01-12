@@ -168,20 +168,34 @@ exports.handler = async (event) => {
         const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
         
         // Send confirmation to attendee if they provided an email
+        console.log('[RUNS SIGNUP] Checking email for attendee:', { 
+          hasEmail: !!createdSignup.email, 
+          emailValue: createdSignup.email,
+          emailType: typeof createdSignup.email 
+        });
         if (createdSignup.email && createdSignup.email.trim()) {
           try {
+            const attendeeEmail = createdSignup.email.trim();
+            console.log('[RUNS SIGNUP] Sending confirmation email to:', attendeeEmail);
             const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
-            await emailService.sendEmail({
-              to: createdSignup.email.trim(),
+            const emailResult = await emailService.sendEmail({
+              to: attendeeEmail,
               subject: attendeeEmailContent.subject,
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
               fromName: attendeeEmailContent.fromName,
             });
-            console.log('[RUNS SIGNUP] Confirmation email sent to attendee');
+            if (emailResult) {
+              console.log('[RUNS SIGNUP] Confirmation email sent successfully to attendee:', attendeeEmail);
+            } else {
+              console.error('[RUNS SIGNUP] Email service returned false for attendee email');
+            }
           } catch (attendeeEmailError) {
             console.error('[RUNS SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+            console.error('[RUNS SIGNUP] Error stack:', attendeeEmailError.stack);
           }
+        } else {
+          console.log('[RUNS SIGNUP] No email provided by attendee, skipping confirmation email');
         }
 
         // Send notification to coordinator if coordinator email exists
