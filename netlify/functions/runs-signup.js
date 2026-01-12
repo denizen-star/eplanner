@@ -158,9 +158,17 @@ exports.handler = async (event) => {
 
     // Send confirmation emails (non-blocking)
     console.log('[RUNS SIGNUP] Sending confirmation emails...');
+    console.log('[RUNS SIGNUP] Created signup object:', JSON.stringify({
+      id: createdSignup.id,
+      name: createdSignup.name,
+      email: createdSignup.email,
+      phone: createdSignup.phone
+    }));
     try {
       const emailService = new EmailService();
-      if (emailService.isEnabled()) {
+      const emailEnabled = emailService.isEnabled();
+      console.log('[RUNS SIGNUP] Email service enabled:', emailEnabled);
+      if (emailEnabled) {
         // Generate event view link
         const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
         const protocol = event.headers?.['x-forwarded-proto'] || 'https';
