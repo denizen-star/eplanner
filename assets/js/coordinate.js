@@ -441,7 +441,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
         location: locationToSave,
         dateTime: formData.dateTime
       };
-      const whatsappMessage = generateWhatsAppMessage(runForMessage, signupLink);
+      const whatsappMessage = generateWhatsAppMessage(runForMessage, signupLink, userTimezone);
       const whatsappMessageEscaped = whatsappMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;');
       
       resultDiv.innerHTML = `
@@ -541,28 +541,32 @@ function extractCity(location) {
 }
 
 // Format date for WhatsApp message: "Dec 25, 2024 at 6:30 PM EST"
-function formatDateForWhatsApp(dateString) {
+function formatDateForWhatsApp(dateString, timezone = null) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const formatted = date.toLocaleString('en-US', {
-    timeZone: 'America/New_York',
+  const options = {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
-  });
-  // Convert "Dec 25, 2024, 6:30 PM" to "Dec 25, 2024 at 6:30 PM"
-  return formatted.replace(', ', ' at ') + ' EST';
+    hour12: true,
+    timeZoneName: 'short'
+  };
+  if (timezone) {
+    options.timeZone = timezone;
+  }
+  const formatted = date.toLocaleString('en-US', options);
+  // Convert "Dec 25, 2024, 6:30 PM EST" to "Dec 25, 2024 at 6:30 PM EST"
+  return formatted.replace(', ', ' at ');
 }
 
 // Generate WhatsApp message template
-function generateWhatsAppMessage(run, signupLink) {
+function generateWhatsAppMessage(run, signupLink, timezone = null) {
   const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
   const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
   const city = extractCity(run.location || '');
-  const dateFormatted = formatDateForWhatsApp(run.dateTime);
+  const dateFormatted = formatDateForWhatsApp(run.dateTime, timezone);
   
   let message = 'Hi Participants, \n';
   message += `🎉 ${pacerName} here! I am hosting an event`;
