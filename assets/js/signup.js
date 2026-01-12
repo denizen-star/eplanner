@@ -270,7 +270,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     }
 
     // Redirect to event page with success parameter
-    window.location.href = `/event.html?id=${runId}&success=true`;
+    // Use replace() to prevent back button from going to signup page
+    window.location.replace(`/event.html?id=${runId}&success=true`);
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';
