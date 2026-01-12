@@ -269,9 +269,16 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Failed to sign up');
     }
 
+    // Verify we have a valid runId
+    if (!runId) {
+      throw new Error('Invalid event ID');
+    }
+
     // Redirect to event page with success parameter
     // Use replace() to prevent back button from going to signup page
-    window.location.replace(`/event.html?id=${runId}&success=true`);
+    const redirectUrl = `/event.html?id=${runId}&success=true`;
+    console.log('[SIGNUP] Redirecting to:', redirectUrl);
+    window.location.replace(redirectUrl);
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';
