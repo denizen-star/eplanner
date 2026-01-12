@@ -1,7 +1,4 @@
-const { runs, signups, waivers, telemetry } = require('../../lib/databaseClient');
-const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
-const EmailService = require('../../lib/emailService');
-const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
+const { runs, signups, waivers } = require('../../lib/databaseClient');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -120,8 +117,8 @@ exports.handler = async (event) => {
       createdSignup = await signups.create({
         runId: runId,
         name: name.trim(),
-        phone: phone ? phone.trim() : '',
-        email: email ? email.trim() : '',
+        phone: phone ? phone.trim() : null,
+        email: email ? email.trim() : null,
         instagram: instagram ? instagram.trim() : '',
         waiverAccepted: true,
         signedAt: signedAt,
@@ -144,7 +141,7 @@ exports.handler = async (event) => {
         runId: runId,
         signupId: createdSignup.id,
         participantName: name.trim(),
-        participantPhone: phone ? phone.trim() : '',
+        participantPhone: phone ? phone.trim() : null,
         waiverText: waiverText || '',
         timestamp: signedAt,
         metadata: metadata,
@@ -155,98 +152,7 @@ exports.handler = async (event) => {
       // Don't fail the signup if waiver creation fails, but log it
     }
 
-    // Create telemetry record (non-blocking, don't fail if this fails)
-    console.log('[RUNS SIGNUP] Creating telemetry record...');
-    try {
-      // Extract session ID from sessionInfo
-      const sessionId = sessionInfo?.sessionId || null;
-      
-      // Get IP geolocation
-      let ipGeolocation = null;
-      if (ipAddress && ipAddress !== 'unknown') {
-        try {
-          console.log('[RUNS SIGNUP] Fetching geolocation for IP:', ipAddress);
-          ipGeolocation = await getGeolocationFromIP(ipAddress);
-          console.log('[RUNS SIGNUP] Geolocation result:', ipGeolocation ? 'success' : 'null');
-        } catch (geoError) {
-          console.warn('[RUNS SIGNUP] IP geolocation failed:', geoError.message);
-        }
-      } else {
-        console.log('[RUNS SIGNUP] Skipping geolocation - invalid IP:', ipAddress);
-      }
-
-      await telemetry.create({
-        eventType: 'signup',
-        runId: runId,
-        signupId: createdSignup.id,
-        sessionId: sessionId,
-        ipAddress: ipAddress,
-        ipGeolocation: ipGeolocation,
-        deviceInfo: deviceInfo || null,
-        sessionInfo: sessionInfo || null,
-        pageUrl: pageUrl || null,
-        referrer: referrer || null,
-      });
-      console.log('[RUNS SIGNUP] Telemetry record created successfully');
-    } catch (telemetryError) {
-      console.error('[RUNS SIGNUP] Database error creating telemetry:', telemetryError.message);
-      // Don't fail the signup if telemetry creation fails, but log it
-    }
-
     console.log('[RUNS SIGNUP] Success! Signup completed for:', name);
-
-    // Send confirmation emails (non-blocking)
-    console.log('[RUNS SIGNUP] Sending confirmation emails...');
-    try {
-      const emailService = new EmailService();
-      if (emailService.isEnabled()) {
-        // Generate event view link
-        const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
-        const protocol = event.headers?.['x-forwarded-proto'] || 'https';
-        const baseUrl = `${protocol}://${host}`;
-        const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
-        
-        // Send confirmation to attendee if they provided an email
-        if (createdSignup.email && createdSignup.email.trim()) {
-          try {
-            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
-            await emailService.sendEmail({
-              to: createdSignup.email.trim(),
-              subject: attendeeEmailContent.subject,
-              html: attendeeEmailContent.html,
-              text: attendeeEmailContent.text,
-              fromName: attendeeEmailContent.fromName,
-            });
-            console.log('[RUNS SIGNUP] Confirmation email sent to attendee');
-          } catch (attendeeEmailError) {
-            console.error('[RUNS SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
-          }
-        }
-
-        // Send notification to coordinator if coordinator email exists
-        if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
-          try {
-            const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
-            await emailService.sendEmail({
-              to: run.coordinatorEmail.trim(),
-              subject: coordinatorEmailContent.subject,
-              html: coordinatorEmailContent.html,
-              text: coordinatorEmailContent.text,
-              fromName: coordinatorEmailContent.fromName,
-            });
-            console.log('[RUNS SIGNUP] Notification email sent to coordinator');
-          } catch (coordinatorEmailError) {
-            console.error('[RUNS SIGNUP] Error sending email to coordinator:', coordinatorEmailError.message);
-          }
-        }
-      } else {
-        console.log('[RUNS SIGNUP] Email service is disabled, skipping emails');
-      }
-    } catch (emailError) {
-      console.error('[RUNS SIGNUP] Error in email sending process:', emailError.message);
-      // Don't fail the signup if email fails
-    }
-
     return jsonResponse(200, {
       success: true,
       signup: {
@@ -269,4 +175,3 @@ exports.handler = async (event) => {
     });
   }
 };
-

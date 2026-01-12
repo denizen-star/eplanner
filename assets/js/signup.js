@@ -1,20 +1,20 @@
 const waiverText = `
 <h4>Electronic Waiver of Liability, Media Release, and Code of Conduct</h4>
-<p><strong>Event Planner (the "Club")</strong></p>
+<p><strong>Miami Beach Gay Runners (the "Club")</strong></p>
 <p><strong>PLEASE READ THIS DOCUMENT CAREFULLY. BY CLICKING "I ACCEPT," YOU ARE WAIVING IMPORTANT LEGAL RIGHTS AND AGREEING TO ALL TERMS.</strong></p>
 
 <h4>1. ACKNOWLEDGMENT, MEDICAL FITNESS, AND ASSUMPTION OF RISK</h4>
 <p>I understand that participating in activities organized by the Club involves physical exertion and carries <strong>INHERENT RISKS</strong>, including but not limited to falls, traffic, weather, and equipment failure. I certify that I am <strong>MEDICALLY ABLE</strong> and properly trained. I understand and voluntarily assume the risk of exposure to <strong>COMMUNICABLE DISEASES, VIRUSES, AND BACTERIA</strong> (including COVID-19). I <strong>VOLUNTARILY ACKNOWLEDGE AND ASSUME ALL RISKS, KNOWN AND UNKNOWN</strong>, associated with my involvement.</p>
 
 <h4>2. GENERAL WAIVER, RELEASE, AND DISCHARGE OF LIABILITY</h4>
-<p>I permanently waive, release, and <strong>FOREVER DISCHARGE</strong> the Club, its officers, directors, employees, volunteers, <strong>PLANNERS</strong>, agents, sponsors, and representatives (the "<strong>Released Parties</strong>") from any and all claims, liabilities, demands, or damages that may arise from my participation, <strong>EVEN IF THE INJURY OR DAMAGE IS CAUSED BY THE ORDINARY NEGLIGENCE OR CARELESSNESS OF THE RELEASED PARTIES.</strong></p>
+<p>I permanently waive, release, and <strong>FOREVER DISCHARGE</strong> the Club, its officers, directors, employees, volunteers, <strong>PACEMAKERS (PACERS)</strong>, agents, sponsors, and representatives (the "<strong>Released Parties</strong>") from any and all claims, liabilities, demands, or damages that may arise from my participation, <strong>EVEN IF THE INJURY OR DAMAGE IS CAUSED BY THE ORDINARY NEGLIGENCE OR CARELESSNESS OF THE RELEASED PARTIES.</strong></p>
 
 <h4>3. ENHANCED INDEMNIFICATION, LEGAL COSTS, AND MEDICAL AUTHORIZATION</h4>
 <p><strong>INDEMNIFICATION AND LEGAL COSTS:</strong> I agree to protect, defend, and <strong>HOLD HARMLESS</strong> the Released Parties from any and all financial loss or cost they may incur. This includes my agreement to <strong>REIMBURSE AND PAY FOR ALL LEGAL AND OTHER COSTS</strong> (including reasonable attorneys' fees) incurred by the Released Parties in connection with any legal action that arises from or relates to my participation or alleged actions/omissions.</p>
 <p><strong>MEDICAL AUTHORIZATION:</strong> I consent to and authorize the Club's staff, volunteers, or emergency personnel to arrange for medical assistance in the event of my injury, and I hereby <strong>RELEASE THEM FROM ANY LIABILITY</strong> arising from such actions. I understand I am <strong>FINANCIALLY RESPONSIBLE</strong> for any resulting medical costs.</p>
 
-<h4>4. DISCLAIMER REGARDING PLANNERS AND GUIDANCE</h4>
-<p>I acknowledge that any Planners are <strong>VOLUNTEERS</strong> offering non-professional guidance. The guidance is <strong>NOT</strong> professional coaching or medical advice. I remain <strong>SOLELY RESPONSIBLE</strong> for monitoring my own pace, health, safety, and adherence to all laws and rules.</p>
+<h4>4. DISCLAIMER REGARDING PACERS AND GUIDANCE</h4>
+<p>I acknowledge that any Pacemakers (Pacers) are <strong>VOLUNTEERS</strong> offering non-professional guidance. The guidance is <strong>NOT</strong> professional coaching or medical advice. I remain <strong>SOLELY RESPONSIBLE</strong> for monitoring my own pace, health, safety, and adherence to all laws and rules.</p>
 
 <h4>5. MEDIA RELEASE AND CONSENT</h4>
 <p>I grant the Club the <strong>IRREVOCABLE, PERPETUAL, WORLDWIDE, AND ROYALTY-FREE RIGHT</strong> to use my name, voice, likeness, and image (collectively, "Media") captured during Club activities for <strong>MARKETING, ADVERTISING, PROMOTIONAL, AND COMMERCIAL USE</strong>. I waive any right to compensation or approval for the use of this Media.</p>
@@ -26,7 +26,7 @@ const waiverText = `
 <p>This agreement shall be governed by and interpreted under the laws of the <strong>State of Florida</strong>, and any legal action shall be brought exclusively in the courts of <strong>Miami-Dade County, Florida</strong>.</p>
 
 <h4>8. COMMUNICATION AND DISTRIBUTION CONSENT</h4>
-<p>By signing this waiver, I <strong>CONSENT TO RECEIVE COMMUNICATIONS</strong> related to my participation in events organized by the Club via <strong>TEXT MESSAGE (SMS), WHATSAPP, AND/OR EMAIL</strong> at the contact information I provide during registration. I understand that these communications may include, but are not limited to, event confirmations, updates, changes, reminders, and other event-related information. I acknowledge that <strong>STANDARD MESSAGING AND DATA RATES MAY APPLY</strong> for text messages and WhatsApp communications, and I am <strong>RESPONSIBLE FOR ANY SUCH CHARGES</strong> from my mobile carrier. I understand that I may receive communications via text message, WhatsApp, and/or email, and I consent to being added to the official Event Planner distribution list for communications. My consent to receive these communications is <strong>VOLUNTARY</strong>, and I understand that I can withdraw my consent at any time by contacting the Club.</p>
+<p>I agree to receive operational and promotional communication via text message (SMS) and/or WhatsApp from the Club at the phone number provided during registration. I acknowledge that I am responsible for any costs or fees associated with receiving these messages (e.g., carrier data or SMS rates). I also consent to be added to the official Miami Beach Gay Runners distribution list for email and/or messaging updates.</p>
 
 <h4>9. ELECTRONIC CONSENT</h4>
 <p>I acknowledge that I have carefully read, fully understand, and agree to all terms of this Electronic Waiver. I am at least 18 years of age (or a parent/guardian signing on behalf of a minor). My electronic acceptance has the same legal force and effect as if I had signed a physical document.</p>
@@ -55,11 +55,11 @@ function updateOpenGraphTags(run, runTitle) {
   
   // Build title
   const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
-  let title = 'Sign Up for Event - Event Planner';
+  let title = 'Sign Up for Run - Gay Run Club';
   if (runTitle) {
-    title = `${runTitle} - Event Planner`;
+    title = `${runTitle} - Gay Run Club`;
   } else if (pacerName) {
-    title = `Event with ${pacerName} - Event Planner`;
+    title = `Run with ${pacerName} - Gay Run Club`;
   }
   
   // Build description
@@ -74,7 +74,7 @@ function updateOpenGraphTags(run, runTitle) {
     hour12: true
   });
   
-  let description = `Join us for an event!`;
+  let description = `Join us for a run!`;
   if (run.location) {
     description += ` Location: ${run.location}`;
   }
@@ -82,22 +82,11 @@ function updateOpenGraphTags(run, runTitle) {
     description += ` | Date: ${formattedDate} EST`;
   }
   if (pacerName) {
-    description += ` | Planner: ${pacerName}`;
+    description += ` | Pacer: ${pacerName}`;
   }
   
   // Set image URL (absolute URL required for Open Graph)
-  // Use event picture if available, otherwise fallback to default
-  let imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
-  if (run.picture) {
-    // For base64 images, we can't use them directly in og:image, so we keep the default
-    // In production, you might want to upload the image to a CDN
-    imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
-  }
-  
-  // Update description to include event description if available
-  if (run.description && run.description.trim()) {
-    description += ` | ${run.description.substring(0, 100)}${run.description.length > 100 ? '...' : ''}`;
-  }
+  const imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
   
   // Update meta tags
   document.getElementById('og-url').setAttribute('content', currentUrl);
@@ -114,31 +103,11 @@ async function loadRun() {
   try {
     const response = await fetch(`/api/runs/${runId}`);
     if (!response.ok) {
-      throw new Error('Event not found');
+      throw new Error('Run not found');
     }
     const run = await response.json();
 
     document.getElementById('runLocation').textContent = run.location;
-    
-    // Display picture if available
-    const pictureContainer = document.getElementById('eventPictureContainer');
-    const pictureImg = document.getElementById('eventPicture');
-    if (run.picture) {
-      pictureImg.src = 'data:image/jpeg;base64,' + run.picture;
-      pictureContainer.style.display = 'block';
-    } else {
-      pictureContainer.style.display = 'none';
-    }
-    
-    // Display description if available
-    const descriptionContainer = document.getElementById('eventDescriptionContainer');
-    const descriptionText = document.getElementById('eventDescription');
-    if (run.description && run.description.trim()) {
-      descriptionText.textContent = run.description.trim();
-      descriptionContainer.style.display = 'block';
-    } else {
-      descriptionContainer.style.display = 'none';
-    }
     
     const runTitleElement = document.getElementById('runTitle');
     const pacerNameElement = document.getElementById('runPacerName');
@@ -148,19 +117,19 @@ async function loadRun() {
       const pacerName = run.pacerName.trim();
       if (runTitleDisplay) {
         runTitleElement.textContent = `${runTitleDisplay} - ${pacerName}`;
-        document.title = `${runTitleDisplay} - ${pacerName} - Event Planner`;
+        document.title = `${runTitleDisplay} - ${pacerName} - Gay Run Club`;
       } else {
-        runTitleElement.textContent = `Event with ${pacerName}`;
-        document.title = `Event with ${pacerName} - Event Planner`;
+        runTitleElement.textContent = `Run with ${pacerName}`;
+        document.title = `Run with ${pacerName} - Gay Run Club`;
       }
       if (pacerNameElement) pacerNameElement.textContent = pacerName;
     } else {
       if (runTitleDisplay) {
         runTitleElement.textContent = runTitleDisplay;
-        document.title = `${runTitleDisplay} - Event Planner`;
+        document.title = `${runTitleDisplay} - Gay Run Club`;
       } else {
-        runTitleElement.textContent = 'Sign Up for Event';
-        document.title = 'Sign Up for Event - Event Planner';
+        runTitleElement.textContent = 'Sign Up for Run';
+        document.title = 'Sign Up for Run - Gay Run Club';
       }
       if (pacerNameElement) pacerNameElement.textContent = '-';
     }
@@ -179,7 +148,7 @@ async function loadRun() {
     if (spotsLeft <= 0) {
       document.getElementById('runInfo').style.display = 'none';
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('notFound').innerHTML = '<h1>Event is Full</h1><p>This event has reached its maximum capacity.</p><a href="index.html" class="button button-primary">Return Home</a>';
+      document.getElementById('notFound').innerHTML = '<h1>Run is Full</h1><p>This run has reached its maximum capacity.</p><a href="index.html" class="button button-primary">Return Home</a>';
       document.getElementById('notFound').style.display = 'block';
       return;
     }
@@ -289,16 +258,11 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Failed to sign up');
     }
 
-    successDiv.textContent = 'Successfully signed up for the event!';
+    successDiv.textContent = 'Successfully signed up for the run!';
     successDiv.style.display = 'block';
     document.getElementById('signupForm').reset();
     document.getElementById('submitButton').disabled = true;
-    
-    // Redirect to event page with success parameter
-    const eventLink = `${window.location.origin}/event.html?id=${runId}&success=true`;
-    setTimeout(() => {
-      window.location.href = eventLink;
-    }, 1500);
+    loadRun();
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';
@@ -324,4 +288,3 @@ function toggleInstructions() {
     icon.classList.add('collapsed');
   }
 }
-
