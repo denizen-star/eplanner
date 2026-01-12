@@ -272,6 +272,7 @@ app.post('/api/runs/create', async (req, res) => {
           ...runData,
           plannerName: trimmedPlannerName,
           location: trimmedLocation,
+          timezone: timezone || null,
         };
         const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
         

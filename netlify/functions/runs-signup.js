@@ -1,4 +1,6 @@
 const { runs, signups, waivers } = require('../../lib/databaseClient');
+const EmailService = require('../../lib/emailService');
+const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -153,6 +155,59 @@ exports.handler = async (event) => {
     }
 
     console.log('[RUNS SIGNUP] Success! Signup completed for:', name);
+
+    // Send confirmation emails (non-blocking)
+    console.log('[RUNS SIGNUP] Sending confirmation emails...');
+    try {
+      const emailService = new EmailService();
+      if (emailService.isEnabled()) {
+        // Generate event view link
+        const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
+        const protocol = event.headers?.['x-forwarded-proto'] || 'https';
+        const baseUrl = `${protocol}://${host}`;
+        const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
+        
+        // Send confirmation to attendee if they provided an email
+        if (createdSignup.email && createdSignup.email.trim()) {
+          try {
+            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
+            await emailService.sendEmail({
+              to: createdSignup.email.trim(),
+              subject: attendeeEmailContent.subject,
+              html: attendeeEmailContent.html,
+              text: attendeeEmailContent.text,
+              fromName: attendeeEmailContent.fromName,
+            });
+            console.log('[RUNS SIGNUP] Confirmation email sent to attendee');
+          } catch (attendeeEmailError) {
+            console.error('[RUNS SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+          }
+        }
+
+        // Send notification to coordinator if coordinator email exists
+        if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
+          try {
+            const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
+            await emailService.sendEmail({
+              to: run.coordinatorEmail.trim(),
+              subject: coordinatorEmailContent.subject,
+              html: coordinatorEmailContent.html,
+              text: coordinatorEmailContent.text,
+              fromName: coordinatorEmailContent.fromName,
+            });
+            console.log('[RUNS SIGNUP] Notification email sent to coordinator');
+          } catch (coordinatorEmailError) {
+            console.error('[RUNS SIGNUP] Error sending email to coordinator:', coordinatorEmailError.message);
+          }
+        }
+      } else {
+        console.log('[RUNS SIGNUP] Email service is disabled, skipping emails');
+      }
+    } catch (emailError) {
+      console.error('[RUNS SIGNUP] Error in email sending process:', emailError.message);
+      // Don't fail the signup if email fails
+    }
+
     return jsonResponse(200, {
       success: true,
       signup: {

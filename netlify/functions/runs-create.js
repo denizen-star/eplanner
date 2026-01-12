@@ -278,6 +278,7 @@ exports.handler = async (event) => {
           ...runData,
           plannerName: trimmedPlannerName,
           location: trimmedLocation,
+          timezone: timezone || null,
         };
         const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
         

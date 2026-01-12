@@ -1,4 +1,5 @@
 function formatPhoneNumber(phone) {
+  if (!phone) return '-';
   const digits = phone.replace(/\D/g, '');
   if (digits.length === 10) {
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
@@ -510,8 +511,9 @@ function loadSignupsForRun(runId, signups) {
       const displayHours = hours % 12 || 12;
       const formattedDate = `${month}/${day}/${year}, ${displayHours}:${minutes}:${seconds} ${ampm}`;
       const formattedPhone = formatPhoneNumber(signup.phone);
-      const phoneDigits = signup.phone.replace(/\D/g, '');
-      const telLink = `tel:${phoneDigits}`;
+      const phoneDigits = signup.phone ? signup.phone.replace(/\D/g, '') : '';
+      const telLink = phoneDigits ? `tel:${phoneDigits}` : '#';
+      const phoneDisplay = signup.phone ? `<a href="${telLink}" class="phone-link">${formattedPhone}</a>` : formattedPhone;
       
       let contactInfo = '';
       if (signup.email) {
@@ -521,7 +523,7 @@ function loadSignupsForRun(runId, signups) {
         contactInfo += ` - <a href="https://instagram.com/${signup.instagram}" target="_blank" class="contact-link">@${signup.instagram}</a>`;
       }
       
-      return `<li class="signup-item">${signup.name} - <a href="${telLink}" class="phone-link">${formattedPhone}</a>${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}</li>`;
+      return `<li class="signup-item">${signup.name} - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}</li>`;
     }).join('');
   }
 }
