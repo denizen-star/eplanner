@@ -280,6 +280,7 @@ app.post('/api/runs/create', async (req, res) => {
           subject: emailContent.subject,
           html: emailContent.html,
           text: emailContent.text,
+          fromName: emailContent.fromName,
         });
         
         emailStatus.sent = emailResult;
@@ -476,6 +477,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
               subject: attendeeEmailContent.subject,
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
+              fromName: attendeeEmailContent.fromName,
             });
             console.log('[SIGNUP] Confirmation email sent to attendee');
           } catch (attendeeEmailError) {
@@ -492,6 +494,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
               subject: coordinatorEmailContent.subject,
               html: coordinatorEmailContent.html,
               text: coordinatorEmailContent.text,
+              fromName: coordinatorEmailContent.fromName,
             });
             console.log('[SIGNUP] Notification email sent to coordinator');
           } catch (coordinatorEmailError) {
@@ -647,6 +650,7 @@ app.put('/api/runs/:runId', async (req, res) => {
                 subject: coordinatorEmailContent.subject,
                 html: coordinatorEmailContent.html,
                 text: coordinatorEmailContent.text,
+                fromName: coordinatorEmailContent.fromName,
               });
               console.log('[RUN UPDATE] Update email sent to coordinator');
             } catch (coordinatorEmailError) {
@@ -668,6 +672,7 @@ app.put('/api/runs/:runId', async (req, res) => {
                     subject: signupEmailContent.subject,
                     html: signupEmailContent.html,
                     text: signupEmailContent.text,
+                    fromName: signupEmailContent.fromName,
                   });
                 } catch (signupEmailError) {
                   console.error(`[RUN UPDATE] Error sending email to signup ${signup.id}:`, signupEmailError.message);

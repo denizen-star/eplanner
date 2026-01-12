@@ -212,6 +212,7 @@ exports.handler = async (event) => {
               subject: attendeeEmailContent.subject,
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
+              fromName: attendeeEmailContent.fromName,
             });
             console.log('[RUNS SIGNUP] Confirmation email sent to attendee');
           } catch (attendeeEmailError) {
@@ -228,6 +229,7 @@ exports.handler = async (event) => {
               subject: coordinatorEmailContent.subject,
               html: coordinatorEmailContent.html,
               text: coordinatorEmailContent.text,
+              fromName: coordinatorEmailContent.fromName,
             });
             console.log('[RUNS SIGNUP] Notification email sent to coordinator');
           } catch (coordinatorEmailError) {

@@ -119,16 +119,45 @@ ADD COLUMN coordinator_email VARCHAR(255) NULL;
 1. Replace all instances of `plannerName` with `pacerName` (the Runs app uses `pacerName`)
 2. Replace references to "Event" with "Run" where appropriate in email text
 3. Replace references to "Event Planner" with "Gay Run Club" or appropriate app name
+4. **NEW**: The email templates now include enhanced features that need to be preserved:
+   - WhatsApp message generation (with emojis - these should stay)
+   - QR code generation for signup links
+   - Calendar links (Google Calendar and iCal)
+   - Blue accent color (#6488F4) - ensure this is used consistently
+   - Event view links (event.html?id=...) for signup confirmations
+   - No emojis in email body content (only in WhatsApp messages)
 
 **Specific Changes:**
-- Line ~30: `const plannerName = run.plannerName || run.pacerName || 'Event Coordinator';`
-  - Change to: `const plannerName = run.pacerName || 'Run Coordinator';`
-- Line ~30: `const plannerName = run.plannerName || run.pacerName || 'Event Coordinator';`
-  - Change to: `const plannerName = run.pacerName || 'Run Coordinator';`
-- Throughout: Replace "Event" with "Run" in subject lines and content
-- Throughout: Replace "Event Planner" with "Gay Run Club" in footer text
+- **Function: `generateWhatsAppMessage()`**: Keep as-is, but ensure it uses `pacerName` instead of `plannerName`
+- **Function: `formatCalendarDescription()`**: Update to use `pacerName`, remove emojis from calendar descriptions
+- **Function: `eventCreatedEmail()`**: 
+  - Change `plannerName` to `pacerName`
+  - Change "Event" to "Run" in subject and content
+  - Change "Event Planner" to "Gay Run Club" in footer
+  - Ensure accent color is `#6488F4` (blue)
+  - Keep WhatsApp message, QR code, and calendar links
+- **Function: `signupConfirmationEmail()`**: 
+  - Change `plannerName` to `pacerName`
+  - Change "Event" to "Run" in subject and content
+  - Ensure accent color is `#6488F4` (blue)
+  - Keep event view link and calendar links
+  - Ensure `eventViewLink` parameter is passed (3rd parameter)
+- **Function: `signupNotificationEmail()`**: 
+  - Change "Event" to "Run" in subject and content
+  - Ensure accent color is `#6488F4` (blue)
+  - Remove "You have a new signup for your event:" text
+  - Remove "New Participant:" heading
+  - Keep the participant info box styling
 
-**Action:** Copy the file and make the above replacements.
+**Key Template Features to Preserve:**
+- Accent color: `#6488F4` (blue) - used in headers, buttons, and borders
+- WhatsApp messages include emojis (🎉, 📅, 📍, 🔗)
+- Email body content has NO emojis
+- QR code generation using `generateQRCodeUrl()` helper
+- Calendar link generation using `generateGoogleCalendarLink()` and `generateICalLink()` helpers
+- Event view link: `event.html?id=${runId}` (for signup confirmations)
+
+**Action:** Copy the file and make the above replacements. The template structure is comprehensive and includes all helper functions needed.
 
 ---
 
@@ -595,8 +624,33 @@ console.log('[RUNS CREATE] Success! Run created:', { shortId, signupLink, manage
 
 // Send confirmation email to coordinator (non-blocking)
 console.log('[RUNS CREATE] Sending confirmation email...');
+let emailStatus = {
+  attempted: false,
+  enabled: false, // Always boolean, never password or other value
+  sent: false,
+  error: null
+};
+
 try {
   const emailService = new EmailService();
+  
+  // Diagnostic logging (NEVER log passwords!)
+  const emailStatusInfo = {
+    enabled: !!emailService.enabled, // Ensure boolean
+    isEnabled: emailService.isEnabled(),
+    hasSmtpServer: !!emailService.config.smtpServer,
+    hasSenderEmail: !!emailService.config.senderEmail,
+    hasSenderPassword: !!emailService.config.senderPassword, // Only boolean, never the actual password
+    smtpServer: emailService.config.smtpServer || 'NOT SET',
+    senderEmail: emailService.config.senderEmail || 'NOT SET',
+    // NEVER log senderPassword - security risk!
+  };
+  
+  console.log('[RUNS CREATE] Email service status:', emailStatusInfo);
+  
+  emailStatus.attempted = true;
+  emailStatus.enabled = !!emailService.isEnabled(); // Ensure boolean, never password
+  
   if (emailService.isEnabled()) {
     const runForEmail = {
       ...runData,
@@ -605,18 +659,30 @@ try {
     };
     const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
     
-    await emailService.sendEmail({
+    console.log('[RUNS CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
+    const emailResult = await emailService.sendEmail({
       to: trimmedCoordinatorEmail,
       subject: emailContent.subject,
       html: emailContent.html,
       text: emailContent.text,
     });
-    console.log('[RUNS CREATE] Confirmation email sent successfully');
+    
+    emailStatus.sent = emailResult;
+    
+    if (emailResult) {
+      console.log('[RUNS CREATE] Confirmation email sent successfully');
+    } else {
+      console.error('[RUNS CREATE] Email service returned false - email not sent');
+      emailStatus.error = 'Email service returned false';
+    }
   } else {
-    console.log('[RUNS CREATE] Email service is disabled, skipping email');
+    console.warn('[RUNS CREATE] Email service is disabled or configuration incomplete');
+    emailStatus.error = 'Email service disabled or configuration incomplete';
   }
 } catch (emailError) {
   console.error('[RUNS CREATE] Error sending confirmation email:', emailError.message);
+  console.error('[RUNS CREATE] Error stack:', emailError.stack);
+  emailStatus.error = emailError.message;
   // Don't fail the event creation if email fails
 }
 
@@ -624,9 +690,16 @@ return jsonResponse(200, {
   success: true,
   run: runData,
   signupLink: signupLink,
-  manageLink: manageLink
+  manageLink: manageLink,
+  emailStatus: emailStatus
 });
 ```
+
+**Note:** The email now includes `emailStatus` in the response for debugging. The `eventCreatedEmail` function now includes:
+- WhatsApp message section
+- QR code for signup link
+- Calendar links (Google Calendar and iCal)
+- Blue accent color (#6488F4)
 
 **Action:** Make all 5 changes to `netlify/functions/runs-create.js`
 
@@ -670,6 +743,12 @@ return jsonResponse(200, {
 ```javascript
 console.log('[RUNS SIGNUP] Success! Signup completed for:', name);
 
+// Generate event view link for signup confirmation email
+const host = event.headers?.host || event.headers?.Host || 'gayrunclub.kervinapps.com';
+const protocol = event.headers?.['x-forwarded-proto'] || 'https';
+const baseUrl = `${protocol}://${host}`;
+const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
+
 // Send confirmation emails (non-blocking)
 console.log('[RUNS SIGNUP] Sending confirmation emails...');
 try {
@@ -678,7 +757,8 @@ try {
     // Send confirmation to attendee if they provided an email
     if (createdSignup.email && createdSignup.email.trim()) {
       try {
-        const attendeeEmailContent = signupConfirmationEmail(run, createdSignup);
+        // Pass eventViewLink as 3rd parameter for calendar links
+        const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
         await emailService.sendEmail({
           to: createdSignup.email.trim(),
           subject: attendeeEmailContent.subject,
@@ -727,6 +807,8 @@ return jsonResponse(200, {
   }
 });
 ```
+
+**Note:** The `signupConfirmationEmail` function now requires 3 parameters: `(run, signup, eventViewLink)`. Make sure to generate and pass the event view link.
 
 **Action:** Make both changes to `netlify/functions/runs-signup.js`
 
@@ -855,7 +937,80 @@ Find the return statement and add email sending code (same pattern as Netlify fu
 
 ### Change 3: Update POST `/api/runs/:runId/signup` endpoint
 
-**Add email sending after successful signup** (same pattern as Netlify function)
+**Add email sending after successful signup**
+
+Find the return statement after successful signup creation:
+```javascript
+res.json({
+  success: true,
+  signup: {
+    id: createdSignup.id,
+    name: createdSignup.name,
+    // ...
+  }
+});
+```
+
+**Change to:**
+```javascript
+// Generate event view link for signup confirmation email
+const baseUrl = req.protocol + '://' + req.get('host');
+const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
+
+// Send confirmation emails (non-blocking)
+console.log('[SIGNUP] Sending confirmation emails...');
+try {
+  const emailService = new EmailService();
+  if (emailService.isEnabled()) {
+    // Send confirmation to attendee if they provided an email
+    if (createdSignup.email && createdSignup.email.trim()) {
+      try {
+        // Pass eventViewLink as 3rd parameter
+        const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
+        await emailService.sendEmail({
+          to: createdSignup.email.trim(),
+          subject: attendeeEmailContent.subject,
+          html: attendeeEmailContent.html,
+          text: attendeeEmailContent.text,
+        });
+        console.log('[SIGNUP] Confirmation email sent to attendee');
+      } catch (attendeeEmailError) {
+        console.error('[SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+      }
+    }
+
+    // Send notification to coordinator if coordinator email exists
+    if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
+      try {
+        const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
+        await emailService.sendEmail({
+          to: run.coordinatorEmail.trim(),
+          subject: coordinatorEmailContent.subject,
+          html: coordinatorEmailContent.html,
+          text: coordinatorEmailContent.text,
+        });
+        console.log('[SIGNUP] Notification email sent to coordinator');
+      } catch (coordinatorEmailError) {
+        console.error('[SIGNUP] Error sending email to coordinator:', coordinatorEmailError.message);
+      }
+    }
+  } else {
+    console.log('[SIGNUP] Email service is disabled, skipping emails');
+  }
+} catch (emailError) {
+  console.error('[SIGNUP] Error in email sending process:', emailError.message);
+  // Don't fail the signup if email fails
+}
+
+res.json({
+  success: true,
+  signup: {
+    id: createdSignup.id,
+    name: createdSignup.name,
+    // ...
+  }
+});
+```
 
 ### Change 4: Update PUT `/api/runs/:runId` endpoint
 
@@ -1085,4 +1240,69 @@ When making changes, refer to these EventPlan files as templates:
 
 ---
 
-**Last Updated**: 2025-01-09
+---
+
+## Step 11: Enhanced Email Template Features (NEW)
+
+The email templates have been enhanced with additional features. When copying `emailTemplates.js`, ensure these features are preserved:
+
+### Features Included:
+
+1. **WhatsApp Message Generation**
+   - Function: `generateWhatsAppMessage(run, signupLink)`
+   - Includes emojis (🎉, 📅, 📍, 🔗) - these should stay
+   - Used in event creation email
+
+2. **QR Code Generation**
+   - Function: `generateQRCodeUrl(signupLink)`
+   - Generates QR code image URL for signup link
+   - Used in event creation email
+
+3. **Calendar Links**
+   - Functions: `generateGoogleCalendarLink(run, signupLink)` and `generateICalLink(run, signupLink)`
+   - Google Calendar: Opens Google Calendar with event details
+   - iCal: Downloadable .ics file
+   - Used in both event creation and signup confirmation emails
+
+4. **Event View Link**
+   - Format: `event.html?id=${runId}`
+   - Used in signup confirmation email
+   - Must be passed as 3rd parameter to `signupConfirmationEmail(run, signup, eventViewLink)`
+
+5. **Accent Color**
+   - Color: `#6488F4` (blue)
+   - Used consistently across all emails
+   - Applied to headers, buttons, and border accents
+
+6. **Emoji Policy**
+   - WhatsApp messages: Include emojis (🎉, 📅, 📍, 🔗)
+   - Email body content: NO emojis
+   - Calendar descriptions: NO emojis
+
+7. **Signup Notification Email Updates**
+   - Removed: "You have a new signup for your event:" text
+   - Removed: "New Participant:" heading
+   - Uses blue accent color (#6488F4)
+   - Cleaner, more direct layout
+
+### Helper Functions to Preserve:
+
+All these helper functions are included in `emailTemplates.js`:
+- `extractCity(location)` - Extract city from location string
+- `formatDateForWhatsApp(dateString)` - Format date for WhatsApp
+- `generateWhatsAppMessage(run, signupLink)` - Generate WhatsApp message
+- `generateQRCodeUrl(signupLink)` - Generate QR code URL
+- `formatDateForGoogleCalendar(date)` - Format date for Google Calendar
+- `calculateEndTime(dateTime)` - Calculate end time (start + 1 hour)
+- `formatCalendarTitle(run)` - Format calendar event title
+- `formatCalendarDescription(run, signupLink)` - Format calendar description (no emojis)
+- `generateGoogleCalendarLink(run, signupLink)` - Generate Google Calendar URL
+- `formatDateForICal(date)` - Format date for iCal
+- `escapeICalText(text)` - Escape text for iCal format
+- `generateICalLink(run, signupLink)` - Generate iCal file data URI
+
+**Action:** When copying `emailTemplates.js`, ensure all helper functions are included. Then make the replacements for `pacerName` and "Run" terminology.
+
+---
+
+**Last Updated**: 2025-01-12

@@ -286,6 +286,7 @@ exports.handler = async (event) => {
           subject: emailContent.subject,
           html: emailContent.html,
           text: emailContent.text,
+          fromName: emailContent.fromName,
         });
         
         emailStatus.sent = emailResult;
