@@ -1,5 +1,7 @@
 const { runs, telemetry } = require('../../lib/databaseClient');
 const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
+const EmailService = require('../../lib/emailService');
+const { eventCreatedEmail } = require('../../lib/emailTemplates');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -77,7 +79,8 @@ exports.handler = async (event) => {
     const { 
       location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
-      neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description
+      neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
+      coordinatorEmail
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -86,16 +89,25 @@ exports.handler = async (event) => {
       hasLocation: !!location,
       hasPlannerName: !!nameToUse,
       hasDateTime: !!dateTime,
-      maxParticipants: maxParticipants
+      maxParticipants: maxParticipants,
+      hasCoordinatorEmail: !!coordinatorEmail
     });
 
     // Validate and trim all required fields
     const trimmedLocation = location ? location.trim() : '';
     const trimmedPlannerName = nameToUse ? nameToUse.trim() : '';
+    const trimmedCoordinatorEmail = coordinatorEmail ? coordinatorEmail.trim() : '';
 
-    if (!trimmedLocation || !trimmedPlannerName || !dateTime || !maxParticipants) {
+    if (!trimmedLocation || !trimmedPlannerName || !dateTime || !maxParticipants || !trimmedCoordinatorEmail) {
       console.error('[RUNS CREATE] Validation failed: Missing required fields');
-      return jsonResponse(400, { success: false, error: 'Missing required fields' });
+      return jsonResponse(400, { success: false, error: 'Missing required fields: location, plannerName, dateTime, maxParticipants, and coordinatorEmail are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedCoordinatorEmail)) {
+      console.error('[RUNS CREATE] Validation failed: Invalid email format');
+      return jsonResponse(400, { success: false, error: 'Invalid coordinator email address format' });
     }
 
     if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
@@ -149,6 +161,7 @@ exports.handler = async (event) => {
         location: trimmedLocation,
         coordinates: coordinates || null,
         plannerName: trimmedPlannerName,
+        coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
         maxParticipants: parseInt(maxParticipants),
@@ -229,6 +242,33 @@ exports.handler = async (event) => {
     }
 
     console.log('[RUNS CREATE] Success! Run created:', { shortId, signupLink, manageLink });
+
+    // Send confirmation email to coordinator (non-blocking)
+    console.log('[RUNS CREATE] Sending confirmation email...');
+    try {
+      const emailService = new EmailService();
+      if (emailService.isEnabled()) {
+        const runForEmail = {
+          ...runData,
+          plannerName: trimmedPlannerName,
+          location: trimmedLocation,
+        };
+        const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+        
+        await emailService.sendEmail({
+          to: trimmedCoordinatorEmail,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+        console.log('[RUNS CREATE] Confirmation email sent successfully');
+      } else {
+        console.log('[RUNS CREATE] Email service is disabled, skipping email');
+      }
+    } catch (emailError) {
+      console.error('[RUNS CREATE] Error sending confirmation email:', emailError.message);
+      // Don't fail the event creation if email fails
+    }
 
     return jsonResponse(200, {
       success: true,

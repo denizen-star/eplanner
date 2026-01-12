@@ -7,6 +7,14 @@ if (process.env.NETLIFY !== 'true') {
 const express = require('express');
 const cors = require('cors');
 const { runs, signups, waivers } = require('./lib/databaseClient');
+const EmailService = require('./lib/emailService');
+const { 
+  eventCreatedEmail,
+  signupConfirmationEmail, 
+  signupNotificationEmail,
+  eventUpdatedEmail, 
+  eventUpdatedToSignupsEmail 
+} = require('./lib/emailTemplates');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -90,7 +98,7 @@ app.post('/api/runs/create', async (req, res) => {
   });
 
   try {
-    const { location, coordinates, pacerName, plannerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo, picture, description } = req.body;
+    const { location, coordinates, pacerName, plannerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail } = req.body;
 
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -98,6 +106,7 @@ app.post('/api/runs/create', async (req, res) => {
     // Validate and trim all required fields
     const trimmedLocation = location ? location.trim() : '';
     const trimmedPlannerName = nameToUse ? nameToUse.trim() : '';
+    const trimmedCoordinatorEmail = coordinatorEmail ? coordinatorEmail.trim() : '';
 
     console.log('[RUN CREATE] Validating fields...');
     console.log('[RUN CREATE] Field check:', {
@@ -105,7 +114,8 @@ app.post('/api/runs/create', async (req, res) => {
       hasPlannerName: !!trimmedPlannerName,
       hasDateTime: !!dateTime,
       maxParticipants: maxParticipants,
-      maxParticipantsType: typeof maxParticipants
+      maxParticipantsType: typeof maxParticipants,
+      hasCoordinatorEmail: !!trimmedCoordinatorEmail
     });
     
     // Build detailed error message showing which fields are missing
@@ -114,6 +124,7 @@ app.post('/api/runs/create', async (req, res) => {
     if (!trimmedPlannerName) missingFields.push('plannerName');
     if (!dateTime) missingFields.push('dateTime');
     if (!maxParticipants) missingFields.push('maxParticipants');
+    if (!trimmedCoordinatorEmail) missingFields.push('coordinatorEmail');
     
     if (missingFields.length > 0) {
       console.error('[RUN CREATE] Validation failed: Missing required fields', {
@@ -133,6 +144,15 @@ app.post('/api/runs/create', async (req, res) => {
     if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
       console.error('[RUN CREATE] Validation failed: Invalid maxParticipants');
       return res.status(400).json({ error: 'Max participants must be a positive integer' });
+    }
+
+    // Validate email format
+    if (trimmedCoordinatorEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedCoordinatorEmail)) {
+        console.error('[RUN CREATE] Validation failed: Invalid email format');
+        return res.status(400).json({ error: 'Invalid coordinator email address format' });
+      }
     }
 
     console.log('[RUN CREATE] Generating IDs...');
@@ -175,6 +195,7 @@ app.post('/api/runs/create', async (req, res) => {
         location: trimmedLocation,
         coordinates: coordinates || null,
         plannerName: trimmedPlannerName,
+        coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
         maxParticipants: parseInt(maxParticipants),
@@ -208,6 +229,33 @@ app.post('/api/runs/create', async (req, res) => {
     const manageLink = `${baseUrl}/manage.html?id=${shortId}`;
 
     console.log('[RUN CREATE] Success! Run created:', { shortId, signupLink, manageLink });
+
+    // Send confirmation email to coordinator (non-blocking)
+    console.log('[RUN CREATE] Sending confirmation email...');
+    try {
+      const emailService = new EmailService();
+      if (emailService.isEnabled()) {
+        const runForEmail = {
+          ...runData,
+          plannerName: trimmedPlannerName,
+          location: trimmedLocation,
+        };
+        const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+        
+        await emailService.sendEmail({
+          to: trimmedCoordinatorEmail,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+        console.log('[RUN CREATE] Confirmation email sent successfully');
+      } else {
+        console.log('[RUN CREATE] Email service is disabled, skipping email');
+      }
+    } catch (emailError) {
+      console.error('[RUN CREATE] Error sending confirmation email:', emailError.message);
+      // Don't fail the event creation if email fails
+    }
 
     res.json({
       success: true,
@@ -358,6 +406,51 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
     }
 
     console.log('[SIGNUP] Success! Signup completed for:', name);
+
+    // Send confirmation emails (non-blocking)
+    console.log('[SIGNUP] Sending confirmation emails...');
+    try {
+      const emailService = new EmailService();
+      if (emailService.isEnabled()) {
+        // Send confirmation to attendee if they provided an email
+        if (createdSignup.email && createdSignup.email.trim()) {
+          try {
+            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup);
+            await emailService.sendEmail({
+              to: createdSignup.email.trim(),
+              subject: attendeeEmailContent.subject,
+              html: attendeeEmailContent.html,
+              text: attendeeEmailContent.text,
+            });
+            console.log('[SIGNUP] Confirmation email sent to attendee');
+          } catch (attendeeEmailError) {
+            console.error('[SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+          }
+        }
+
+        // Send notification to coordinator if coordinator email exists
+        if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
+          try {
+            const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
+            await emailService.sendEmail({
+              to: run.coordinatorEmail.trim(),
+              subject: coordinatorEmailContent.subject,
+              html: coordinatorEmailContent.html,
+              text: coordinatorEmailContent.text,
+            });
+            console.log('[SIGNUP] Notification email sent to coordinator');
+          } catch (coordinatorEmailError) {
+            console.error('[SIGNUP] Error sending email to coordinator:', coordinatorEmailError.message);
+          }
+        }
+      } else {
+        console.log('[SIGNUP] Email service is disabled, skipping emails');
+      }
+    } catch (emailError) {
+      console.error('[SIGNUP] Error in email sending process:', emailError.message);
+      // Don't fail the signup if email fails
+    }
+
     res.json({
       success: true,
       signup: {
@@ -458,8 +551,88 @@ app.put('/api/runs/:runId', async (req, res) => {
       updates.maxParticipants = parseInt(maxParticipants);
     }
 
+    // Track changes for email notifications
+    const changes = {};
+    if (updates.location !== undefined && updates.location !== existingRun.location) {
+      changes['Location'] = `${existingRun.location} → ${updates.location}`;
+    }
+    if (updates.title !== undefined && updates.title !== existingRun.title) {
+      changes['Title'] = `${existingRun.title || '(none)'} → ${updates.title || '(none)'}`;
+    }
+    if (updates.dateTime !== undefined && updates.dateTime !== existingRun.dateTime) {
+      const oldDate = new Date(existingRun.dateTime).toLocaleString();
+      const newDate = new Date(updates.dateTime).toLocaleString();
+      changes['Date & Time'] = `${oldDate} → ${newDate}`;
+    }
+    if (updates.maxParticipants !== undefined && updates.maxParticipants !== existingRun.maxParticipants) {
+      changes['Max Participants'] = `${existingRun.maxParticipants} → ${updates.maxParticipants}`;
+    }
+    if (updates.pacerName !== undefined && updates.pacerName !== existingRun.plannerName) {
+      changes['Planner Name'] = `${existingRun.plannerName} → ${updates.pacerName}`;
+    }
+    if (updates.description !== undefined && updates.description !== existingRun.description) {
+      changes['Description'] = 'Updated';
+    }
+
     // Update in database
     const updatedRun = await runs.update(runId, updates);
+
+    // Send update emails if there were changes (non-blocking)
+    if (Object.keys(changes).length > 0) {
+      console.log('[RUN UPDATE] Changes detected, sending update emails...');
+      try {
+        const emailService = new EmailService();
+        if (emailService.isEnabled()) {
+          // Send email to coordinator
+          if (updatedRun.coordinatorEmail && updatedRun.coordinatorEmail.trim()) {
+            try {
+              const coordinatorEmailContent = eventUpdatedEmail(updatedRun, changes, updatedRun.coordinatorEmail);
+              await emailService.sendEmail({
+                to: updatedRun.coordinatorEmail.trim(),
+                subject: coordinatorEmailContent.subject,
+                html: coordinatorEmailContent.html,
+                text: coordinatorEmailContent.text,
+              });
+              console.log('[RUN UPDATE] Update email sent to coordinator');
+            } catch (coordinatorEmailError) {
+              console.error('[RUN UPDATE] Error sending email to coordinator:', coordinatorEmailError.message);
+            }
+          }
+
+          // Send email to all signups with email addresses
+          try {
+            const allSignups = await signups.getByRunId(runId);
+            const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
+            
+            if (signupsWithEmail.length > 0) {
+              const emailPromises = signupsWithEmail.map(async (signup) => {
+                try {
+                  const signupEmailContent = eventUpdatedToSignupsEmail(updatedRun, changes, signup);
+                  await emailService.sendEmail({
+                    to: signup.email.trim(),
+                    subject: signupEmailContent.subject,
+                    html: signupEmailContent.html,
+                    text: signupEmailContent.text,
+                  });
+                } catch (signupEmailError) {
+                  console.error(`[RUN UPDATE] Error sending email to signup ${signup.id}:`, signupEmailError.message);
+                }
+              });
+              
+              await Promise.all(emailPromises);
+              console.log(`[RUN UPDATE] Update emails sent to ${signupsWithEmail.length} signup(s)`);
+            }
+          } catch (signupsEmailError) {
+            console.error('[RUN UPDATE] Error sending emails to signups:', signupsEmailError.message);
+          }
+        } else {
+          console.log('[RUN UPDATE] Email service is disabled, skipping emails');
+        }
+      } catch (emailError) {
+        console.error('[RUN UPDATE] Error in email sending process:', emailError.message);
+        // Don't fail the update if email fails
+      }
+    }
 
     res.json({ success: true, run: updatedRun });
   } catch (error) {

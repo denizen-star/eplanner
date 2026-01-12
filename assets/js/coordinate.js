@@ -234,6 +234,16 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please enter a planner name');
     }
 
+    const coordinatorEmail = document.getElementById('coordinatorEmail').value.trim();
+    if (!coordinatorEmail) {
+      throw new Error('Please enter a coordinator email address');
+    }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(coordinatorEmail)) {
+      throw new Error('Please enter a valid email address');
+    }
+
     const dateTimeInput = document.getElementById('dateTime');
     const dateTime = dateTimeInput ? dateTimeInput.value : null;
     if (!dateTime) {
@@ -285,6 +295,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       location: locationToSave,
       coordinates: validatedCoordinates,
       plannerName: plannerName,
+      coordinatorEmail: coordinatorEmail,
       title: runTitle || null,
       dateTime: dateTime,
       maxParticipants: maxParticipantsValue,
