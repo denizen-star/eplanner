@@ -247,6 +247,19 @@ exports.handler = async (event) => {
     console.log('[RUNS CREATE] Sending confirmation email...');
     try {
       const emailService = new EmailService();
+      
+      // Diagnostic logging
+      console.log('[RUNS CREATE] Email service status:', {
+        enabled: emailService.enabled,
+        isEnabled: emailService.isEnabled(),
+        hasSmtpServer: !!emailService.config.smtpServer,
+        hasSenderEmail: !!emailService.config.senderEmail,
+        hasSenderPassword: !!emailService.config.senderPassword,
+        smtpServer: emailService.config.smtpServer || 'NOT SET',
+        senderEmail: emailService.config.senderEmail || 'NOT SET',
+        hasPassword: !!emailService.config.senderPassword
+      });
+      
       if (emailService.isEnabled()) {
         const runForEmail = {
           ...runData,
@@ -255,18 +268,31 @@ exports.handler = async (event) => {
         };
         const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
         
-        await emailService.sendEmail({
+        console.log('[RUNS CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
+        const emailResult = await emailService.sendEmail({
           to: trimmedCoordinatorEmail,
           subject: emailContent.subject,
           html: emailContent.html,
           text: emailContent.text,
         });
-        console.log('[RUNS CREATE] Confirmation email sent successfully');
+        
+        if (emailResult) {
+          console.log('[RUNS CREATE] Confirmation email sent successfully');
+        } else {
+          console.error('[RUNS CREATE] Email service returned false - email not sent');
+        }
       } else {
-        console.log('[RUNS CREATE] Email service is disabled, skipping email');
+        console.warn('[RUNS CREATE] Email service is disabled or configuration incomplete');
+        console.warn('[RUNS CREATE] To enable emails, set environment variables:');
+        console.warn('[RUNS CREATE]   - EMAIL_ENABLED=true');
+        console.warn('[RUNS CREATE]   - SMTP_SERVER (e.g., smtp.zoho.com)');
+        console.warn('[RUNS CREATE]   - SMTP_PORT (587 or 465)');
+        console.warn('[RUNS CREATE]   - SENDER_EMAIL (your email address)');
+        console.warn('[RUNS CREATE]   - SENDER_PASSWORD (app-specific password)');
       }
     } catch (emailError) {
       console.error('[RUNS CREATE] Error sending confirmation email:', emailError.message);
+      console.error('[RUNS CREATE] Error stack:', emailError.stack);
       // Don't fail the event creation if email fails
     }
 

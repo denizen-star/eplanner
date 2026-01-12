@@ -234,7 +234,15 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please enter a planner name');
     }
 
-    const coordinatorEmail = document.getElementById('coordinatorEmail').value.trim();
+    const coordinatorEmailInput = document.getElementById('coordinatorEmail');
+    if (!coordinatorEmailInput) {
+      console.error('[COORDINATE] Coordinator email input field not found!');
+      throw new Error('Coordinator email field not found. Please refresh the page.');
+    }
+    
+    const coordinatorEmail = coordinatorEmailInput.value.trim();
+    console.log('[COORDINATE] Coordinator email extracted:', coordinatorEmail ? 'Found' : 'EMPTY', coordinatorEmail);
+    
     if (!coordinatorEmail) {
       throw new Error('Please enter a coordinator email address');
     }
@@ -321,6 +329,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     };
     
     console.log('Form Data being sent (with address fields):', formData);
+    console.log('Coordinator Email in formData:', formData.coordinatorEmail);
+    console.log('FormData keys:', Object.keys(formData));
 
     const response = await fetch('/api/runs/create', {
       method: 'POST',

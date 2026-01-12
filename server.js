@@ -92,10 +92,17 @@ app.post('/api/runs/create', async (req, res) => {
   console.log('[RUN CREATE] Request received:', {
     hasLocation: !!req.body.location,
     hasPacerName: !!req.body.pacerName,
+    hasPlannerName: !!req.body.plannerName,
     hasDateTime: !!req.body.dateTime,
     maxParticipants: req.body.maxParticipants,
+    hasCoordinatorEmail: !!req.body.coordinatorEmail,
+    coordinatorEmailValue: req.body.coordinatorEmail,
     isNetlify: process.env.NETLIFY === 'true'
   });
+  
+  // Debug: Log all body keys
+  console.log('[RUN CREATE] Request body keys:', Object.keys(req.body));
+  console.log('[RUN CREATE] Full request body:', JSON.stringify(req.body, null, 2));
 
   try {
     const { location, coordinates, pacerName, plannerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail } = req.body;
@@ -234,6 +241,19 @@ app.post('/api/runs/create', async (req, res) => {
     console.log('[RUN CREATE] Sending confirmation email...');
     try {
       const emailService = new EmailService();
+      
+      // Diagnostic logging
+      console.log('[RUN CREATE] Email service status:', {
+        enabled: emailService.enabled,
+        isEnabled: emailService.isEnabled(),
+        hasSmtpServer: !!emailService.config.smtpServer,
+        hasSenderEmail: !!emailService.config.senderEmail,
+        hasSenderPassword: !!emailService.config.senderPassword,
+        smtpServer: emailService.config.smtpServer || 'NOT SET',
+        senderEmail: emailService.config.senderEmail || 'NOT SET',
+        hasPassword: !!emailService.config.senderPassword
+      });
+      
       if (emailService.isEnabled()) {
         const runForEmail = {
           ...runData,
@@ -242,18 +262,31 @@ app.post('/api/runs/create', async (req, res) => {
         };
         const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
         
-        await emailService.sendEmail({
+        console.log('[RUN CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
+        const emailResult = await emailService.sendEmail({
           to: trimmedCoordinatorEmail,
           subject: emailContent.subject,
           html: emailContent.html,
           text: emailContent.text,
         });
-        console.log('[RUN CREATE] Confirmation email sent successfully');
+        
+        if (emailResult) {
+          console.log('[RUN CREATE] Confirmation email sent successfully');
+        } else {
+          console.error('[RUN CREATE] Email service returned false - email not sent');
+        }
       } else {
-        console.log('[RUN CREATE] Email service is disabled, skipping email');
+        console.warn('[RUN CREATE] Email service is disabled or configuration incomplete');
+        console.warn('[RUN CREATE] To enable emails, set environment variables:');
+        console.warn('[RUN CREATE]   - EMAIL_ENABLED=true');
+        console.warn('[RUN CREATE]   - SMTP_SERVER (e.g., smtp.zoho.com)');
+        console.warn('[RUN CREATE]   - SMTP_PORT (587 or 465)');
+        console.warn('[RUN CREATE]   - SENDER_EMAIL (your email address)');
+        console.warn('[RUN CREATE]   - SENDER_PASSWORD (app-specific password)');
       }
     } catch (emailError) {
       console.error('[RUN CREATE] Error sending confirmation email:', emailError.message);
+      console.error('[RUN CREATE] Error stack:', emailError.stack);
       // Don't fail the event creation if email fails
     }
 
