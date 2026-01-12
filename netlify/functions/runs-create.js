@@ -247,7 +247,7 @@ exports.handler = async (event) => {
     console.log('[RUNS CREATE] Sending confirmation email...');
     let emailStatus = {
       attempted: false,
-      enabled: false,
+      enabled: false, // Always boolean, never password or other value
       sent: false,
       error: null
     };
@@ -255,22 +255,22 @@ exports.handler = async (event) => {
     try {
       const emailService = new EmailService();
       
-      // Diagnostic logging
+      // Diagnostic logging (NEVER log passwords!)
       const emailStatusInfo = {
-        enabled: emailService.enabled,
+        enabled: !!emailService.enabled, // Ensure boolean
         isEnabled: emailService.isEnabled(),
         hasSmtpServer: !!emailService.config.smtpServer,
         hasSenderEmail: !!emailService.config.senderEmail,
-        hasSenderPassword: !!emailService.config.senderPassword,
+        hasSenderPassword: !!emailService.config.senderPassword, // Only boolean, never the actual password
         smtpServer: emailService.config.smtpServer || 'NOT SET',
         senderEmail: emailService.config.senderEmail || 'NOT SET',
-        hasPassword: !!emailService.config.senderPassword
+        // NEVER log senderPassword - security risk!
       };
       
       console.log('[RUNS CREATE] Email service status:', emailStatusInfo);
       
       emailStatus.attempted = true;
-      emailStatus.enabled = emailService.isEnabled();
+      emailStatus.enabled = !!emailService.isEnabled(); // Ensure boolean, never password
       
       if (emailService.isEnabled()) {
         const runForEmail = {

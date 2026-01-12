@@ -344,14 +344,21 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     try {
       data = JSON.parse(responseText);
       
-      // Log email status if available
+      // Log email status if available (sanitize to prevent password exposure)
       if (data.emailStatus) {
-        console.log('[COORDINATE] Email Status:', data.emailStatus);
+        // Create sanitized version - never log passwords or sensitive data
+        const sanitizedStatus = {
+          attempted: data.emailStatus.attempted,
+          enabled: !!data.emailStatus.enabled, // Ensure boolean, never password
+          sent: data.emailStatus.sent,
+          error: data.emailStatus.error
+        };
+        console.log('[COORDINATE] Email Status:', sanitizedStatus);
         if (data.emailStatus.sent) {
           console.log('[COORDINATE] ✅ Confirmation email sent successfully');
         } else if (data.emailStatus.attempted) {
           console.warn('[COORDINATE] ⚠️ Email was attempted but not sent');
-          console.warn('[COORDINATE] Email enabled:', data.emailStatus.enabled);
+          console.warn('[COORDINATE] Email enabled:', !!data.emailStatus.enabled); // Ensure boolean
           if (data.emailStatus.error) {
             console.warn('[COORDINATE] Email error:', data.emailStatus.error);
           }
