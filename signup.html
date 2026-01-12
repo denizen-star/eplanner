@@ -81,8 +81,7 @@
                            &nbsp;&nbsp;&nbsp;• Spots available</p>
                         <p style="margin-bottom: 12px; color: var(--text-gray); line-height: 1.8;"><strong>3️⃣ Fill in:</strong><br>
                            &nbsp;&nbsp;&nbsp;• Your name (required)<br>
-                           &nbsp;&nbsp;&nbsp;• Phone number (required)<br>
-                           &nbsp;&nbsp;&nbsp;• Email (optional)<br>
+                           &nbsp;&nbsp;&nbsp;• Phone number or email (at least one required)<br>
                            &nbsp;&nbsp;&nbsp;• Instagram (optional)</p>
                         <p style="margin-bottom: 12px; color: var(--text-gray); line-height: 1.8;"><strong>4️⃣ Read & accept the waiver (required)</strong></p>
                         <p style="margin-bottom: 12px; color: var(--text-gray); line-height: 1.8;"><strong>5️⃣ Click "Sign Up"</strong></p>
@@ -127,8 +126,8 @@
 
                     <div class="form-group">
                         <label for="phone">
-                            Phone Number *
-                            <span class="info-icon" title="We will only use your number to verify you are human and for WhatsApp messages about this event">
+                            Phone Number
+                            <span class="info-icon" title="We will use your phone number for confirmations and event updates via text or WhatsApp">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/>
                                     <path d="M8 11V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -136,13 +135,14 @@
                                 </svg>
                             </span>
                         </label>
-                        <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
-                        <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">We will only use your number to verify you are human and for WhatsApp messages about this event.</small>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                        <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">At least one of phone or email is required. We will use this for confirmations and event updates.</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email Address (Optional)</label>
+                        <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" placeholder="Enter your email address">
+                        <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">At least one of phone or email is required. We will use this for confirmations and event updates.</small>
                     </div>
 
                     <div class="form-group">

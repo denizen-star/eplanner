@@ -68,9 +68,12 @@ exports.handler = async (event) => {
 
     console.log('[RUNS SIGNUP] Request received for runId:', runId);
 
-    if (!name || !phone || !waiverAccepted) {
+    // At least one of phone or email must be provided
+    const hasContactInfo = phone || email;
+    
+    if (!name || !hasContactInfo || !waiverAccepted) {
       console.error('[RUNS SIGNUP] Validation failed: Missing required fields');
-      return jsonResponse(400, { success: false, error: 'Name, phone, and waiver acceptance are required' });
+      return jsonResponse(400, { success: false, error: 'Name, at least one of phone or email, and waiver acceptance are required' });
     }
 
     if (!runId) {
@@ -117,7 +120,7 @@ exports.handler = async (event) => {
       createdSignup = await signups.create({
         runId: runId,
         name: name.trim(),
-        phone: phone.trim(),
+        phone: phone ? phone.trim() : '',
         email: email ? email.trim() : '',
         instagram: instagram ? instagram.trim() : '',
         waiverAccepted: true,
@@ -141,7 +144,7 @@ exports.handler = async (event) => {
         runId: runId,
         signupId: createdSignup.id,
         participantName: name.trim(),
-        participantPhone: phone.trim(),
+        participantPhone: phone ? phone.trim() : '',
         waiverText: waiverText || '',
         timestamp: signedAt,
         metadata: metadata,

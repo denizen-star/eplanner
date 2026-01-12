@@ -85,7 +85,18 @@ async function loadEvent() {
       if (plannerNameElement) plannerNameElement.textContent = '-';
     }
     
-    document.getElementById('eventDateTime').textContent = new Date(event.dateTime).toLocaleString();
+    // Format date using stored timezone if available, otherwise use browser timezone
+    const eventDate = new Date(event.dateTime);
+    const timezone = event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('eventDateTime').textContent = eventDate.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
     document.getElementById('eventMax').textContent = event.maxParticipants;
     
     // Display created timestamp in EST

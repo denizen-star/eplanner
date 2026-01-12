@@ -72,13 +72,23 @@ async function loadRuns() {
       
       runsList.innerHTML = '<div class="compact-list">' + sortedRuns.map(run => {
         const date = new Date(run.dateTime);
+        // Use stored timezone if available, otherwise use browser timezone
+        const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
         // Ensure signups array exists (default to empty array if missing)
         const signupsArray = run.signups || [];
         const spotsLeft = run.maxParticipants - signupsArray.length;
         const baseUrl = window.location.origin;
         const signupLink = `${baseUrl}/signup.html?id=${run.id}`;
         const manageLink = `${baseUrl}/manage.html?id=${run.id}`;
-        const formattedDate = date.toLocaleString();
+        const formattedDate = date.toLocaleString('en-US', {
+          timeZone: timezone,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
         const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
         const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
         const isDisabled = run.status === 'completed' || run.status === 'deleted';

@@ -142,7 +142,18 @@ async function loadRun() {
       if (pacerNameElement) pacerNameElement.textContent = '-';
     }
     
-    document.getElementById('runDateTime').textContent = new Date(run.dateTime).toLocaleString();
+    // Format date using stored timezone if available, otherwise use browser timezone
+    const runDate = new Date(run.dateTime);
+    const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('runDateTime').textContent = runDate.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
     document.getElementById('runMax').textContent = run.maxParticipants;
     document.getElementById('runCurrent').textContent = run.signups.length;
     

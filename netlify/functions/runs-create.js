@@ -77,7 +77,7 @@ exports.handler = async (event) => {
   try {
     const body = parseBody(event);
     const { 
-      location, coordinates, plannerName, pacerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo,
+      location, coordinates, plannerName, pacerName, title, dateTime, timezone, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
       neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
       coordinatorEmail
@@ -164,6 +164,7 @@ exports.handler = async (event) => {
         coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
+        timezone: timezone || null,
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         createdAt: createdAt,

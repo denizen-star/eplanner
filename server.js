@@ -105,7 +105,7 @@ app.post('/api/runs/create', async (req, res) => {
   console.log('[RUN CREATE] Full request body:', JSON.stringify(req.body, null, 2));
 
   try {
-    const { location, coordinates, pacerName, plannerName, title, dateTime, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail } = req.body;
+    const { location, coordinates, pacerName, plannerName, title, dateTime, timezone, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail } = req.body;
 
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -205,6 +205,7 @@ app.post('/api/runs/create', async (req, res) => {
         coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
+        timezone: timezone || null,
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         createdAt: createdAt,
@@ -379,9 +380,12 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
     const { name, phone, email, instagram, waiverAccepted, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = req.body;
 
     console.log('[SIGNUP] Validating signup data...');
-    if (!name || !phone || !waiverAccepted) {
+    // At least one of phone or email must be provided
+    const hasContactInfo = phone || email;
+    
+    if (!name || !hasContactInfo || !waiverAccepted) {
       console.error('[SIGNUP] Validation failed: Missing required fields');
-      return res.status(400).json({ error: 'Name, phone, and waiver acceptance are required' });
+      return res.status(400).json({ error: 'Name, at least one of phone or email, and waiver acceptance are required' });
     }
 
     // Verify run exists and check capacity
@@ -423,7 +427,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
       createdSignup = await signups.create({
         runId: runId,
         name: name.trim(),
-        phone: phone.trim(),
+        phone: phone ? phone.trim() : '',
         email: email ? email.trim() : '',
         instagram: instagram ? instagram.trim() : '',
         waiverAccepted: true,
@@ -446,7 +450,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         runId: runId,
         signupId: createdSignup.id,
         participantName: name.trim(),
-        participantPhone: phone.trim(),
+        participantPhone: phone ? phone.trim() : '',
         waiverText: waiverText || '',
         timestamp: signedAt,
         metadata: metadata,

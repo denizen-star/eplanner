@@ -299,6 +299,9 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     console.log('  town:', addr.town || '(not in addressComponents)');
     console.log('  municipality:', addr.municipality || '(not in addressComponents)');
 
+    // Capture user's timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const formData = {
       location: locationToSave,
       coordinates: validatedCoordinates,
@@ -306,6 +309,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       coordinatorEmail: coordinatorEmail,
       title: runTitle || null,
       dateTime: dateTime,
+      timezone: userTimezone,
       maxParticipants: maxParticipantsValue,
       deviceInfo: deviceInfo,
       sessionInfo: sessionInfo,

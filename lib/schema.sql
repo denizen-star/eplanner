@@ -11,6 +11,7 @@ CREATE TABLE ep_events (
   planner_name VARCHAR(255) NOT NULL,
   title VARCHAR(255),
   date_time DATETIME NOT NULL,
+  timezone VARCHAR(50),
   max_participants INT NOT NULL,
   status VARCHAR(20) DEFAULT 'active',
   -- Address component fields from Nominatim geocoding

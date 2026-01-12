@@ -26,7 +26,7 @@ const waiverText = `
 <p>This agreement shall be governed by and interpreted under the laws of the <strong>State of Florida</strong>, and any legal action shall be brought exclusively in the courts of <strong>Miami-Dade County, Florida</strong>.</p>
 
 <h4>8. COMMUNICATION AND DISTRIBUTION CONSENT</h4>
-<p>I agree to receive operational and promotional communication via text message (SMS) and/or WhatsApp from the Club at the phone number provided during registration. I acknowledge that I am responsible for any costs or fees associated with receiving these messages (e.g., carrier data or SMS rates). I also consent to be added to the official Event Planner distribution list for email and/or messaging updates.</p>
+<p>By signing this waiver, I <strong>CONSENT TO RECEIVE COMMUNICATIONS</strong> related to my participation in events organized by the Club via <strong>TEXT MESSAGE (SMS), WHATSAPP, AND/OR EMAIL</strong> at the contact information I provide during registration. I understand that these communications may include, but are not limited to, event confirmations, updates, changes, reminders, and other event-related information. I acknowledge that <strong>STANDARD MESSAGING AND DATA RATES MAY APPLY</strong> for text messages and WhatsApp communications, and I am <strong>RESPONSIBLE FOR ANY SUCH CHARGES</strong> from my mobile carrier. I understand that I may receive communications via text message, WhatsApp, and/or email, and I consent to being added to the official Event Planner distribution list for communications. My consent to receive these communications is <strong>VOLUNTARY</strong>, and I understand that I can withdraw my consent at any time by contacting the Club.</p>
 
 <h4>9. ELECTRONIC CONSENT</h4>
 <p>I acknowledge that I have carefully read, fully understand, and agree to all terms of this Electronic Waiver. I am at least 18 years of age (or a parent/guardian signing on behalf of a minor). My electronic acceptance has the same legal force and effect as if I had signed a physical document.</p>
@@ -196,10 +196,14 @@ async function loadRun() {
 function validateForm() {
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
   const waiver = document.getElementById('waiverAccepted').checked;
   const submitButton = document.getElementById('submitButton');
 
-  if (name && phone && waiver) {
+  // At least one of phone or email must be provided
+  const hasContactInfo = phone || email;
+  
+  if (name && hasContactInfo && waiver) {
     submitButton.disabled = false;
   } else {
     submitButton.disabled = true;
@@ -208,6 +212,7 @@ function validateForm() {
 
 document.getElementById('name').addEventListener('input', validateForm);
 document.getElementById('phone').addEventListener('input', validateForm);
+document.getElementById('email').addEventListener('input', validateForm);
 document.getElementById('waiverAccepted').addEventListener('change', validateForm);
 
 function formatInstagramHandle(handle) {
@@ -224,8 +229,17 @@ function validateEmail(email) {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const phone = document.getElementById('phone').value.trim();
   const email = document.getElementById('email').value.trim();
   const instagram = formatInstagramHandle(document.getElementById('instagram').value);
+
+  // Validate that at least one of phone or email is provided
+  if (!phone && !email) {
+    const errorDiv = document.getElementById('error');
+    errorDiv.textContent = 'Please provide at least one of phone number or email address';
+    errorDiv.style.display = 'block';
+    return;
+  }
 
   if (email && !validateEmail(email)) {
     const errorDiv = document.getElementById('error');
