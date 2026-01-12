@@ -253,10 +253,19 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     }
 
     const dateTimeInput = document.getElementById('dateTime');
-    const dateTime = dateTimeInput ? dateTimeInput.value : null;
-    if (!dateTime) {
+    const dateTimeLocal = dateTimeInput ? dateTimeInput.value : null;
+    if (!dateTimeLocal) {
       throw new Error('Please select a date and time for the event');
     }
+
+    // Capture user's timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    // Convert datetime-local value to ISO string
+    // datetime-local gives "YYYY-MM-DDTHH:mm" which represents local time
+    // We need to create a Date object treating it as local time, then convert to ISO
+    const dateTimeDate = new Date(dateTimeLocal);
+    const dateTime = dateTimeDate.toISOString();
 
     const runTitle = document.getElementById('runTitle').value.trim();
     const eventDescription = document.getElementById('eventDescription')?.value.trim() || null;
@@ -298,9 +307,6 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     console.log('  village:', addr.village || '(not in addressComponents)');
     console.log('  town:', addr.town || '(not in addressComponents)');
     console.log('  municipality:', addr.municipality || '(not in addressComponents)');
-
-    // Capture user's timezone
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const formData = {
       location: locationToSave,
