@@ -43,20 +43,24 @@ function extractCity(location) {
 /**
  * Format date for calendar description: "Dec 25, 2024 at 6:30 PM EST"
  */
-function formatDateForCalendarDescription(dateString) {
+function formatDateForCalendarDescription(dateString, timezone = null) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const formatted = date.toLocaleString('en-US', {
-    timeZone: 'America/New_York',
+  const options = {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
-  });
-  // Convert "Dec 25, 2024, 6:30 PM" to "Dec 25, 2024 at 6:30 PM"
-  return formatted.replace(', ', ' at ') + ' EST';
+    hour12: true,
+    timeZoneName: 'short'
+  };
+  if (timezone) {
+    options.timeZone = timezone;
+  }
+  const formatted = date.toLocaleString('en-US', options);
+  // Convert "Dec 25, 2024, 6:30 PM EST" to "Dec 25, 2024 at 6:30 PM EST"
+  return formatted.replace(', ', ' at ');
 }
 
 /**
@@ -68,7 +72,8 @@ function formatCalendarDescription(event) {
   const eventTitle = event.title && typeof event.title === 'string' && event.title.trim() ? event.title.trim() : '';
   // Use address component city field first, fall back to parsing if not available
   const city = event.city || event.town || event.village || event.municipality || extractCity(event.location || '');
-  const dateFormatted = formatDateForCalendarDescription(event.dateTime);
+  const eventTimezone = event.timezone || null;
+  const dateFormatted = formatDateForCalendarDescription(event.dateTime, eventTimezone);
   const location = event.location || '';
   
   // Construct confirmation link (event.html page)
@@ -196,17 +201,35 @@ function downloadICalFile(event) {
 }
 
 /**
- * Format date for Google Calendar URL (YYYYMMDDTHHmmssZ)
+ * Format date for Google Calendar URL (YYYYMMDDTHHmmss)
+ * Formats the date/time as it appears in the specified timezone
  */
-function formatDateForGoogleCalendar(date) {
+function formatDateForGoogleCalendar(date, timezone = null) {
   if (!date) return '';
   const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const seconds = String(d.getSeconds()).padStart(2, '0');
+  
+  // Use Intl.DateTimeFormat to get date components in the specified timezone
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: timezone || undefined
+  };
+  
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const parts = formatter.formatToParts(d);
+  
+  const year = parts.find(p => p.type === 'year').value;
+  const month = parts.find(p => p.type === 'month').value;
+  const day = parts.find(p => p.type === 'day').value;
+  const hours = parts.find(p => p.type === 'hour').value;
+  const minutes = parts.find(p => p.type === 'minute').value;
+  const seconds = parts.find(p => p.type === 'second').value;
+  
   return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }
 
@@ -220,13 +243,14 @@ function generateGoogleCalendarLink(event) {
   const location = event.location || '';
   const startDate = new Date(event.dateTime);
   const endDate = calculateEndTime(event.dateTime);
+  const eventTimezone = event.timezone || null;
   
   if (!startDate || !endDate) {
     throw new Error('Invalid date for calendar event');
   }
   
-  const startTime = formatDateForGoogleCalendar(startDate);
-  const endTime = formatDateForGoogleCalendar(endDate);
+  const startTime = formatDateForGoogleCalendar(startDate, eventTimezone);
+  const endTime = formatDateForGoogleCalendar(endDate, eventTimezone);
   
   const params = new URLSearchParams({
     action: 'TEMPLATE',
