@@ -343,6 +343,22 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     let data;
     try {
       data = JSON.parse(responseText);
+      
+      // Log email status if available
+      if (data.emailStatus) {
+        console.log('[COORDINATE] Email Status:', data.emailStatus);
+        if (data.emailStatus.sent) {
+          console.log('[COORDINATE] ✅ Confirmation email sent successfully');
+        } else if (data.emailStatus.attempted) {
+          console.warn('[COORDINATE] ⚠️ Email was attempted but not sent');
+          console.warn('[COORDINATE] Email enabled:', data.emailStatus.enabled);
+          if (data.emailStatus.error) {
+            console.warn('[COORDINATE] Email error:', data.emailStatus.error);
+          }
+        } else {
+          console.warn('[COORDINATE] ⚠️ Email service was not attempted');
+        }
+      }
     } catch (parseError) {
       console.error('[COORDINATE] Failed to parse response:', parseError);
       console.error('[COORDINATE] Response text:', responseText);

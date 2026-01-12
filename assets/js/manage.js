@@ -128,38 +128,6 @@ async function loadRun() {
 
     document.getElementById('runLocation').textContent = run.location;
     
-    // Display picture if available
-    const pictureContainer = document.getElementById('eventPictureContainer');
-    const pictureImg = document.getElementById('eventPicture');
-    if (run.picture) {
-      pictureImg.src = 'data:image/jpeg;base64,' + run.picture;
-      pictureContainer.style.display = 'block';
-    } else {
-      pictureContainer.style.display = 'none';
-    }
-    
-    // Display description if available - use event title as heading
-    const descriptionContainer = document.getElementById('eventDescriptionContainer');
-    const descriptionHeading = descriptionContainer.querySelector('h3');
-    const descriptionText = document.getElementById('eventDescription');
-    
-    // Set heading to event title if available, otherwise "Event Description"
-    const eventTitleDisplay = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
-    if (descriptionHeading) {
-      descriptionHeading.textContent = eventTitleDisplay || 'Event Description';
-    }
-    
-    if (run.description && run.description.trim()) {
-      descriptionText.textContent = run.description.trim();
-      descriptionContainer.style.display = 'block';
-    } else if (eventTitleDisplay) {
-      // Show container even if no description, if we have a title
-      descriptionText.textContent = '';
-      descriptionContainer.style.display = 'block';
-    } else {
-      descriptionContainer.style.display = 'none';
-    }
-    
     const runTitleElement = document.getElementById('runTitle');
     const pacerNameElement = document.getElementById('runPacerName');
     
@@ -278,17 +246,11 @@ async function loadRun() {
         <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
           <a href="${signupLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${signupLink}">${signupLink}</a>
           <button onclick="copySignupLink()" class="button" style="white-space: nowrap; min-width: 60px;">Copy</button>
-          <div id="qrCodeContainer" style="width: 45px; height: 45px; flex-shrink: 0;"></div>
         </div>
         <input type="text" id="signupLinkText" value="${signupLink.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
       </div>
     `;
     runInfoDiv.appendChild(whatsappSection);
-
-    // Generate QR code inline next to Copy button
-    setTimeout(() => {
-      generateQRCode(signupLink, 'qrCodeContainer');
-    }, 100);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('runInfo').style.display = 'block';
@@ -375,15 +337,13 @@ function addCalendarLinksSection(run) {
     calendarSection.id = 'calendarLinksSection';
     calendarSection.style.cssText = 'margin-top: 24px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border-gray);';
     calendarSection.innerHTML = `
+      <h2 style="margin-bottom: 16px;">Add to Calendar</h2>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button onclick="window.downloadICalFile(window.currentRun)" class="button button-primary" style="flex: 1; min-width: 120px;">
           Download iCal
         </button>
         <a href="${googleCalendarLink}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
           Google Calendar
-        </a>
-        <a href="print-event.html?id=${run.id}" target="_blank" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
-          Print Event
         </a>
       </div>
     `;
@@ -399,74 +359,6 @@ function addCalendarLinksSection(run) {
     console.error('Error adding calendar links section:', error);
   }
 }
-
-/**
- * Wait for QRCode library to be available
- */
-function waitForQRCodeLibrary() {
-  return new Promise((resolve, reject) => {
-    if (typeof QRCode !== 'undefined') {
-      resolve();
-      return;
-    }
-
-    let attempts = 0;
-    const maxAttempts = 50;
-    const checkInterval = setInterval(() => {
-      attempts++;
-      if (typeof QRCode !== 'undefined') {
-        clearInterval(checkInterval);
-        resolve();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(checkInterval);
-        reject(new Error('QRCode library failed to load'));
-      }
-    }, 100);
-  });
-}
-
-/**
- * Generate QR code for event signup link
- * @param {string} signupLink - The signup URL to encode
- * @param {string} containerId - ID of the container element to display QR code
- */
-async function generateQRCode(signupLink, containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) {
-    console.error('QR code container not found:', containerId);
-    return;
-  }
-
-  try {
-    // Wait for QRCode library to be available
-    await waitForQRCodeLibrary();
-
-    // Verify QRCode is available and has the correct API
-    if (typeof QRCode === 'undefined') {
-      throw new Error('QRCode library not loaded');
-    }
-
-    // qrcodejs uses a different API - create QRCode instance
-    // Clear container completely first
-    container.innerHTML = '';
-    
-    // Create QR code using qrcodejs API
-    const qr = new QRCode(container, {
-      text: signupLink,
-      width: 45,
-      height: 45,
-      colorDark: '#000000',
-      colorLight: '#FFFFFF',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-    
-    console.log('QR code generated successfully');
-  } catch (error) {
-    console.error('Error generating QR code:', error);
-    container.innerHTML = '';
-  }
-}
-
 
 async function deleteSignup(signupIndex) {
   if (!confirm('Are you sure you want to delete this participant? This action cannot be undone.')) {

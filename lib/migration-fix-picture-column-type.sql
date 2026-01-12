@@ -8,3 +8,9 @@ MODIFY COLUMN picture LONGTEXT NULL;
 
 -- Note: description stays as TEXT since 65KB is plenty for text descriptions
 
+
+
+
+
+
+

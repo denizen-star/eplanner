@@ -9,3 +9,9 @@ ADD COLUMN picture TEXT NULL;
 ALTER TABLE ep_events 
 ADD COLUMN description TEXT NULL;
 
+
+
+
+
+
+

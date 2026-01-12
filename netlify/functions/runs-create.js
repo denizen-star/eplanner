@@ -245,11 +245,18 @@ exports.handler = async (event) => {
 
     // Send confirmation email to coordinator (non-blocking)
     console.log('[RUNS CREATE] Sending confirmation email...');
+    let emailStatus = {
+      attempted: false,
+      enabled: false,
+      sent: false,
+      error: null
+    };
+    
     try {
       const emailService = new EmailService();
       
       // Diagnostic logging
-      console.log('[RUNS CREATE] Email service status:', {
+      const emailStatusInfo = {
         enabled: emailService.enabled,
         isEnabled: emailService.isEnabled(),
         hasSmtpServer: !!emailService.config.smtpServer,
@@ -258,7 +265,12 @@ exports.handler = async (event) => {
         smtpServer: emailService.config.smtpServer || 'NOT SET',
         senderEmail: emailService.config.senderEmail || 'NOT SET',
         hasPassword: !!emailService.config.senderPassword
-      });
+      };
+      
+      console.log('[RUNS CREATE] Email service status:', emailStatusInfo);
+      
+      emailStatus.attempted = true;
+      emailStatus.enabled = emailService.isEnabled();
       
       if (emailService.isEnabled()) {
         const runForEmail = {
@@ -276,10 +288,13 @@ exports.handler = async (event) => {
           text: emailContent.text,
         });
         
+        emailStatus.sent = emailResult;
+        
         if (emailResult) {
           console.log('[RUNS CREATE] Confirmation email sent successfully');
         } else {
           console.error('[RUNS CREATE] Email service returned false - email not sent');
+          emailStatus.error = 'Email service returned false';
         }
       } else {
         console.warn('[RUNS CREATE] Email service is disabled or configuration incomplete');
@@ -289,10 +304,12 @@ exports.handler = async (event) => {
         console.warn('[RUNS CREATE]   - SMTP_PORT (587 or 465)');
         console.warn('[RUNS CREATE]   - SENDER_EMAIL (your email address)');
         console.warn('[RUNS CREATE]   - SENDER_PASSWORD (app-specific password)');
+        emailStatus.error = 'Email service disabled or configuration incomplete';
       }
     } catch (emailError) {
       console.error('[RUNS CREATE] Error sending confirmation email:', emailError.message);
       console.error('[RUNS CREATE] Error stack:', emailError.stack);
+      emailStatus.error = emailError.message;
       // Don't fail the event creation if email fails
     }
 
@@ -300,7 +317,8 @@ exports.handler = async (event) => {
       success: true,
       run: runData,
       signupLink: signupLink,
-      manageLink: manageLink
+      manageLink: manageLink,
+      emailStatus: emailStatus
     });
   } catch (error) {
     console.error('[RUNS CREATE] ERROR:', error);

@@ -4,11 +4,33 @@
 
 If events are being created successfully but emails are not being sent, follow this troubleshooting guide.
 
+## Important: Where to Find Logs
+
+**Browser Console (F12)**: Shows client-side logs only (`[COORDINATE]`)
+- These logs appear in the browser's Developer Tools console
+- They show what the frontend is doing
+
+**Netlify Function Logs**: Shows server-side logs (`[RUN CREATE]`, `[EMAIL SERVICE]`)
+- These logs appear in the Netlify Dashboard
+- They show what the backend is doing
+- **This is where email status logs appear!**
+
+### How to Access Netlify Function Logs
+
+1. Go to https://app.netlify.com
+2. Click on your site (eplanner)
+3. In the left sidebar, click **"Functions"**
+4. Click on **"runs-create"** function
+5. Click **"Logs"** or **"View logs"** tab
+6. Look for logs starting with `[RUNS CREATE]` or `[EMAIL SERVICE]`
+
+**Alternative**: Go to **"Deploys"** → Click latest deploy → Scroll to **"Function logs"**
+
 ## Quick Diagnostic Steps
 
-### Step 1: Check Server Logs
+### Step 1: Check Netlify Function Logs
 
-Look for these log messages in your server/Netlify function logs:
+Look for these log messages in Netlify Function logs (NOT browser console):
 
 **If you see:**
 ```

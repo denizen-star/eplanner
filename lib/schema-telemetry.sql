@@ -26,3 +26,10 @@ CREATE TABLE telemetry (
   -- Removed: PlanetScale may have restrictions on foreign keys
 );
 
+
+
+
+
+
+
+
