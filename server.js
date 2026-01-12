@@ -463,10 +463,14 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
     try {
       const emailService = new EmailService();
       if (emailService.isEnabled()) {
+        // Generate event view link
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
+        
         // Send confirmation to attendee if they provided an email
         if (createdSignup.email && createdSignup.email.trim()) {
           try {
-            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup);
+            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
             await emailService.sendEmail({
               to: createdSignup.email.trim(),
               subject: attendeeEmailContent.subject,
