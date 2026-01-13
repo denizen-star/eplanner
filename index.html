@@ -7,11 +7,11 @@
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-    <header class="header">
+    <header class="header overlay" id="mainHeader">
         <nav class="nav-container">
             <a href="index.html" class="logo">
                 <div class="logo-icon">EP</div>
@@ -36,40 +36,48 @@
         </nav>
     </header>
 
-    <main class="main-container" style="position: relative; overflow-x: hidden;">
-        <!-- Abstract Background Shapes -->
-        <div class="abstract-shape shape-1"></div>
-        <div class="abstract-shape shape-2"></div>
-        <div class="abstract-shape shape-3"></div>
-        
-        <div class="card">
-            <h1>Welcome to Event Planner</h1>
-            <p>Community event management platform for coordinating and managing events.</p>
-            <p>With built-in safety features and user-friendly design, the platform helps create a welcoming space for event organizers and participants to connect and build lasting relationships.</p>
-        </div>
+    <main style="position: relative; overflow-x: hidden;">
+        <!-- Hero Section -->
+        <section class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-content">
+                <div class="hero-location">• Toronto</div>
+                <h1 class="hero-headline">The weekly gatherings turning strangers into friends</h1>
+                <div class="hero-cta-group">
+                    <a href="coordinate.html" class="hero-cta-primary">Find your group</a>
+                    <a href="#features" class="hero-cta-secondary">Learn more</a>
+                </div>
+            </div>
+        </section>
 
-        <div class="card">
-            <h2>Key Features</h2>
-            <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 16px;">
-                    <strong style="color: var(--primary-green);">Event Scheduling</strong>
-                    <p style="margin-top: 8px;">Easy-to-use interface for organizing regular events and special occasions</p>
-                </li>
-                <li style="margin-bottom: 16px;">
-                    <strong style="color: var(--primary-green);">Community Building</strong>
-                    <p style="margin-top: 8px;">Foster connections among members with social features</p>
-                </li>
-                <li style="margin-bottom: 16px;">
-                    <strong style="color: var(--primary-green);">Safety Tools</strong>
-                    <p style="margin-top: 8px;">Built-in safety features for community protection</p>
-                </li>
-                <li style="margin-bottom: 16px;">
-                    <strong style="color: var(--primary-green);">Attendance Tracking</strong>
-                    <p style="margin-top: 8px;">Monitor participation and engagement metrics</p>
-                </li>
-            </ul>
-        </div>
+        <div class="main-container" id="features">
+            <div class="card">
+                <h2 class="section-headline">Why we do what we do</h2>
+                <p style="font-size: var(--font-lg); color: var(--text-secondary); margin-bottom: var(--space-lg);">You don't find friends, you become one. Start by showing up.</p>
+                <a href="coordinate.html" class="button button-primary">Sign up now</a>
+            </div>
 
+            <div class="card">
+                <h2 class="section-subheadline">Key Features</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 24px;">
+                        <strong style="color: var(--accent-pink); font-size: var(--font-lg);">Event Scheduling</strong>
+                        <p style="margin-top: 8px; color: var(--text-secondary);">Easy-to-use interface for organizing regular events and special occasions</p>
+                    </li>
+                    <li style="margin-bottom: 24px;">
+                        <strong style="color: var(--accent-pink); font-size: var(--font-lg);">Community Building</strong>
+                        <p style="margin-top: 8px; color: var(--text-secondary);">Foster connections among members with social features</p>
+                    </li>
+                    <li style="margin-bottom: 24px;">
+                        <strong style="color: var(--accent-pink); font-size: var(--font-lg);">Safety Tools</strong>
+                        <p style="margin-top: 8px; color: var(--text-secondary);">Built-in safety features for community protection</p>
+                    </li>
+                    <li style="margin-bottom: 24px;">
+                        <strong style="color: var(--accent-pink); font-size: var(--font-lg);">Attendance Tracking</strong>
+                        <p style="margin-top: 8px; color: var(--text-secondary);">Monitor participation and engagement metrics</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </main>
     <script src="assets/js/dropdown.js"></script>
 </body>

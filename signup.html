@@ -20,12 +20,12 @@
     <meta name="twitter:image" content="" id="twitter-image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
-    <header class="header">
+    <header class="header overlay" id="mainHeader">
         <nav class="nav-container">
             <a href="index.html" class="logo">
                 <div class="logo-icon">EP</div>
@@ -60,11 +60,16 @@
         </nav>
     </header>
 
-    <main class="main-container" style="position: relative; overflow-x: hidden;">
-        <!-- Abstract Background Shapes -->
-        <div class="abstract-shape shape-1"></div>
-        <div class="abstract-shape shape-2"></div>
-        <div class="abstract-shape shape-3"></div>
+    <main style="position: relative; overflow-x: hidden;">
+        <!-- Hero Section -->
+        <section class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-headline" id="heroTitle">Join Us</h1>
+                <p style="color: var(--white); font-size: var(--font-lg); max-width: 600px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);" id="heroSubtitle">Be part of something special</p>
+            </div>
+        </section>
+
+        <div class="main-container">
         <div class="card" style="margin-bottom: 24px;">
             <div class="collapsible-section">
                 <button class="collapsible-toggle" onclick="toggleInstructions()" id="instructionsToggle">
@@ -169,6 +174,7 @@
                 <p>The event you're looking for doesn't exist or the link is invalid.</p>
                 <a href="index.html" class="button button-primary">Return Home</a>
             </div>
+        </div>
         </div>
     </main>
 

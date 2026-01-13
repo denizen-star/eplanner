@@ -7,12 +7,12 @@
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
-    <header class="header">
+    <header class="header overlay" id="mainHeader">
         <nav class="nav-container">
             <a href="index.html" class="logo">
                 <div class="logo-icon">EP</div>
@@ -51,15 +51,20 @@
         </nav>
     </header>
 
-    <main class="main-container" style="position: relative; overflow-x: hidden;">
-        <!-- Abstract Background Shapes -->
-        <div class="abstract-shape shape-1"></div>
-        <div class="abstract-shape shape-2"></div>
-        <div class="abstract-shape shape-3"></div>
-        
-        <div class="card">
-            <h1>Coordinate an Event</h1>
-            <p style="margin-bottom: 24px;">Fill out the form below to create a new event. You'll receive signup and management links upon submission.</p>
+    <main style="position: relative; overflow-x: hidden;">
+        <!-- Hero Section -->
+        <section class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-headline">Coordinate an Event</h1>
+                <p style="color: var(--white); font-size: var(--font-lg); max-width: 600px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Create and manage community events that bring people together</p>
+            </div>
+        </section>
+
+        <div class="main-container">
+        <div class="card form-card">
+            <div class="form-intro">
+                <p style="font-size: var(--font-lg); color: var(--text-secondary); margin-bottom: var(--space-xl); line-height: 1.7;">Fill out the form below to create a new event. You'll receive signup and management links upon submission.</p>
+            </div>
 
             <form id="coordinateForm">
                 <div class="form-columns">
@@ -72,31 +77,31 @@
                         <div class="form-group">
                             <label for="coordinatorEmail">Coordinator Email *</label>
                             <input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="e.g., coordinator@example.com">
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Email address for event confirmations and notifications</small>
+                            <small>Email address for event confirmations and notifications</small>
                         </div>
 
                         <div class="form-group">
                             <label for="runTitle">Event Title (Optional)</label>
                             <input type="text" id="runTitle" name="runTitle" placeholder="e.g., Morning Beach Event">
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Give your event a name if you'd like</small>
+                            <small>Give your event a name if you'd like</small>
                         </div>
 
                         <div class="form-group">
                             <label for="dateTime">Date and Time *</label>
                             <input type="datetime-local" id="dateTime" name="dateTime" required>
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Select the date and time for the event</small>
+                            <small>Select the date and time for the event</small>
                         </div>
 
                         <div class="form-group">
                             <label for="maxParticipants">Max Number of Participants *</label>
                             <input type="number" id="maxParticipants" name="maxParticipants" required min="1" placeholder="e.g., 10" value="10">
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Maximum number of participants allowed to sign up</small>
+                            <small>Maximum number of participants allowed to sign up</small>
                         </div>
 
                         <div class="form-group">
                             <label for="eventDescription">Event Description (Optional)</label>
                             <textarea id="eventDescription" name="eventDescription" rows="4" placeholder="Add details about your event..."></textarea>
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Provide additional information about the event</small>
+                            <small>Provide additional information about the event</small>
                         </div>
                     </div>
 
@@ -104,7 +109,7 @@
                         <div class="form-group">
                             <label for="eventPicture">Event Picture (Optional)</label>
                             <input type="file" id="eventPicture" name="eventPicture" accept="image/*">
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Upload an image from your phone gallery or computer</small>
+                            <small>Upload an image from your phone gallery or computer</small>
                             <div id="picturePreview" style="display: none; margin-top: 12px;">
                                 <img id="previewImage" src="" alt="Preview" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
                                 <button type="button" id="removePicture" class="button button-secondary" style="margin-top: 8px;">Remove Picture</button>
@@ -114,7 +119,7 @@
                         <div class="form-group">
                             <label for="location">Location *</label>
                             <input type="text" id="location" name="location" required placeholder="e.g., 1664 Lincoln Rd, Miami Beach, FL 33139">
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Enter an address or location. A map will appear below when the location is found.</small>
+                            <small>Enter an address or location. A map will appear below when the location is found.</small>
                         </div>
 
                         <div id="locationMap" class="location-map" style="margin-bottom: 20px;"></div>
@@ -124,7 +129,9 @@
                     </div>
                 </div>
 
-                <button type="submit" class="button button-primary" id="submitButton">Create Event</button>
+                <div style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-light);">
+                    <button type="submit" class="button button-primary" id="submitButton" style="font-size: var(--font-base); padding: 14px 40px;">Create Event</button>
+                </div>
             </form>
 
             <div id="result" style="display: none; margin-top: 32px;">
@@ -159,6 +166,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </main>
 

@@ -156,6 +156,37 @@ async function loadRun() {
     // Update Open Graph meta tags for social sharing
     updateOpenGraphTags(run, runTitleDisplay);
 
+    // Update hero section
+    const heroTitle = document.getElementById('heroTitle');
+    const heroSubtitle = document.getElementById('heroSubtitle');
+    if (heroTitle && heroSubtitle) {
+      if (runTitleDisplay) {
+        heroTitle.textContent = runTitleDisplay;
+      } else if (run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim()) {
+        heroTitle.textContent = `Run with ${run.pacerName.trim()}`;
+      } else {
+        heroTitle.textContent = 'Join Us';
+      }
+      
+      const runDate = new Date(run.dateTime);
+      const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const formattedDate = runDate.toLocaleString('en-US', {
+        timeZone: timezone,
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      if (run.location) {
+        heroSubtitle.textContent = `${formattedDate} • ${run.location}`;
+      } else {
+        heroSubtitle.textContent = formattedDate;
+      }
+    }
+
     if (spotsLeft <= 0) {
       document.getElementById('runInfo').style.display = 'none';
       document.getElementById('loading').style.display = 'none';

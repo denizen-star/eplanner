@@ -7,6 +7,7 @@ let locationUpdateTimeout;
 let validatedAddress = null;
 let validatedCoordinates = null;
 let validatedAddressComponents = null;
+let validatedPlaceName = null;
 let eventPictureBase64 = null;
 
 // Initialize session manager and device collector
@@ -37,6 +38,7 @@ document.getElementById('location').addEventListener('input', (e) => {
   validatedAddress = null;
   validatedCoordinates = null;
   validatedAddressComponents = null;
+  validatedPlaceName = null;
   document.getElementById('locationValidation').style.display = 'none';
   
   if (locationText.length > 3) {
@@ -64,6 +66,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     validatedAddress = null;
     validatedCoordinates = null;
     validatedAddressComponents = null;
+    validatedPlaceName = null;
     document.getElementById('locationValidation').style.display = 'none';
     return;
   }
@@ -77,17 +80,24 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     validatedAddress = geocodeResult.address;
     validatedCoordinates = geocodeResult.coordinates;
     validatedAddressComponents = geocodeResult.addressComponents;
+    validatedPlaceName = geocodeResult.placeName;
     
-    const map = initMap(mapId, geocodeResult.coordinates, geocodeResult.address, staticMode, defaultCenter);
+    const map = initMap(mapId, geocodeResult.coordinates, geocodeResult.address, staticMode, defaultCenter, geocodeResult.placeName);
 
     if (!map) {
       mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Unable to display map</div>';
       validatedAddress = null;
       validatedCoordinates = null;
       validatedAddressComponents = null;
+      validatedPlaceName = null;
     } else {
-      // Show validated address
-      document.getElementById('validatedAddress').textContent = validatedAddress;
+      // Show validated address with place name as title if available
+      const validatedAddressElement = document.getElementById('validatedAddress');
+      if (validatedPlaceName) {
+        validatedAddressElement.innerHTML = `<strong>${validatedPlaceName}</strong><br>${validatedAddress}`;
+      } else {
+        validatedAddressElement.textContent = validatedAddress;
+      }
       document.getElementById('locationValidation').style.display = 'block';
     }
   } catch (error) {
@@ -97,6 +107,7 @@ async function updateMapForLocationWithValidation(mapId, locationText, staticMod
     validatedAddress = null;
     validatedCoordinates = null;
     validatedAddressComponents = null;
+    validatedPlaceName = null;
     document.getElementById('locationValidation').style.display = 'none';
   }
 }

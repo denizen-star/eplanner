@@ -30,6 +30,9 @@ async function geocodeLocation(locationText) {
     const lat = parseFloat(result.lat);
     const lon = parseFloat(result.lon);
     
+    // Extract business/place name if available
+    const placeName = result.name || null;
+    
     // Build full address from Nominatim result, preserving street number
     let fullAddress = '';
     if (result.address) {
@@ -78,6 +81,7 @@ async function geocodeLocation(locationText) {
     return {
       coordinates: [lat, lon],
       address: fullAddress,
+      placeName: placeName,
       addressComponents: result.address || {},
       rawResult: result
     };
@@ -87,7 +91,7 @@ async function geocodeLocation(locationText) {
   }
 }
 
-function initMap(mapId, coordinates, address, staticMode = false, defaultCenter = null) {
+function initMap(mapId, coordinates, address, staticMode = false, defaultCenter = null, placeName = null) {
   const mapContainer = document.getElementById(mapId);
   if (!mapContainer) {
     console.error(`Map container ${mapId} not found`);
@@ -118,14 +122,22 @@ function initMap(mapId, coordinates, address, staticMode = false, defaultCenter 
 
     const map = L.map(mapId, mapOptions);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+    // Use Esri World Imagery for satellite view
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
       maxZoom: 19
     }).addTo(map);
 
     if (coordinates && address) {
       const marker = L.marker(coordinates).addTo(map);
-      marker.bindPopup(`<strong>${address}</strong>`).openPopup();
+      // Include place name as title if available
+      let popupContent = '';
+      if (placeName) {
+        popupContent = `<strong>${placeName}</strong><br>${address}`;
+      } else {
+        popupContent = `<strong>${address}</strong>`;
+      }
+      marker.bindPopup(popupContent).openPopup();
     }
 
     mapCache[mapId] = map;
@@ -167,7 +179,7 @@ async function updateMapForLocation(mapId, locationText, staticMode = false, def
     mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Loading map...</div>';
 
     const geocodeResult = await geocodeLocation(locationText);
-    const map = initMap(mapId, geocodeResult.coordinates, geocodeResult.address, staticMode, defaultCenter);
+    const map = initMap(mapId, geocodeResult.coordinates, geocodeResult.address, staticMode, defaultCenter, geocodeResult.placeName);
 
     if (!map) {
       mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Unable to display map</div>';
