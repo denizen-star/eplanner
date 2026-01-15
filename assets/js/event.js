@@ -129,6 +129,17 @@ async function loadEvent() {
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('eventInfo').style.display = 'block';
+    
+    // Track event view
+    if (window.Analytics?.safeTrack) {
+      const eventSlug = eventTitleDisplay || event.id;
+      window.Analytics.safeTrack('trackEventView', eventId, eventSlug);
+      
+      // Set up scroll tracking for event read events
+      if (window.Analytics?.setupScrollTracking) {
+        window.Analytics.setupScrollTracking(eventId, eventSlug);
+      }
+    }
   } catch (error) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('notFound').style.display = 'block';

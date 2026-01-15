@@ -1,6 +1,6 @@
 /**
  * Device Metadata Collection System
- * Handles session tracking and device metadata collection for Gay Run Club
+ * Handles session tracking and device metadata collection for EventPlan
  */
 
 class SessionManager {

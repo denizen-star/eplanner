@@ -65,10 +65,23 @@ async function forwardToSheets(payload) {
   return submitToGoogleSheets(payload);
 }
 
+function getAppName(event) {
+  const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
+  const hostLower = host.toLowerCase();
+  
+  if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
+    return 'eplanner';
+  }
+  
+  // Fallback to environment variable or default
+  return process.env.APP_NAME || 'eplanner';
+}
+
 module.exports = {
   jsonResponse,
   parseBody,
   extractClientMetadata,
   forwardToSheets,
+  getAppName,
 };
 

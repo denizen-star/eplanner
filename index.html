@@ -23,14 +23,14 @@
                 <span></span>
             </button>
             <ul class="nav-menu">
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="coordinate.html">Coordinate an Event</a></li>
+                <li><a href="index.html" class="active" data-track-cta="navigation_home_click">Home</a></li>
+                <li><a href="coordinate.html" data-track-cta="navigation_coordinate_click">Coordinate an Event</a></li>
             </ul>
             <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
             <div class="mobile-nav-menu" id="mobileNavMenu">
                 <ul>
-                    <li><a href="index.html" class="active">Home</a></li>
-                    <li><a href="coordinate.html">Coordinate an Event</a></li>
+                    <li><a href="index.html" class="active" data-track-cta="navigation_home_click">Home</a></li>
+                    <li><a href="coordinate.html" data-track-cta="navigation_coordinate_click">Coordinate an Event</a></li>
                 </ul>
             </div>
         </nav>
@@ -42,8 +42,8 @@
             <div class="hero-content">
                 <h1 class="hero-headline">The weekly gatherings turning strangers into friends</h1>
                 <div class="hero-cta-group">
-                    <a href="coordinate.html" class="hero-cta-primary">Find your group</a>
-                    <a href="#features" class="hero-cta-secondary">Learn more</a>
+                    <a href="coordinate.html" class="hero-cta-primary" data-track-cta="hero_find_group_click">Find your group</a>
+                    <a href="#features" class="hero-cta-secondary" data-track-cta="hero_learn_more_click">Learn more</a>
                 </div>
             </div>
         </section>
@@ -52,7 +52,7 @@
             <div class="card">
                 <h2 class="section-headline">Why we do what we do</h2>
                 <p style="font-size: var(--font-lg); color: var(--text-secondary); margin-bottom: var(--space-lg);">You don't find friends, you become one. Start by showing up.</p>
-                <a href="coordinate.html" class="button button-primary">Sign up now</a>
+                <a href="coordinate.html" class="button button-primary" data-track-cta="home_signup_button_click">Sign up now</a>
             </div>
 
             <div class="card">
@@ -79,6 +79,8 @@
         </div>
     </main>
     <script src="assets/js/dropdown.js"></script>
+    <script src="assets/js/device-collector.js"></script>
+    <script src="assets/js/analytics.js"></script>
 </body>
 </html>
 

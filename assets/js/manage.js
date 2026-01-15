@@ -272,6 +272,13 @@ async function loadRun() {
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('runInfo').style.display = 'block';
+    
+    // Track event view in manage page
+    if (window.Analytics?.safeTrack) {
+      const runTitle = run.title || '';
+      const eventSlug = runTitle || run.id;
+      window.Analytics.safeTrack('trackEventView', runId, eventSlug);
+    }
   } catch (error) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('notFound').style.display = 'block';

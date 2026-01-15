@@ -155,6 +155,11 @@ async function loadRun() {
     
     // Update Open Graph meta tags for social sharing
     updateOpenGraphTags(run, runTitleDisplay);
+    
+    // Track event view
+    if (window.Analytics?.safeTrack) {
+      window.Analytics.safeTrack('trackEventView', runId, runTitleDisplay || run.id);
+    }
 
     // Update hero section
     const heroTitle = document.getElementById('heroTitle');
@@ -239,6 +244,14 @@ function validateEmail(email) {
 
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  
+  // Track signup submission CTA click
+  if (window.Analytics?.safeTrack) {
+    window.Analytics.safeTrack('trackCTAClick', 'signup_submit_click', {
+      pageCategory: 'event_signup',
+      articleId: runId,
+    });
+  }
 
   const phone = document.getElementById('phone').value.trim();
   const email = document.getElementById('email').value.trim();

@@ -217,6 +217,13 @@ document.getElementById('removePicture')?.addEventListener('click', () => {
 
 document.getElementById('coordinateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  
+  // Track CTA click for event creation
+  if (window.Analytics?.safeTrack) {
+    window.Analytics.safeTrack('trackCTAClick', 'create_event_button_click', {
+      pageCategory: 'event_create',
+    });
+  }
 
   const submitButton = document.getElementById('submitButton');
   submitButton.disabled = true;

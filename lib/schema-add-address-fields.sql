@@ -30,3 +30,4 @@ ADD INDEX idx_postcode (postcode);
 
 
 
+Summary confirmation

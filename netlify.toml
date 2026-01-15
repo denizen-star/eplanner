@@ -13,6 +13,12 @@
   included_files = ["server.js", "lib/**", "package.json"]
 
 [[redirects]]
+  from = "/api/analytics/event"
+  to = "/.netlify/functions/analytics-event"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/runs/create"
   to = "/.netlify/functions/runs-create"
   status = 200
