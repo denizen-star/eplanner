@@ -227,7 +227,7 @@ async function loadRun() {
             <div class="signup-item-main">
               <strong>${signup.name}</strong> - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}
             </div>
-            <button class="button button-secondary button-sm delete-signup-btn" onclick="deleteSignup(${index})" title="Delete Participant">
+            <button class="button button-secondary button-sm delete-signup-btn" onclick="deleteSignup(${index})" title="Delete Participant" data-track-cta="delete_signup_click">
               Delete
             </button>
           </div>
@@ -256,14 +256,14 @@ async function loadRun() {
       <div style="margin-bottom: 16px; padding: 16px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd;">
         <p style="margin-bottom: 8px;"><strong>WhatsApp Message:</strong></p>
         <div style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.5; max-height: 300px; overflow-y: auto;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
-        <button onclick="copyWhatsAppMessage()" class="button button-primary" style="width: 100%;">Copy WhatsApp Message</button>
+        <button onclick="copyWhatsAppMessage()" class="button button-primary" style="width: 100%;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
         <textarea id="whatsappMessageText" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">${whatsappMessageEscaped}</textarea>
       </div>
       <div style="margin-bottom: 8px;">
         <p><strong>Signup Link:</strong></p>
         <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
           <a href="${signupLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${signupLink}">${signupLink}</a>
-          <button onclick="copySignupLink()" class="button" style="white-space: nowrap; min-width: 60px;">Copy</button>
+          <button onclick="copySignupLink()" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_signup_link_click">Copy</button>
         </div>
         <input type="text" id="signupLinkText" value="${signupLink.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
       </div>

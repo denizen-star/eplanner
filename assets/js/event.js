@@ -170,13 +170,13 @@ function addCalendarLinksSection(event) {
     calendarSection.style.cssText = 'margin-top: 24px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border-gray);';
     calendarSection.innerHTML = `
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button onclick="window.downloadICalFile(window.currentEvent)" class="button button-primary" style="flex: 1; min-width: 120px;">
+        <button onclick="window.downloadICalFile(window.currentEvent)" class="button button-primary" style="flex: 1; min-width: 120px;" data-track-cta="download_ical_click">
           Download iCal
         </button>
-        <a href="${googleCalendarLink}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
+        <a href="${googleCalendarLink}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;" data-track-cta="google_calendar_click">
           Google Calendar
         </a>
-        <a href="print-event.html?id=${event.id}" target="_blank" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;">
+        <a href="print-event.html?id=${event.id}" target="_blank" class="button button-secondary" style="flex: 1; min-width: 120px; text-align: center; text-decoration: none; display: inline-block;" data-track-cta="print_event_click">
           Print Event
         </a>
       </div>

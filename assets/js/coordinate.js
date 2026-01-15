@@ -475,7 +475,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
           <p><strong>Signup Link:</strong></p>
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
             <a href="${signupLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${signupLink}">${signupLink}</a>
-            <button onclick="copyToClipboard('signupLink')" class="button" style="white-space: nowrap; min-width: 60px;">Copy</button>
+            <button onclick="copyToClipboard('signupLink')" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_signup_link_click">Copy</button>
           </div>
           <input type="text" id="signupLink" value="${signupLinkEscaped}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
         </div>
@@ -483,14 +483,14 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
           <p><strong>Management Link:</strong></p>
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
             <a href="${manageLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${manageLink}">${manageLink}</a>
-            <button onclick="copyToClipboard('manageLink')" class="button" style="white-space: nowrap; min-width: 60px;">Copy</button>
+            <button onclick="copyToClipboard('manageLink')" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_manage_link_click">Copy</button>
           </div>
           <input type="text" id="manageLink" value="${manageLinkEscaped}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
         </div>
         <div style="margin-bottom: 16px; padding: 16px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd;">
           <p style="margin-bottom: 8px;"><strong>WhatsApp Message:</strong></p>
           <div style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.5;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
-          <button onclick="copyToClipboard('whatsappMessage')" class="button button-primary" style="width: 100%;">Copy WhatsApp Message</button>
+          <button onclick="copyToClipboard('whatsappMessage')" class="button button-primary" style="width: 100%;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
           <textarea id="whatsappMessage" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">${whatsappMessageEscaped}</textarea>
         </div>
         <p style="font-size: 14px; color: var(--text-gray);">Share the signup link with participants. Keep the management link private to view and manage signups.</p>

@@ -119,7 +119,7 @@ async function loadRuns() {
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
               <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">WhatsApp Message:</strong>
               <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; line-height: 1.4; max-height: 200px; overflow-y: auto;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
-              <button class="button button-primary copy-whatsapp-button" data-message="${whatsappMessageEscaped}" style="width: 100%; padding: 6px 12px; font-size: 12px;">Copy WhatsApp Message</button>
+              <button class="button button-primary copy-whatsapp-button" data-message="${whatsappMessageEscaped}" style="width: 100%; padding: 6px 12px; font-size: 12px;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
             </div>
           `;
         }
@@ -145,8 +145,8 @@ async function loadRuns() {
                 <span>Signups</span>
                 <span class="dropdown-icon" id="signupsIcon-${run.id}">▼</span>
               </button>
-              <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}">Edit</button>
-              <button class="button button-secondary" onclick="deleteRun('${run.id}')">Delete</button>
+              <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" data-track-cta="edit_button_click">Edit</button>
+              <button class="button button-secondary" onclick="deleteRun('${run.id}')" data-track-cta="delete_button_click">Delete</button>
             </div>
             <div class="list-item-dropdown" id="linksDropdown-${run.id}" style="display: none;">
               <div class="dropdown-content">
@@ -158,7 +158,7 @@ async function loadRuns() {
                       `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</span>` :
                       `<a href="${signupLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</a>`
                     }
-                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;">Copy</button>` : ''}
+                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_signup_link_click">Copy</button>` : ''}
                   </div>
                 </div>
                 <div style="margin-bottom: 12px;">
@@ -169,7 +169,7 @@ async function loadRuns() {
                       `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</span>` :
                       `<a href="${manageLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</a>`
                     }
-                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;">Copy</button>` : ''}
+                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_manage_link_click">Copy</button>` : ''}
                   </div>
                 </div>
                 ${whatsappMessageHtml}
@@ -217,7 +217,7 @@ async function loadRuns() {
                       <div id="editCurrentPicture-${run.id}" style="display: none;">
                         <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">Current picture:</p>
                         <img id="editCurrentPictureImg-${run.id}" src="" alt="Current picture" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
-                        <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')">Remove Picture</button>
+                        <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')" data-track-cta="remove_picture_click">Remove Picture</button>
                       </div>
                       <div id="editNewPicturePreview-${run.id}" style="display: none;">
                         <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">New picture:</p>
@@ -226,8 +226,8 @@ async function loadRuns() {
                     </div>
                   </div>
                   <div style="display: flex; gap: 12px;">
-                    <button type="submit" class="button button-primary">Save Changes</button>
-                    <button type="button" class="button button-secondary" onclick="cancelEdit('${run.id}')">Cancel</button>
+                    <button type="submit" class="button button-primary" data-track-cta="save_edit_click">Save Changes</button>
+                    <button type="button" class="button button-secondary" onclick="cancelEdit('${run.id}')" data-track-cta="cancel_edit_click">Cancel</button>
                   </div>
                 </form>
                 <div id="editError-${run.id}" class="message message-error" style="display: none; margin-top: 12px;"></div>
