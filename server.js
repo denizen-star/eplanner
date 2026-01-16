@@ -273,6 +273,9 @@ app.post('/api/runs/create', async (req, res) => {
           plannerName: trimmedPlannerName,
           location: trimmedLocation,
           timezone: timezone || null,
+          coordinates: coordinates || null,
+          picture: picture || null,
+          description: description || null,
         };
         const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
         
