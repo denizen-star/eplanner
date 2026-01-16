@@ -99,6 +99,30 @@ async function loadEvent() {
     });
     document.getElementById('eventMax').textContent = event.maxParticipants;
     
+    // Display event picture if available
+    const pictureContainer = document.getElementById('eventPictureContainer');
+    const pictureElement = document.getElementById('eventPicture');
+    if (pictureContainer && pictureElement) {
+      if (event.picture && typeof event.picture === 'string' && event.picture.trim()) {
+        pictureElement.src = `data:image/jpeg;base64,${event.picture}`;
+        pictureContainer.style.display = 'block';
+      } else {
+        pictureContainer.style.display = 'none';
+      }
+    }
+    
+    // Display event description if available
+    const descriptionContainer = document.getElementById('eventDescriptionContainer');
+    const descriptionElement = document.getElementById('eventDescription');
+    if (descriptionContainer && descriptionElement) {
+      if (event.description && typeof event.description === 'string' && event.description.trim()) {
+        descriptionElement.textContent = event.description.trim();
+        descriptionContainer.style.display = 'block';
+      } else {
+        descriptionContainer.style.display = 'none';
+      }
+    }
+    
     // Display created timestamp in EST
     if (event.createdAt) {
       const createdDate = new Date(event.createdAt);

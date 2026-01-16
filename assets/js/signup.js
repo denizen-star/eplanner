@@ -149,6 +149,30 @@ async function loadRun() {
     const spotsLeft = run.maxParticipants - run.signups.length;
     document.getElementById('runSpots').textContent = `${spotsLeft} of ${run.maxParticipants}`;
 
+    // Display event picture if available
+    const pictureContainer = document.getElementById('eventPictureContainer');
+    const pictureElement = document.getElementById('eventPicture');
+    if (pictureContainer && pictureElement) {
+      if (run.picture && typeof run.picture === 'string' && run.picture.trim()) {
+        pictureElement.src = `data:image/jpeg;base64,${run.picture}`;
+        pictureContainer.style.display = 'block';
+      } else {
+        pictureContainer.style.display = 'none';
+      }
+    }
+
+    // Display event description if available
+    const descriptionContainer = document.getElementById('eventDescriptionContainer');
+    const descriptionElement = document.getElementById('eventDescription');
+    if (descriptionContainer && descriptionElement) {
+      if (run.description && typeof run.description === 'string' && run.description.trim()) {
+        descriptionElement.textContent = run.description.trim();
+        descriptionContainer.style.display = 'block';
+      } else {
+        descriptionContainer.style.display = 'none';
+      }
+    }
+
     if (run.location) {
       updateMapForLocation('locationMap', run.location, true);
     }

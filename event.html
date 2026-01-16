@@ -63,12 +63,22 @@
 
             <div id="eventInfo" style="display: none;">
                 <h1 id="eventTitle">Event</h1>
+                
+                <div id="eventPictureContainer" style="display: none; margin-bottom: 24px;">
+                    <img id="eventPicture" src="" alt="Event picture" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
+                </div>
+                
                 <div style="margin-bottom: 24px;">
                     <p><strong>Location:</strong> <span id="eventLocation"></span></p>
                     <p><strong>Event Planner:</strong> <span id="eventPlannerName">-</span></p>
                     <p><strong>Date & Time:</strong> <span id="eventDateTime"></span></p>
                     <p><strong>Max Participants:</strong> <span id="eventMax"></span></p>
                     <p><strong>Created:</strong> <span id="eventCreated">-</span></p>
+                </div>
+
+                <div id="eventDescriptionContainer" style="display: none; margin-bottom: 24px; padding: 16px; background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
+                    <h3 style="margin-bottom: 8px; font-size: 18px;">About This Event</h3>
+                    <p id="eventDescription" style="color: var(--text-gray); line-height: 1.6; white-space: pre-wrap;"></p>
                 </div>
 
                 <div id="locationMap" class="location-map" style="display: none; margin-bottom: 24px;"></div>
