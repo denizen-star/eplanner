@@ -277,7 +277,27 @@ app.post('/api/runs/create', async (req, res) => {
           picture: picture || null,
           description: description || null,
         };
-        const emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+        
+        let emailContent;
+        try {
+          emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+          
+          // Validate email content
+          if (!emailContent || !emailContent.subject || !emailContent.html) {
+            throw new Error('Email content generation failed: missing required fields');
+          }
+          
+          console.log('[RUN CREATE] Email content generated successfully:', {
+            hasSubject: !!emailContent.subject,
+            hasHtml: !!emailContent.html,
+            hasText: !!emailContent.text,
+            htmlLength: emailContent.html ? emailContent.html.length : 0
+          });
+        } catch (templateError) {
+          console.error('[RUN CREATE] Error generating email template:', templateError.message);
+          console.error('[RUN CREATE] Template error stack:', templateError.stack);
+          throw templateError;
+        }
         
         console.log('[RUN CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
         const emailResult = await emailService.sendEmail({
