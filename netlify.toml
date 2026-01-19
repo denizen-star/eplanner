@@ -18,6 +18,7 @@
   status = 200
   force = true
 
+# Specific API routes MUST come before pattern routes
 [[redirects]]
   from = "/api/runs/create"
   to = "/.netlify/functions/runs-create"
@@ -25,14 +26,21 @@
   force = true
 
 [[redirects]]
-  from = "/api/runs"
-  to = "/.netlify/functions/runs-get"
+  from = "/api/runs/complete"
+  to = "/.netlify/functions/runs-complete"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/api/runs/:runId"
-  to = "/.netlify/functions/run-get"
+  from = "/api/runs/public-calendar"
+  to = "/.netlify/functions/runs-public-calendar"
+  status = 200
+  force = true
+
+# Pattern routes come after specific routes
+[[redirects]]
+  from = "/api/runs"
+  to = "/.netlify/functions/runs-get"
   status = 200
   force = true
 
@@ -49,15 +57,8 @@
   force = true
 
 [[redirects]]
-  from = "/api/runs/complete"
-  to = "/.netlify/functions/runs-complete"
-  status = 200
-  force = true
-
-# API redirects - must come before catch-all redirects
-[[redirects]]
-  from = "/api/runs/public-calendar"
-  to = "/.netlify/functions/runs-public-calendar"
+  from = "/api/runs/:runId"
+  to = "/.netlify/functions/run-get"
   status = 200
   force = true
 
