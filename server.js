@@ -13,7 +13,8 @@ const {
   signupConfirmationEmail, 
   signupNotificationEmail,
   eventUpdatedEmail, 
-  eventUpdatedToSignupsEmail 
+  eventUpdatedToSignupsEmail,
+  eventCancelledEmail
 } = require('./lib/emailTemplates');
 
 const app = express();
@@ -535,6 +536,21 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
       return res.status(404).json({ error: 'Run not found' });
     }
 
+    // Check if event is cancelled
+    if (run.status === 'cancelled') {
+      console.error('[SIGNUP] Event is cancelled:', runId);
+      return res.status(400).json({ error: 'This event has been cancelled.' });
+    }
+
+    // Check if signups are still available (1-hour restriction)
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    if (hoursUntilEvent < 1) {
+      console.error('[SIGNUP] Signups blocked - event starts within 1 hour:', { runId, hoursUntilEvent });
+      return res.status(400).json({ error: 'Signups are no longer available. This event starts within 1 hour.' });
+    }
+
     // Check if run is full
     const signupCount = await signups.countByRunId(runId);
     if (signupCount >= run.maxParticipants) {
@@ -730,6 +746,19 @@ app.put('/api/runs/:runId', async (req, res) => {
       return res.status(404).json({ error: 'Run not found' });
     }
 
+    // Check if event is cancelled
+    if (existingRun.status === 'cancelled') {
+      return res.status(400).json({ error: 'This event has been cancelled.' });
+    }
+
+    // Check if event can be modified (24-hour restriction)
+    const eventStartTime = new Date(existingRun.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    if (hoursUntilEvent < 24) {
+      return res.status(400).json({ error: 'Event cannot be modified within 24 hours of the event start time.' });
+    }
+
     // Prepare updates
     const updates = {};
     if (location !== undefined) updates.location = location.trim();
@@ -840,6 +869,96 @@ app.put('/api/runs/:runId', async (req, res) => {
   } catch (error) {
     console.error('Error updating run:', error);
     res.status(500).json({ error: 'Failed to update run', message: error.message });
+  }
+});
+
+app.patch('/api/runs/:runId/cancel', async (req, res) => {
+  try {
+    const { runId } = req.params;
+    const isAdmin = req.query.isAdmin === 'true' || req.headers['x-is-admin'] === 'true';
+
+    console.log('[CANCEL] Request received for runId:', runId, 'isAdmin:', isAdmin);
+
+    // Verify run exists
+    const run = await runs.getById(runId);
+    if (!run) {
+      console.error('[CANCEL] Run not found:', runId);
+      return res.status(404).json({ error: 'Run not found' });
+    }
+
+    // Check if already cancelled
+    if (run.status === 'cancelled') {
+      console.error('[CANCEL] Event already cancelled:', runId);
+      return res.status(400).json({ error: 'This event has already been cancelled.' });
+    }
+
+    // Check time-based restrictions
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+
+    if (isAdmin) {
+      // Admins can cancel up to event start time
+      if (eventStartTime < now) {
+        console.error('[CANCEL] Event has already started:', runId);
+        return res.status(400).json({ error: 'Event cannot be cancelled after it has started.' });
+      }
+    } else {
+      // Coordinators can cancel up to 6 hours before event start
+      if (hoursUntilEvent < 6) {
+        console.error('[CANCEL] Event cannot be cancelled by coordinator - within 6 hours:', { runId, hoursUntilEvent });
+        return res.status(400).json({ error: 'Event cannot be cancelled within 6 hours of start time by coordinators.' });
+      }
+    }
+
+    // Update event status to 'cancelled'
+    console.log('[CANCEL] Updating event status to cancelled...');
+    await runs.update(runId, { status: 'cancelled' });
+    const cancelledRun = await runs.getById(runId);
+
+    // Send cancellation emails to all signups (non-blocking)
+    console.log('[CANCEL] Sending cancellation emails...');
+    try {
+      const emailService = new EmailService();
+      if (emailService.isEnabled()) {
+        const allSignups = await signups.getByRunId(runId);
+        const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
+
+        if (signupsWithEmail.length > 0) {
+          const emailPromises = signupsWithEmail.map(async (signup) => {
+            try {
+              const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup);
+              await emailService.sendEmail({
+                to: signup.email.trim(),
+                subject: cancellationEmailContent.subject,
+                html: cancellationEmailContent.html,
+                text: cancellationEmailContent.text,
+                fromName: cancellationEmailContent.fromName,
+              });
+              console.log(`[CANCEL] Cancellation email sent to signup ${signup.id}`);
+            } catch (signupEmailError) {
+              console.error(`[CANCEL] Error sending email to signup ${signup.id}:`, signupEmailError.message);
+            }
+          });
+
+          await Promise.all(emailPromises);
+          console.log(`[CANCEL] Cancellation emails sent to ${signupsWithEmail.length} signup(s)`);
+        } else {
+          console.log('[CANCEL] No signups with email addresses found');
+        }
+      } else {
+        console.log('[CANCEL] Email service is disabled, skipping emails');
+      }
+    } catch (emailError) {
+      console.error('[CANCEL] Error in email sending process:', emailError.message);
+      // Don't fail the cancellation if email fails
+    }
+
+    console.log('[CANCEL] Success! Event cancelled:', runId);
+    res.json({ success: true, run: cancelledRun });
+  } catch (error) {
+    console.error('[CANCEL] Error cancelling run:', error);
+    res.status(500).json({ error: 'Failed to cancel run', message: error.message });
   }
 });
 

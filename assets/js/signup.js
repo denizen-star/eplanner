@@ -216,6 +216,27 @@ async function loadRun() {
       }
     }
 
+    // Check if event is cancelled
+    if (run.status === 'cancelled') {
+      document.getElementById('runInfo').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('notFound').innerHTML = '<h1>Event Cancelled</h1><p>This event has been cancelled.</p><a href="index.html" class="button button-primary">Return Home</a>';
+      document.getElementById('notFound').style.display = 'block';
+      return;
+    }
+
+    // Check if event starts within 1 hour
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    if (hoursUntilEvent < 1) {
+      document.getElementById('runInfo').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('notFound').innerHTML = '<h1>Signups Closed</h1><p>Signups are no longer available. This event starts within 1 hour.</p><a href="index.html" class="button button-primary">Return Home</a>';
+      document.getElementById('notFound').style.display = 'block';
+      return;
+    }
+
     if (spotsLeft <= 0) {
       document.getElementById('runInfo').style.display = 'none';
       document.getElementById('loading').style.display = 'none';

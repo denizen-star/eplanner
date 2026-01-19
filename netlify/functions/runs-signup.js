@@ -89,6 +89,21 @@ exports.handler = async (event) => {
       return jsonResponse(404, { success: false, error: 'Run not found' });
     }
 
+    // Check if event is cancelled
+    if (run.status === 'cancelled') {
+      console.error('[RUNS SIGNUP] Event is cancelled:', runId);
+      return jsonResponse(400, { success: false, error: 'This event has been cancelled.' });
+    }
+
+    // Check if signups are still available (1-hour restriction)
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    if (hoursUntilEvent < 1) {
+      console.error('[RUNS SIGNUP] Signups blocked - event starts within 1 hour:', { runId, hoursUntilEvent });
+      return jsonResponse(400, { success: false, error: 'Signups are no longer available. This event starts within 1 hour.' });
+    }
+
     // Check if run is full
     const signupCount = await signups.countByRunId(runId);
     if (signupCount >= run.maxParticipants) {

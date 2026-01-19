@@ -137,6 +137,15 @@ async function loadRun() {
     const runTitleElement = document.getElementById('runTitle');
     const pacerNameElement = document.getElementById('runPacerName');
     
+    // Check if event is cancelled
+    if (run.status === 'cancelled') {
+      document.getElementById('runInfo').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('notFound').innerHTML = '<h1>Event Cancelled</h1><p>This event has been cancelled.</p><a href="index.html" class="button button-primary">Return Home</a>';
+      document.getElementById('notFound').style.display = 'block';
+      return;
+    }
+
     if (run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim()) {
       const pacerName = run.pacerName.trim();
       runTitleElement.textContent = `Event Management - ${pacerName}`;
@@ -193,6 +202,9 @@ async function loadRun() {
     setTimeout(() => {
       addCalendarLinksSection(run);
     }, 500);
+
+    // Add cancel event button
+    addCancelEventButton(run);
 
     const signupList = document.getElementById('signupList');
     if (run.signups.length === 0) {
@@ -382,6 +394,87 @@ function addCalendarLinksSection(run) {
     }
   } catch (error) {
     console.error('Error adding calendar links section:', error);
+  }
+}
+
+/**
+ * Add cancel event button to the page
+ */
+function addCancelEventButton(run) {
+  const runInfoDiv = document.getElementById('runInfo');
+  if (!runInfoDiv) return;
+
+  // Check if cancel button section already exists, if so remove it
+  const existingCancelSection = document.getElementById('cancelEventSection');
+  if (existingCancelSection) {
+    existingCancelSection.remove();
+  }
+
+  // Check if event can be cancelled (coordinator: 6 hours before event)
+  const eventStartTime = new Date(run.dateTime);
+  const now = new Date();
+  const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+  const canCancel = hoursUntilEvent >= 6 && run.status !== 'cancelled';
+
+  const cancelSection = document.createElement('div');
+  cancelSection.id = 'cancelEventSection';
+  cancelSection.style.cssText = 'margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--border-gray);';
+  
+  if (canCancel) {
+    cancelSection.innerHTML = `
+      <h2 style="margin-bottom: 16px; color: #dc3545;">Cancel Event</h2>
+      <p style="margin-bottom: 16px; color: var(--text-gray);">If you need to cancel this event, all registered participants will be notified via email.</p>
+      <button onclick="cancelEvent()" class="button" style="background-color: #dc3545; color: white; border: none;" data-track-cta="cancel_event_click">Cancel Event</button>
+    `;
+  } else {
+    let reason = '';
+    if (run.status === 'cancelled') {
+      reason = 'This event has already been cancelled.';
+    } else if (hoursUntilEvent < 6) {
+      reason = 'Event cannot be cancelled within 6 hours of start time.';
+    } else {
+      reason = 'Event cannot be cancelled.';
+    }
+    cancelSection.innerHTML = `
+      <h2 style="margin-bottom: 16px; color: var(--text-gray);">Cancel Event</h2>
+      <p style="margin-bottom: 16px; color: var(--text-gray);">${reason}</p>
+      <button disabled class="button" style="background-color: #ccc; color: #666; border: none; cursor: not-allowed;" title="${reason}">Cancel Event</button>
+    `;
+  }
+
+  // Insert after WhatsApp section or at the end
+  const whatsappSection = document.getElementById('whatsappMessageSection');
+  if (whatsappSection && whatsappSection.parentNode) {
+    whatsappSection.parentNode.insertBefore(cancelSection, whatsappSection.nextSibling);
+  } else {
+    runInfoDiv.appendChild(cancelSection);
+  }
+}
+
+/**
+ * Cancel the event (coordinator function)
+ */
+async function cancelEvent() {
+  if (!confirm('Are you sure you want to cancel this event? All registered participants will be notified via email. This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/runs/${runId}/cancel`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to cancel event');
+    }
+
+    alert('Event cancelled successfully. All participants have been notified.');
+    window.location.reload();
+  } catch (error) {
+    alert('Error cancelling event: ' + error.message);
   }
 }
 

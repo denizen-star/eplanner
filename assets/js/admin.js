@@ -92,8 +92,14 @@ async function loadRuns() {
         });
         const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
         const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
-        const isDisabled = run.status === 'completed' || run.status === 'deleted';
-        const statusText = run.status === 'completed' ? 'Completed' : run.status === 'deleted' ? 'Deleted' : '';
+        const isDisabled = run.status === 'completed' || run.status === 'deleted' || run.status === 'cancelled';
+        const statusText = run.status === 'completed' ? 'Completed' : run.status === 'deleted' ? 'Deleted' : run.status === 'cancelled' ? 'Cancelled' : '';
+        
+        // Check if event is within 24 hours (cannot be edited)
+        const eventStartTime = new Date(run.dateTime);
+        const now = new Date();
+        const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+        const canEdit = hoursUntilEvent >= 24 && run.status !== 'cancelled';
         
         // Format created timestamp in EST
         let createdTimestamp = '';
@@ -145,7 +151,8 @@ async function loadRuns() {
                 <span>Signups</span>
                 <span class="dropdown-icon" id="signupsIcon-${run.id}">▼</span>
               </button>
-              <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" data-track-cta="edit_button_click">Edit</button>
+              <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" ${!canEdit ? 'disabled title="Event cannot be modified within 24 hours of start time"' : ''} data-track-cta="edit_button_click">Edit</button>
+              <button class="button button-secondary" onclick="cancelEvent('${run.id}')" id="cancelButton-${run.id}" ${run.status === 'cancelled' || eventStartTime < now ? 'disabled title="' + (run.status === 'cancelled' ? 'Event already cancelled' : 'Event cannot be cancelled after it has started') + '"' : ''} data-track-cta="cancel_button_click">Cancel</button>
               <button class="button button-secondary" onclick="deleteRun('${run.id}')" data-track-cta="delete_button_click">Delete</button>
             </div>
             <div class="list-item-dropdown" id="linksDropdown-${run.id}" style="display: none;">
@@ -450,6 +457,26 @@ function updateEditMap(runId) {
 async function saveRunEdit(event, runId) {
   event.preventDefault();
 
+  // Check if event can be edited (24-hour restriction)
+  const run = currentRuns.find(r => r.id === runId || r.uuid === runId);
+  if (run) {
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    if (hoursUntilEvent < 24) {
+      const errorDiv = document.getElementById(`editError-${runId}`);
+      errorDiv.textContent = 'Event cannot be modified within 24 hours of the event start time.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+    if (run.status === 'cancelled') {
+      const errorDiv = document.getElementById(`editError-${runId}`);
+      errorDiv.textContent = 'This event has been cancelled.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+  }
+
   const description = document.getElementById(`editDescription-${runId}`)?.value.trim() || null;
   const picture = editPictures[runId] !== undefined ? editPictures[runId] : undefined;
   
@@ -569,6 +596,31 @@ document.addEventListener('click', (e) => {
     });
   }
 });
+
+async function cancelEvent(runId) {
+  if (!confirm('Are you sure you want to cancel this event? All registered participants will be notified via email. This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/runs/${runId}/cancel?isAdmin=true`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to cancel event');
+    }
+
+    alert('Event cancelled successfully. All participants have been notified.');
+    loadRuns();
+    loadReport();
+  } catch (error) {
+    alert('Error cancelling event: ' + error.message);
+  }
+}
 
 async function deleteRun(runId) {
   if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
