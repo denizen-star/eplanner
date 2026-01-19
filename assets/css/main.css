@@ -625,7 +625,9 @@ body {
   border-color: var(--accent-pink);
   border-radius: 30px;
   padding: 12px 28px;
+  font-size: var(--font-base);
   font-weight: var(--font-medium);
+  text-decoration: none;
 }
 
 .button-primary:hover {
@@ -633,6 +635,15 @@ body {
   border-color: var(--accent-pink-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 182, 193, 0.3);
+  text-decoration: none;
+}
+
+#signup-now-btn {
+  text-decoration: none !important;
+}
+
+#signup-now-btn:hover {
+  text-decoration: none !important;
 }
 
 .button-primary:disabled {
@@ -1580,7 +1591,7 @@ td, th {
   border: none;
   border-radius: 30px;
   padding: 14px 32px;
-  font-size: var(--font-base);
+  font-size: var(--font-lg);
   font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1601,7 +1612,7 @@ td, th {
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 30px;
   padding: 14px 32px;
-  font-size: var(--font-base);
+  font-size: var(--font-lg);
   font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all 0.3s ease;
