@@ -1,6 +1,6 @@
 /**
  * Domain Variant Configuration
- * Updates button links and text based on the current domain
+ * Updates button links, text, and favicon based on the current domain
  */
 
 (function() {
@@ -10,6 +10,9 @@
   const LGBTQ_DOMAIN = 'to-lgbtq.kervinapps.com';
   const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/Fea7OmKCL338wVUsWEajzr';
   const SIGNUP_BUTTON_NEW_TEXT = 'Create your Activity';
+  const DEFAULT_FAVICON = 'assets/images/favicon.svg';
+  const LGBTQ_FAVICON = 'assets/images/to-logbtqicon.png'; // LGBTQ-specific favicon
+  const LGBTQ_LOGO_ICON = 'assets/images/to-logbtqicon.png'; // LGBTQ logo icon to replace EP
 
   /**
    * Check if current domain matches LGBTQ domain
@@ -19,6 +22,51 @@
     return hostname === LGBTQ_DOMAIN || 
            hostname === 'www.' + LGBTQ_DOMAIN ||
            hostname.includes('to-lgbtq');
+  }
+
+  /**
+   * Update favicon based on domain
+   * This runs immediately to change favicon as early as possible
+   */
+  function updateFavicon() {
+    if (isLGBTQDomain()) {
+      // Remove existing favicon links
+      const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
+      existingFavicons.forEach(link => link.remove());
+      
+      // Add new favicon for LGBTQ domain
+      const faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      faviconLink.type = 'image/png';
+      faviconLink.href = LGBTQ_FAVICON;
+      document.head.appendChild(faviconLink);
+      
+      // Also add apple-touch-icon for better mobile support
+      const appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = LGBTQ_FAVICON;
+      document.head.appendChild(appleIcon);
+    }
+  }
+
+  /**
+   * Update logo icon (EP) based on domain
+   */
+  function updateLogoIcon() {
+    if (isLGBTQDomain()) {
+      const logoIcons = document.querySelectorAll('.logo-icon');
+      logoIcons.forEach(logoIcon => {
+        // Replace EP text with LGBTQ icon image
+        logoIcon.innerHTML = '';
+        const iconImg = document.createElement('img');
+        iconImg.src = LGBTQ_LOGO_ICON;
+        iconImg.alt = 'Event Planner';
+        iconImg.style.width = '100%';
+        iconImg.style.height = '100%';
+        iconImg.style.objectFit = 'contain';
+        logoIcon.appendChild(iconImg);
+      });
+    }
   }
 
   /**
@@ -70,8 +118,13 @@
     }
   }
 
+  // Update favicon immediately (runs before DOM is ready)
+  updateFavicon();
+
   // Run when DOM is ready, with a small delay to ensure all scripts have run
   function init() {
+    // Update logo icon
+    updateLogoIcon();
     // Small delay to ensure DOM is fully ready and other scripts have run
     setTimeout(updateButtonsForDomain, 100);
   }
