@@ -18,12 +18,15 @@ function getWeekRange(date = new Date()) {
 
 exports.handler = async (event) => {
   console.log('[RUNS PUBLIC CALENDAR] Handler invoked');
+  console.log('[RUNS PUBLIC CALENDAR] HTTP Method:', event.httpMethod);
+  console.log('[RUNS PUBLIC CALENDAR] Query params:', event.queryStringParameters);
   
   if (event.httpMethod === 'OPTIONS') {
     return jsonResponse(204, { success: true });
   }
 
   if (event.httpMethod !== 'GET') {
+    console.error('[RUNS PUBLIC CALENDAR] Invalid method:', event.httpMethod);
     return jsonResponse(405, { success: false, error: 'Method Not Allowed' });
   }
 
@@ -45,6 +48,10 @@ exports.handler = async (event) => {
 
     // Validate dates
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('[RUNS PUBLIC CALENDAR] Invalid date format:', {
+        startDate: queryParams.startDate,
+        endDate: queryParams.endDate
+      });
       return jsonResponse(400, { 
         success: false, 
         error: 'Invalid date format. Use YYYY-MM-DD format.' 
@@ -70,6 +77,7 @@ exports.handler = async (event) => {
   } catch (error) {
     console.error('[RUNS PUBLIC CALENDAR] ERROR:', error);
     console.error('[RUNS PUBLIC CALENDAR] Error stack:', error.stack);
+    console.error('[RUNS PUBLIC CALENDAR] Error message:', error.message);
     return jsonResponse(500, {
       success: false,
       error: 'Internal server error',

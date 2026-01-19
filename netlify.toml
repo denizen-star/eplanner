@@ -54,6 +54,7 @@
   status = 200
   force = true
 
+# API redirects - must come before catch-all redirects
 [[redirects]]
   from = "/api/runs/public-calendar"
   to = "/.netlify/functions/runs-public-calendar"
@@ -72,11 +73,13 @@
   status = 200
   force = true
 
+# HTML file redirects
 [[redirects]]
   from = "/*.html"
   to = "/:splat.html"
   status = 200
 
+# Catch-all redirect - must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"

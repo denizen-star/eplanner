@@ -369,6 +369,14 @@ exports.handler = async (event) => {
       // Don't fail the event creation if email fails
     }
 
+    // Log final email status for debugging
+    console.log('[RUNS CREATE] Final email status:', {
+      attempted: emailStatus.attempted,
+      enabled: emailStatus.enabled,
+      sent: emailStatus.sent,
+      error: emailStatus.error || 'none'
+    });
+
     return jsonResponse(200, {
       success: true,
       run: runData,

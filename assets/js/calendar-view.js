@@ -160,12 +160,32 @@ async function fetchPublicEvents(startDate, endDate) {
   
   const url = `/api/runs/public-calendar?startDate=${startDateStr}&endDate=${endDateStr}`;
   
+  console.log('[CALENDAR] Fetching events from:', url);
+  
   try {
     const response = await fetch(url);
+    console.log('[CALENDAR] Response status:', response.status, response.statusText);
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Try to get error details from response
+      let errorDetails = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error || errorData.message) {
+          errorDetails += ` - ${errorData.error || errorData.message}`;
+        }
+      } catch (e) {
+        // If response isn't JSON, use status text
+        errorDetails += ` - ${response.statusText}`;
+      }
+      throw new Error(errorDetails);
     }
+    
     const data = await response.json();
+    console.log('[CALENDAR] Response data:', { 
+      success: data.success, 
+      eventCount: data.events ? data.events.length : 0 
+    });
     
     if (data.success && data.events) {
       return data.events;
@@ -174,6 +194,10 @@ async function fetchPublicEvents(startDate, endDate) {
     }
   } catch (error) {
     console.error('[CALENDAR] Error fetching events:', error);
+    console.error('[CALENDAR] Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
