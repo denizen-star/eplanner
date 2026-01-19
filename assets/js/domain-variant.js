@@ -122,6 +122,18 @@
   }
 
   /**
+   * Update hero headline text based on domain
+   */
+  function updateHeroHeadline() {
+    if (isLGBTQDomain()) {
+      const heroHeadline = document.querySelector('.hero-headline');
+      if (heroHeadline) {
+        heroHeadline.textContent = 'Start your own revolution. Make your activities turn strangers into new friends & adventure accomplices.';
+      }
+    }
+  }
+
+  /**
    * Update buttons based on domain
    */
   function updateButtonsForDomain() {
@@ -177,6 +189,8 @@
   function init() {
     // Update logo icon
     updateLogoIcon();
+    // Update hero headline
+    updateHeroHeadline();
     // Small delay to ensure DOM is fully ready and other scripts have run
     setTimeout(updateButtonsForDomain, 100);
   }
