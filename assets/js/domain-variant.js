@@ -149,8 +149,6 @@
 
   // Run when DOM is ready, with a small delay to ensure all scripts have run
   function init() {
-    // Update page title
-    updatePageTitle();
     // Update logo icon
     updateLogoIcon();
     // Small delay to ensure DOM is fully ready and other scripts have run
