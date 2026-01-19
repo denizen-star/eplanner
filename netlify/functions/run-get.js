@@ -39,6 +39,11 @@ function jsonResponse(statusCode, body) {
 }
 
 exports.handler = async (event, context) => {
+  // Handle OPTIONS for CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return jsonResponse(200, { success: true });
+  }
+  
   // Extract runId from path: /api/runs/:runId
   const pathParts = event.path.split('/').filter(p => p);
   const runIdIndex = pathParts.indexOf('runs');
