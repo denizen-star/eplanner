@@ -1,36 +1,18 @@
 const { runs, signups } = require('../../lib/databaseClient');
-const serverless = require('serverless-http');
-const path = require('path');
+const EmailService = require('../../lib/emailService');
+const { eventUpdatedEmail, eventUpdatedToSignupsEmail } = require('../../lib/emailTemplates');
 
-// Explicitly require express at top level so esbuild bundles it
-// This ensures express is available when server.js is required
-const express = require('express');
-
-// Set Netlify flag before requiring server
-process.env.NETLIFY = 'true';
-
-// Initialize serverless handler for PUT/PATCH delegation
-let updateHandler = null;
-let updateHandlerError = null;
-try {
-  const app = require(path.join(__dirname, '../../server'));
-  updateHandler = serverless(app, {
-    binary: ['image/*', 'application/pdf']
-  });
-  console.log('[RUN GET] Update handler initialized successfully');
-} catch (error) {
-  console.error('[RUN GET] Error initializing update handler:', error);
-  updateHandlerError = error;
-}
-
-function getUpdateHandler() {
-  if (updateHandlerError) {
-    throw updateHandlerError;
+// Helper function to parse request body
+function parseBody(event) {
+  if (!event.body) return {};
+  if (typeof event.body === 'string') {
+    try {
+      return JSON.parse(event.body);
+    } catch (e) {
+      return {};
+    }
   }
-  if (!updateHandler) {
-    throw new Error('Update handler not initialized');
-  }
-  return updateHandler;
+  return event.body;
 }
 
 function jsonResponse(statusCode, body) {
@@ -57,68 +39,159 @@ exports.handler = async (event, context) => {
   
   console.log('[RUN GET] Handler invoked for runId:', runId, 'path:', event.path, 'method:', event.httpMethod);
   
-  // If method is PUT or PATCH, delegate to server.js wrapper (handles updates)
+  // If method is PUT or PATCH, handle updates directly (no Express needed)
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
     try {
-      console.log('[RUN GET] Delegating PUT/PATCH to server.js wrapper');
-      const handler = getUpdateHandler();
-      const result = await handler(event, context);
-      console.log('[RUN GET] Delegation completed:', {
-        statusCode: result?.statusCode,
-        hasBody: !!result?.body,
-        headers: result?.headers
+      const body = parseBody(event);
+      const { location, pacerName, plannerName, title, dateTime, maxParticipants, coordinates, picture, description } = body;
+
+      console.log('[RUN GET] PUT request received:', {
+        runId,
+        bodyKeys: Object.keys(body),
+        location: location ? location.substring(0, 50) : location,
+        plannerName: plannerName || pacerName,
+        title: title,
+        dateTime: dateTime,
+        maxParticipants: maxParticipants
       });
-      
-      // Ensure proper headers for CORS
-      if (result && result.headers) {
-        result.headers['Access-Control-Allow-Origin'] = '*';
-      } else if (result) {
-        result.headers = {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        };
+
+      if (!runId) {
+        return jsonResponse(400, { error: 'Run ID is required' });
       }
-      
-      return result;
-    } catch (error) {
-      console.error('[RUN GET] Error delegating PUT/PATCH:', error);
-      console.error('[RUN GET] Error stack:', error.stack);
-      console.error('[RUN GET] Error details:', {
-        message: error.message,
-        name: error.name,
-        code: error.code
-      });
-      
-      // Try to parse error response if it's a serverless-http error
-      let errorMessage = error.message || 'Failed to process update request';
-      let statusCode = 500;
-      
-      // Check if error has a statusCode (from serverless-http)
-      if (error.statusCode) {
-        statusCode = error.statusCode;
+
+      // Verify run exists
+      const existingRun = await runs.getById(runId);
+      if (!existingRun) {
+        return jsonResponse(404, { error: 'Run not found' });
       }
+
+      // Check if event is cancelled
+      if (existingRun.status === 'cancelled') {
+        return jsonResponse(400, { error: 'This event has been cancelled.' });
+      }
+
+      // Check if event can be modified (24-hour restriction)
+      const eventStartTime = new Date(existingRun.dateTime);
+      const now = new Date();
+      const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+      if (hoursUntilEvent < 24) {
+        return jsonResponse(400, { error: 'Event cannot be modified within 24 hours of the event start time.' });
+      }
+
+      // Prepare updates
+      const finalPlannerName = plannerName || pacerName;
+      const updates = {};
+      if (location !== undefined) updates.location = location.trim();
+      if (finalPlannerName !== undefined) updates.plannerName = finalPlannerName ? finalPlannerName.trim() : '';
+      if (title !== undefined) updates.title = title ? title.trim() : null;
+      if (dateTime !== undefined) updates.dateTime = dateTime;
+      if (coordinates !== undefined) updates.coordinates = coordinates;
+      if (picture !== undefined) updates.picture = picture;
+      if (description !== undefined) updates.description = description;
       
-      // Try to parse error body if it exists
-      if (error.body) {
-        try {
-          const errorBody = typeof error.body === 'string' ? JSON.parse(error.body) : error.body;
-          errorMessage = errorBody.error || errorBody.message || errorMessage;
-          if (errorBody.message) {
-            errorMessage = errorBody.message;
-          }
-        } catch (parseError) {
-          // If we can't parse, use the original message
+      if (maxParticipants !== undefined) {
+        if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
+          return jsonResponse(400, { error: 'Max participants must be a positive integer' });
+        }
+        // Check current signup count
+        const signupCount = await signups.countByRunId(runId);
+        if (signupCount > maxParticipants) {
+          return jsonResponse(400, { error: 'Cannot set max participants below current signup count' });
+        }
+        updates.maxParticipants = parseInt(maxParticipants);
+      }
+
+      // Track changes for email notifications
+      const changes = {};
+      if (updates.location !== undefined && updates.location !== existingRun.location) {
+        changes['Location'] = `${existingRun.location} → ${updates.location}`;
+      }
+      if (updates.title !== undefined && updates.title !== existingRun.title) {
+        changes['Title'] = `${existingRun.title || '(none)'} → ${updates.title || '(none)'}`;
+      }
+      if (updates.dateTime !== undefined) {
+        const oldDateObj = new Date(existingRun.dateTime);
+        const newDateObj = new Date(updates.dateTime);
+        if (oldDateObj.getTime() !== newDateObj.getTime()) {
+          const oldDate = oldDateObj.toLocaleString();
+          const newDate = newDateObj.toLocaleString();
+          changes['Date & Time'] = `${oldDate} → ${newDate}`;
         }
       }
-      
-      console.error('[RUN GET] Returning error response:', {
-        statusCode,
-        errorMessage
-      });
-      
-      return jsonResponse(statusCode, {
-        error: 'Failed to process update request',
-        message: errorMessage
+      if (updates.maxParticipants !== undefined && updates.maxParticipants !== existingRun.maxParticipants) {
+        changes['Max Participants'] = `${existingRun.maxParticipants} → ${updates.maxParticipants}`;
+      }
+      if (updates.plannerName !== undefined && updates.plannerName !== existingRun.plannerName) {
+        changes['Planner Name'] = `${existingRun.plannerName} → ${updates.plannerName}`;
+      }
+      if (updates.description !== undefined && updates.description !== existingRun.description) {
+        changes['Description'] = 'Updated';
+      }
+
+      // Update in database
+      const updatedRun = await runs.update(runId, updates);
+
+      // Send update emails if there were changes (non-blocking)
+      if (Object.keys(changes).length > 0) {
+        try {
+          const emailService = new EmailService();
+          if (emailService.isEnabled()) {
+            // Send email to coordinator
+            if (updatedRun.coordinatorEmail && updatedRun.coordinatorEmail.trim()) {
+              try {
+                const coordinatorEmailContent = eventUpdatedEmail(updatedRun, changes, updatedRun.coordinatorEmail);
+                await emailService.sendEmail({
+                  to: updatedRun.coordinatorEmail.trim(),
+                  subject: coordinatorEmailContent.subject,
+                  html: coordinatorEmailContent.html,
+                  text: coordinatorEmailContent.text,
+                  fromName: coordinatorEmailContent.fromName,
+                });
+              } catch (coordinatorEmailError) {
+                console.error('[RUN GET] Error sending email to coordinator:', coordinatorEmailError.message);
+              }
+            }
+
+            // Send email to all signups with email addresses
+            try {
+              const allSignups = await signups.getByRunId(runId);
+              const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
+              
+              if (signupsWithEmail.length > 0) {
+                const emailPromises = signupsWithEmail.map(async (signup) => {
+                  try {
+                    const signupEmailContent = eventUpdatedToSignupsEmail(updatedRun, changes, signup);
+                    await emailService.sendEmail({
+                      to: signup.email.trim(),
+                      subject: signupEmailContent.subject,
+                      html: signupEmailContent.html,
+                      text: signupEmailContent.text,
+                      fromName: signupEmailContent.fromName,
+                    });
+                  } catch (signupEmailError) {
+                    console.error(`[RUN GET] Error sending email to signup ${signup.id}:`, signupEmailError.message);
+                  }
+                });
+                
+                await Promise.all(emailPromises);
+              }
+            } catch (signupsEmailError) {
+              console.error('[RUN GET] Error sending emails to signups:', signupsEmailError.message);
+            }
+          }
+        } catch (emailError) {
+          console.error('[RUN GET] Error in email sending process:', emailError.message);
+          // Don't fail the update if email fails
+        }
+      }
+
+      return jsonResponse(200, { success: true, run: updatedRun });
+    } catch (error) {
+      console.error('[RUN GET] Error updating run:', error);
+      console.error('[RUN GET] Error stack:', error.stack);
+      return jsonResponse(500, {
+        error: 'Failed to update run',
+        message: error.message
       });
     }
   }
