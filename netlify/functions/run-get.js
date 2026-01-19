@@ -59,15 +59,60 @@ exports.handler = async (event, context) => {
       const result = await handler(event, context);
       console.log('[RUN GET] Delegation completed:', {
         statusCode: result?.statusCode,
-        hasBody: !!result?.body
+        hasBody: !!result?.body,
+        headers: result?.headers
       });
+      
+      // Ensure proper headers for CORS
+      if (result && result.headers) {
+        result.headers['Access-Control-Allow-Origin'] = '*';
+      } else if (result) {
+        result.headers = {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        };
+      }
+      
       return result;
     } catch (error) {
       console.error('[RUN GET] Error delegating PUT/PATCH:', error);
       console.error('[RUN GET] Error stack:', error.stack);
-      return jsonResponse(500, {
+      console.error('[RUN GET] Error details:', {
+        message: error.message,
+        name: error.name,
+        code: error.code
+      });
+      
+      // Try to parse error response if it's a serverless-http error
+      let errorMessage = error.message || 'Failed to process update request';
+      let statusCode = 500;
+      
+      // Check if error has a statusCode (from serverless-http)
+      if (error.statusCode) {
+        statusCode = error.statusCode;
+      }
+      
+      // Try to parse error body if it exists
+      if (error.body) {
+        try {
+          const errorBody = typeof error.body === 'string' ? JSON.parse(error.body) : error.body;
+          errorMessage = errorBody.error || errorBody.message || errorMessage;
+          if (errorBody.message) {
+            errorMessage = errorBody.message;
+          }
+        } catch (parseError) {
+          // If we can't parse, use the original message
+        }
+      }
+      
+      console.error('[RUN GET] Returning error response:', {
+        statusCode,
+        errorMessage
+      });
+      
+      return jsonResponse(statusCode, {
         error: 'Failed to process update request',
-        message: error.message
+        message: errorMessage
       });
     }
   }

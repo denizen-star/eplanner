@@ -926,8 +926,28 @@ app.put('/api/runs/:runId', async (req, res) => {
 
     res.json({ success: true, run: updatedRun });
   } catch (error) {
-    console.error('Error updating run:', error);
-    res.status(500).json({ error: 'Failed to update run', message: error.message });
+    console.error('[RUN UPDATE] Error updating run:', error);
+    console.error('[RUN UPDATE] Error stack:', error.stack);
+    console.error('[RUN UPDATE] Error details:', {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+      sqlMessage: error.sqlMessage
+    });
+    
+    // Provide more detailed error message
+    let errorMessage = error.message || 'Failed to update run';
+    if (error.sqlMessage) {
+      errorMessage = `Database error: ${error.sqlMessage}`;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to update run', 
+      message: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

@@ -866,14 +866,17 @@ async function saveEventEdit(event) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to update event');
+      const errorMessage = data.message || data.error || `Failed to update event (${response.status})`;
+      throw new Error(errorMessage);
     }
 
     // Success - reload the page to show updated data
     alert('Event updated successfully!');
     window.location.reload();
   } catch (error) {
-    errorDiv.textContent = error.message;
+    console.error('[MANAGE] Error saving event edit:', error);
+    const errorMessage = error.message || 'Failed to update event. Please check the console for details.';
+    errorDiv.textContent = errorMessage;
     errorDiv.style.display = 'block';
   }
 }
