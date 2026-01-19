@@ -760,9 +760,11 @@ app.put('/api/runs/:runId', async (req, res) => {
     }
 
     // Prepare updates
+    // Support both plannerName (new) and pacerName (legacy) for backward compatibility
+    const plannerName = req.body.plannerName || pacerName;
     const updates = {};
     if (location !== undefined) updates.location = location.trim();
-    if (pacerName !== undefined) updates.pacerName = pacerName ? pacerName.trim() : '';
+    if (plannerName !== undefined) updates.plannerName = plannerName ? plannerName.trim() : '';
     if (title !== undefined) updates.title = title ? title.trim() : null;
     if (dateTime !== undefined) updates.dateTime = dateTime;
     if (coordinates !== undefined) updates.coordinates = coordinates;
@@ -808,8 +810,8 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (updates.maxParticipants !== undefined && updates.maxParticipants !== existingRun.maxParticipants) {
       changes['Max Participants'] = `${existingRun.maxParticipants} → ${updates.maxParticipants}`;
     }
-    if (updates.pacerName !== undefined && updates.pacerName !== existingRun.plannerName) {
-      changes['Planner Name'] = `${existingRun.plannerName} → ${updates.pacerName}`;
+    if (updates.plannerName !== undefined && updates.plannerName !== existingRun.plannerName) {
+      changes['Planner Name'] = `${existingRun.plannerName} → ${updates.plannerName}`;
     }
     if (updates.description !== undefined && updates.description !== existingRun.description) {
       changes['Description'] = 'Updated';

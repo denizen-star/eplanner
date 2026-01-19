@@ -820,11 +820,16 @@ async function saveEventEdit(event) {
   const description = document.getElementById('editDescription')?.value.trim() || null;
   const picture = editPicture !== undefined ? editPicture : undefined;
   
+  // Convert datetime-local value to ISO string (required by backend)
+  // datetime-local gives "YYYY-MM-DDTHH:mm" which represents local time
+  const dateTimeLocal = document.getElementById('editDateTime').value;
+  const dateTime = dateTimeLocal ? new Date(dateTimeLocal).toISOString() : null;
+  
   const formData = {
     title: document.getElementById('editTitle').value.trim(),
     location: document.getElementById('editLocation').value.trim(),
     pacerName: document.getElementById('editPacerName').value.trim(),
-    dateTime: document.getElementById('editDateTime').value,
+    dateTime: dateTime,
     maxParticipants: parseInt(document.getElementById('editMaxParticipants').value),
     description: description
   };
