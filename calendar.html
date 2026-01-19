@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Events Calendar - Event Planner</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <header class="header overlay" id="mainHeader">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">EP</div>
+                Event Planner
+            </a>
+            <button class="hamburger-menu" id="hamburgerMenu" type="button" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="index.html" data-track-cta="navigation_home_click">Home</a></li>
+                <li><a href="calendar.html" class="active" data-track-cta="navigation_calendar_click">Calendar</a></li>
+                <li><a href="coordinate.html" data-track-cta="navigation_coordinate_click">Coordinate an Event</a></li>
+            </ul>
+            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+            <div class="mobile-nav-menu" id="mobileNavMenu">
+                <ul>
+                    <li><a href="index.html" data-track-cta="navigation_home_click">Home</a></li>
+                    <li><a href="calendar.html" class="active" data-track-cta="navigation_calendar_click">Calendar</a></li>
+                    <li><a href="coordinate.html" data-track-cta="navigation_coordinate_click">Coordinate an Event</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main style="position: relative; overflow-x: hidden;">
+        <!-- Hero Section -->
+        <section class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-headline">Public Events Calendar</h1>
+                <p style="color: var(--white); font-size: var(--font-lg); max-width: 600px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Discover upcoming community events and join the gatherings</p>
+            </div>
+        </section>
+
+        <div class="main-container">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); flex-wrap: wrap; gap: var(--space-md);">
+                    <h2 class="section-headline" style="margin-bottom: 0;" id="weekTitle">This Week's Events</h2>
+                    <div style="display: flex; gap: var(--space-sm);">
+                        <button id="prevWeekBtn" class="button button-secondary" style="white-space: nowrap;">← Previous Week</button>
+                        <button id="nextWeekBtn" class="button button-secondary" style="white-space: nowrap;">Next Week →</button>
+                    </div>
+                </div>
+
+                <div id="loading" style="text-align: center; padding: var(--space-2xl); color: var(--text-secondary);">
+                    Loading events...
+                </div>
+
+                <div id="calendarContainer" style="display: none;">
+                    <div class="calendar-week" id="calendarWeek"></div>
+                </div>
+
+                <div id="noEvents" style="display: none; text-align: center; padding: var(--space-2xl); color: var(--text-secondary);">
+                    <p style="font-size: var(--font-lg); margin-bottom: var(--space-md);">No public events scheduled for this week.</p>
+                    <a href="coordinate.html" class="button button-primary">Create an Event</a>
+                </div>
+
+                <div id="error" class="message message-error" style="display: none;"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/dropdown.js"></script>
+    <script src="assets/js/device-collector.js"></script>
+    <script src="assets/js/format-utils.js"></script>
+    <script src="assets/js/calendar-view.js"></script>
+    <script src="assets/js/analytics.js"></script>
+    <script src="assets/js/domain-variant.js"></script>
+</body>
+</html>

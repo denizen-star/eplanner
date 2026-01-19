@@ -55,6 +55,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/runs/public-calendar"
+  to = "/.netlify/functions/runs-public-calendar"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
   status = 200

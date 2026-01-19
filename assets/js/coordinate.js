@@ -28,6 +28,36 @@ document.addEventListener('DOMContentLoaded', () => {
   tomorrow.setHours(18, 30, 0, 0);
   const defaultDateTime = tomorrow.toISOString().slice(0, 16);
   document.getElementById('dateTime').value = defaultDateTime;
+
+  // Handle radio card selection visual state and make entire card clickable
+  document.querySelectorAll('.radio-card').forEach(card => {
+    const radio = card.querySelector('input[type="radio"]');
+    
+    // Make entire card clickable
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking directly on the radio input
+      if (e.target !== radio) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    
+    // Update visual state when radio changes
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.radio-card').forEach(c => {
+        if (c.querySelector('input').checked) {
+          c.classList.add('selected');
+        } else {
+          c.classList.remove('selected');
+        }
+      });
+    });
+    
+    // Set initial state
+    if (radio.checked) {
+      card.classList.add('selected');
+    }
+  });
 });
 
 document.getElementById('location').addEventListener('input', (e) => {
@@ -276,6 +306,24 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please select a date and time for the event');
     }
 
+    // Capture end time (optional)
+    const endTimeInput = document.getElementById('endTime');
+    const endTimeLocal = endTimeInput ? endTimeInput.value : null;
+    let endTime = null;
+    if (endTimeLocal) {
+      const endTimeDate = new Date(endTimeLocal);
+      endTime = endTimeDate.toISOString();
+    }
+
+    // Capture event visibility (isPublic)
+    const visibilityInputs = document.querySelectorAll('input[name="eventVisibility"]');
+    let isPublic = true; // Default to true
+    visibilityInputs.forEach(input => {
+      if (input.checked) {
+        isPublic = input.value === 'public';
+      }
+    });
+
     // Capture user's timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
@@ -333,8 +381,11 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       coordinatorEmail: coordinatorEmail,
       title: runTitle || null,
       dateTime: dateTime,
+      endTime: endTime,
       timezone: userTimezone,
       maxParticipants: maxParticipantsValue,
+      isPublic: isPublic,
+      placeName: validatedPlaceName || null,
       deviceInfo: deviceInfo,
       sessionInfo: sessionInfo,
       // Address component fields
@@ -530,6 +581,24 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(18, 30, 0, 0);
     document.getElementById('dateTime').value = tomorrow.toISOString().slice(0, 16);
+    
+    // Reset end time
+    const endTimeInput = document.getElementById('endTime');
+    if (endTimeInput) endTimeInput.value = '';
+    
+    // Reset event visibility to public (default)
+    const publicRadio = document.querySelector('input[name="eventVisibility"][value="public"]');
+    if (publicRadio) publicRadio.checked = true;
+    const privateRadio = document.querySelector('input[name="eventVisibility"][value="private"]');
+    if (privateRadio) privateRadio.checked = false;
+    // Update radio card visual state
+    document.querySelectorAll('.radio-card').forEach(card => {
+      if (card.querySelector('input[value="public"]')?.checked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
     
     // Reset max participants to 10
     document.getElementById('maxParticipants').value = '10';

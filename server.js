@@ -64,6 +64,15 @@ function generateUUID() {
   });
 }
 
+// Helper function to generate all event links (DRY principle)
+function generateEventLinks(baseUrl, eventId) {
+  return {
+    signupLink: `${baseUrl}/signup.html?id=${eventId}`,
+    manageLink: `${baseUrl}/manage.html?id=${eventId}`,
+    eventViewLink: `${baseUrl}/event.html?id=${eventId}`
+  };
+}
+
 function extractClientMetadata(req) {
   const headers = req.headers || {};
   const normalized = Object.keys(headers).reduce((acc, key) => {
@@ -105,7 +114,7 @@ app.post('/api/runs/create', async (req, res) => {
   console.log('[RUN CREATE] Full request body:', JSON.stringify(req.body, null, 2));
 
   try {
-    const { location, coordinates, pacerName, plannerName, title, dateTime, timezone, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail } = req.body;
+    const { location, coordinates, pacerName, plannerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail, isPublic, placeName } = req.body;
 
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -193,6 +202,11 @@ app.post('/api/runs/create', async (req, res) => {
     const { ipAddress, userAgent } = extractClientMetadata(req);
     console.log('[RUN CREATE] Client metadata extracted');
 
+    // Get base URL and generate links
+    const baseUrl = req.protocol + '://' + req.get('host');
+    const links = generateEventLinks(baseUrl, shortId);
+    const { signupLink, manageLink, eventViewLink } = links;
+
     // Save to PlanetScale database
     console.log('[RUN CREATE] Saving to PlanetScale database...');
     try {
@@ -205,12 +219,18 @@ app.post('/api/runs/create', async (req, res) => {
         coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
+        endTime: endTime || null,
         timezone: timezone || null,
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
+        isPublic: isPublic !== undefined ? isPublic : true, // Default to true
         createdAt: createdAt,
+        placeName: placeName ? placeName.trim() : null,
         picture: picture || null,
         description: description || null,
+        signupLink: signupLink,
+        manageLink: manageLink,
+        eventViewLink: eventViewLink
       };
       
       console.log('[RUN CREATE] Create data prepared:', {
@@ -225,18 +245,27 @@ app.post('/api/runs/create', async (req, res) => {
       console.error('[RUN CREATE] Database save failed:', dbError.message);
       console.error('[RUN CREATE] Database error stack:', dbError.stack);
       // Check if it's a column error (database migration not run)
-      if (dbError.message && (dbError.message.includes('Unknown column') || dbError.message.includes('picture') || dbError.message.includes('description'))) {
-        throw new Error('Database migration required: Please add picture and description columns. See migration-add-picture-description.sql file.');
+      if (dbError.message && dbError.message.includes('Unknown column')) {
+        const missingColumns = [];
+        if (dbError.message.includes('is_public')) missingColumns.push('is_public');
+        if (dbError.message.includes('end_time')) missingColumns.push('end_time');
+        if (dbError.message.includes('place_name')) missingColumns.push('place_name');
+        if (dbError.message.includes('signup_link')) missingColumns.push('signup_link');
+        if (dbError.message.includes('manage_link')) missingColumns.push('manage_link');
+        if (dbError.message.includes('event_view_link')) missingColumns.push('event_view_link');
+        if (dbError.message.includes('picture') || dbError.message.includes('description')) {
+          missingColumns.push('picture/description');
+        }
+        if (missingColumns.length > 0) {
+          throw new Error(`Database migration required: Please add columns: ${missingColumns.join(', ')}. See migration-add-public-endtime-place-links.sql file.`);
+        }
       }
       throw new Error(`Failed to save event to database: ${dbError.message}`);
     }
 
     console.log('[RUN CREATE] Generating response URLs...');
-    const baseUrl = req.protocol + '://' + req.get('host');
-    const signupLink = `${baseUrl}/signup.html?id=${shortId}`;
-    const manageLink = `${baseUrl}/manage.html?id=${shortId}`;
 
-    console.log('[RUN CREATE] Success! Run created:', { shortId, signupLink, manageLink });
+    console.log('[RUN CREATE] Success! Run created:', { shortId, signupLink, manageLink, eventViewLink });
 
     // Send confirmation email to coordinator (non-blocking)
     console.log('[RUN CREATE] Sending confirmation email...');
@@ -338,6 +367,7 @@ app.post('/api/runs/create', async (req, res) => {
       run: runData,
       signupLink: signupLink,
       manageLink: manageLink,
+      eventViewLink: eventViewLink,
       emailStatus: emailStatus
     });
   } catch (error) {
@@ -393,6 +423,66 @@ app.get('/api/runs', async (req, res) => {
     console.error('[GET RUNS] ERROR:', error);
     console.error('[GET RUNS] Error stack:', error.stack);
     res.status(500).json({ error: 'Failed to get runs', message: error.message });
+  }
+});
+
+app.get('/api/runs/public-calendar', async (req, res) => {
+  console.log('[GET PUBLIC CALENDAR] Request received');
+  
+  try {
+    // Parse query parameters
+    const { startDate, endDate } = req.query;
+    let startDateObj, endDateObj;
+
+    if (startDate && endDate) {
+      // Use provided date range
+      startDateObj = new Date(startDate);
+      endDateObj = new Date(endDate);
+    } else {
+      // Default to current week
+      const today = new Date();
+      const day = today.getDay();
+      const diff = today.getDate() - day; // Sunday = 0
+      startDateObj = new Date(today.setDate(diff));
+      startDateObj.setHours(0, 0, 0, 0);
+      
+      endDateObj = new Date(startDateObj);
+      endDateObj.setDate(endDateObj.getDate() + 6); // Add 6 days
+      endDateObj.setHours(23, 59, 59, 999);
+    }
+
+    // Validate dates
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid date format. Use YYYY-MM-DD format.' 
+      });
+    }
+
+    console.log('[GET PUBLIC CALENDAR] Fetching public events:', {
+      startDate: startDateObj.toISOString(),
+      endDate: endDateObj.toISOString()
+    });
+
+    // Fetch public events for the date range
+    const events = await runs.getPublicEvents(startDateObj.toISOString(), endDateObj.toISOString());
+
+    console.log('[GET PUBLIC CALENDAR] Success! Returning', events.length, 'events');
+
+    res.json({
+      success: true,
+      events: events,
+      startDate: startDateObj.toISOString(),
+      endDate: endDateObj.toISOString()
+    });
+  } catch (error) {
+    console.error('[GET PUBLIC CALENDAR] ERROR:', error);
+    console.error('[GET PUBLIC CALENDAR] Error stack:', error.stack);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 });
 

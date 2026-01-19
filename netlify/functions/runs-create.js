@@ -63,6 +63,15 @@ function generateUUID() {
   });
 }
 
+// Helper function to generate all event links (DRY principle)
+function generateEventLinks(baseUrl, eventId) {
+  return {
+    signupLink: `${baseUrl}/signup.html?id=${eventId}`,
+    manageLink: `${baseUrl}/manage.html?id=${eventId}`,
+    eventViewLink: `${baseUrl}/event.html?id=${eventId}`
+  };
+}
+
 exports.handler = async (event) => {
   console.log('[RUNS CREATE] Handler invoked');
   
@@ -77,10 +86,10 @@ exports.handler = async (event) => {
   try {
     const body = parseBody(event);
     const { 
-      location, coordinates, plannerName, pacerName, title, dateTime, timezone, maxParticipants, deviceInfo, sessionInfo,
+      location, coordinates, plannerName, pacerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
       neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
-      coordinatorEmail
+      coordinatorEmail, isPublic, placeName
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -164,9 +173,11 @@ exports.handler = async (event) => {
         coordinatorEmail: trimmedCoordinatorEmail,
         title: title ? title.trim() : null,
         dateTime: dateTime,
+        endTime: endTime || null,
         timezone: timezone || null,
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
+        isPublic: isPublic !== undefined ? isPublic : true, // Default to true
         createdAt: createdAt,
         // Address component fields
         house_number: house_number || null,
@@ -183,16 +194,33 @@ exports.handler = async (event) => {
         village: village || null,
         town: town || null,
         municipality: municipality || null,
+        placeName: placeName ? placeName.trim() : null,
         picture: picture || null,
-        description: description || null
+        description: description || null,
+        // Store links in database
+        signupLink: signupLink,
+        manageLink: manageLink,
+        eventViewLink: eventViewLink
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {
       console.error('[RUNS CREATE] Database save failed:', dbError.message);
       console.error('[RUNS CREATE] Database error stack:', dbError.stack);
       // Check if it's a column error (database migration not run)
-      if (dbError.message && dbError.message.includes('Unknown column') && (dbError.message.includes('picture') || dbError.message.includes('description'))) {
-        throw new Error('Database migration required: Please add picture and description columns. See migration-add-picture-description.sql file.');
+      if (dbError.message && dbError.message.includes('Unknown column')) {
+        const missingColumns = [];
+        if (dbError.message.includes('is_public')) missingColumns.push('is_public');
+        if (dbError.message.includes('end_time')) missingColumns.push('end_time');
+        if (dbError.message.includes('place_name')) missingColumns.push('place_name');
+        if (dbError.message.includes('signup_link')) missingColumns.push('signup_link');
+        if (dbError.message.includes('manage_link')) missingColumns.push('manage_link');
+        if (dbError.message.includes('event_view_link')) missingColumns.push('event_view_link');
+        if (dbError.message.includes('picture') || dbError.message.includes('description')) {
+          missingColumns.push('picture/description');
+        }
+        if (missingColumns.length > 0) {
+          throw new Error(`Database migration required: Please add columns: ${missingColumns.join(', ')}. See migration-add-public-endtime-place-links.sql file.`);
+        }
       }
       throw new Error(`Failed to save event to database: ${dbError.message}`);
     }
@@ -201,8 +229,10 @@ exports.handler = async (event) => {
     const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
     const protocol = event.headers?.['x-forwarded-proto'] || 'https';
     const baseUrl = `${protocol}://${host}`;
-    const signupLink = `${baseUrl}/signup.html?id=${shortId}`;
-    const manageLink = `${baseUrl}/manage.html?id=${shortId}`;
+    
+    // Generate all event links using helper function (DRY)
+    const links = generateEventLinks(baseUrl, shortId);
+    const { signupLink, manageLink, eventViewLink } = links;
 
     // Create telemetry record (non-blocking, don't fail if this fails)
     console.log('[RUNS CREATE] Creating telemetry record...');
@@ -344,6 +374,7 @@ exports.handler = async (event) => {
       run: runData,
       signupLink: signupLink,
       manageLink: manageLink,
+      eventViewLink: eventViewLink,
       emailStatus: emailStatus
     });
   } catch (error) {
