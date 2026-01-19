@@ -2,14 +2,17 @@ const { runs, signups } = require('../../lib/databaseClient');
 const serverless = require('serverless-http');
 const path = require('path');
 
-// Set Netlify flag before requiring server (needed for dynamic requires)
+// Explicitly require express at top level so esbuild bundles it
+// This ensures express is available when server.js is required
+const express = require('express');
+
+// Set Netlify flag before requiring server
 process.env.NETLIFY = 'true';
 
-// Initialize serverless handler for PUT/PATCH delegation (at top level so esbuild can bundle dependencies)
+// Initialize serverless handler for PUT/PATCH delegation
 let updateHandler = null;
 let updateHandlerError = null;
 try {
-  // Require server.js at top level so esbuild can bundle express and other dependencies
   const app = require(path.join(__dirname, '../../server'));
   updateHandler = serverless(app, {
     binary: ['image/*', 'application/pdf']
