@@ -24,13 +24,24 @@ if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
   return 'eplanner';
 }
 
+// ✅ CORRECT - Gay Run Club example (specific first)
+if (hostLower.includes('gayrunclub')) {
+  return 'gayrunclub';  // Most specific - check first
+}
+if (hostLower.includes('runs')) {
+  return 'runs';  // Generic - check after specific
+}
+
 // ❌ WRONG - Generic check catches everything first
-if (hostLower.includes('eplanner')) {
-  return 'eplanner';  // This would catch 'to-lgbtq' if it contains 'eplanner'
+if (hostLower.includes('runs')) {
+  return 'runs';  // This would catch 'gayrunclub' because it contains 'runs'!
+}
+if (hostLower.includes('gayrunclub')) {
+  return 'gayrunclub';  // Never reached if 'runs' is checked first
 }
 ```
 
-**Why**: If you check generic patterns first, they may match more specific domains incorrectly.
+**Why**: If you check generic patterns first, they may match more specific domains incorrectly. For example, `hostLower.includes('runs')` would return `true` for `'gayrunclub.kervinapps.com'` because it contains the substring 'runs'.
 
 ### 2. Map Initialization Needs Dependency Checking
 
@@ -336,27 +347,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ### For gayrunclub Application
 
-When applying to gayrunclub, you'll need to:
+When applying to gayrunclub, you'll need to handle two domains:
+- `runs.kervinapps.com` → `app_name = 'runs'`
+- `gayrunclub.kervinapps.com` → `app_name = 'gayrunclub'`
 
-1. **Update domain detection**:
+1. **Update domain detection** (check most specific first):
    ```javascript
-   if (hostLower.includes('gayrunclub')) {
-     return 'gayrunclub';
+   function getAppName(event) {
+     const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
+     const hostLower = host.toLowerCase();
+     
+     // Check most specific domain first
+     if (hostLower.includes('gayrunclub')) {
+       return 'gayrunclub';
+     }
+     
+     // Then check runs domain
+     if (hostLower.includes('runs.kervinapps.com') || hostLower === 'runs.kervinapps.com') {
+       return 'runs';
+     }
+     
+     // Check for generic 'runs' (but be careful not to match 'gayrunclub')
+     if (hostLower.includes('runs') && !hostLower.includes('gayrunclub')) {
+       return 'runs';
+     }
+     
+     // Fallback to environment variable or default
+     return process.env.APP_NAME || 'runs'; // Default to 'runs'
    }
    ```
 
-2. **Update migration default** (if different):
+2. **Update migration defaults**:
    ```sql
+   -- For runs.kervinapps.com domain
    ALTER TABLE ep_events 
-   ADD COLUMN app_name VARCHAR(50) DEFAULT 'gayrunclub' AFTER is_public;
+   ADD COLUMN app_name VARCHAR(50) DEFAULT 'runs' AFTER is_public;
+   
+   -- Or if you want gayrunclub as default:
+   -- ALTER TABLE ep_events 
+   -- ADD COLUMN app_name VARCHAR(50) DEFAULT 'gayrunclub' AFTER is_public;
    ```
 
-3. **Update default in code** (if different):
+3. **Update existing events** (choose based on your preference):
+   ```sql
+   -- Option 1: Set all existing to 'runs'
+   UPDATE ep_events 
+   SET app_name = 'runs' 
+   WHERE app_name IS NULL;
+   
+   -- Option 2: Set all existing to 'gayrunclub'
+   -- UPDATE ep_events 
+   -- SET app_name = 'gayrunclub' 
+   -- WHERE app_name IS NULL;
+   ```
+
+4. **Update default in code** (match your migration default):
    ```javascript
-   appName: appName || 'gayrunclub', // Instead of 'eplanner'
+   // In databaseClient.js
+   appName: appName || 'runs', // Match your migration default
+   
+   // In server.js (local development)
+   let appName = 'runs'; // Default, match your migration default
+   if (hostLower.includes('gayrunclub')) {
+     appName = 'gayrunclub';
+   } else if (hostLower.includes('runs.kervinapps.com') || hostLower === 'runs.kervinapps.com') {
+     appName = 'runs';
+   }
    ```
 
-4. **Check table name**: Verify the events table is named `ep_events` or adjust accordingly
+5. **Check table name**: Verify the events table is named `ep_events` or adjust accordingly (may be `gr_events` or similar)
+
+### Domain Detection Logic for Gay Run Club
+
+**Key Pattern**: Check most specific domain (`gayrunclub`) BEFORE generic domain (`runs`):
+
+```javascript
+// ✅ CORRECT - Specific first
+if (hostLower.includes('gayrunclub')) {
+  return 'gayrunclub'; // More specific
+}
+if (hostLower.includes('runs')) {
+  return 'runs'; // Generic
+}
+
+// ❌ WRONG - Generic first
+if (hostLower.includes('runs')) {
+  return 'runs'; // This would match 'gayrunclub' too!
+}
+if (hostLower.includes('gayrunclub')) {
+  return 'gayrunclub'; // Never reached
+}
+```
+
+**Why**: `hostLower.includes('runs')` would return `true` for `'gayrunclub.kervinapps.com'` because it contains the substring 'runs'.
 
 ---
 
@@ -431,6 +514,18 @@ if (hostLower.includes('generic-domain')) return 'generic-domain';
 return 'default';
 ```
 
+**Gay Run Club Example**:
+```javascript
+// ✅ CORRECT - Most specific first
+if (hostLower.includes('gayrunclub')) return 'gayrunclub';
+if (hostLower.includes('runs')) return 'runs';
+return 'runs'; // Default
+
+// ❌ WRONG - Generic first (would match both)
+if (hostLower.includes('runs')) return 'runs'; // Matches 'gayrunclub' too!
+if (hostLower.includes('gayrunclub')) return 'gayrunclub'; // Never reached
+```
+
 ### Place Name Extraction Pattern
 ```javascript
 // Check fields in priority order
@@ -472,10 +567,11 @@ if (appName) {
 
 ## Questions to Ask Before Starting
 
-1. What is the domain name for this application? (e.g., `gayrunclub.kervinapps.com`)
-2. What should the default `app_name` be? (e.g., `'gayrunclub'`)
-3. What is the events table name? (e.g., `ep_events` or `gr_events`)
-4. Are there existing events that need to be updated? (Yes - run UPDATE query)
+1. What are the domain names for this application? (e.g., `runs.kervinapps.com` and `gayrunclub.kervinapps.com`)
+2. What should the default `app_name` be? (e.g., `'runs'` or `'gayrunclub'`)
+3. How should existing events be categorized? (All to `'runs'`, all to `'gayrunclub'`, or manual assignment)
+4. What is the events table name? (e.g., `ep_events` or `gr_events`)
+5. Are there existing events that need to be updated? (Yes - run UPDATE query)
 
 ---
 
