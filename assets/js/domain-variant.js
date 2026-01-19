@@ -15,7 +15,10 @@
    * Check if current domain matches LGBTQ domain
    */
   function isLGBTQDomain() {
-    return window.location.hostname === LGBTQ_DOMAIN;
+    const hostname = window.location.hostname.toLowerCase();
+    return hostname === LGBTQ_DOMAIN || 
+           hostname === 'www.' + LGBTQ_DOMAIN ||
+           hostname.includes('to-lgbtq');
   }
 
   /**
@@ -32,32 +35,48 @@
     if (isLGBTQDomain()) {
       const findGroupButton = document.getElementById('hero-find-group-btn');
       if (findGroupButton) {
-        findGroupButton.href = WHATSAPP_GROUP_LINK;
+        // Update href using setAttribute for reliability
+        findGroupButton.setAttribute('href', WHATSAPP_GROUP_LINK);
+        findGroupButton.href = WHATSAPP_GROUP_LINK; // Also set directly as fallback
+        
         // Add target="_blank" and rel for external link
-        findGroupButton.target = '_blank';
-        findGroupButton.rel = 'noopener noreferrer';
+        findGroupButton.setAttribute('target', '_blank');
+        findGroupButton.setAttribute('rel', 'noopener noreferrer');
+        
         // Add WhatsApp icon before the text
         const whatsappIcon = document.createElement('img');
-        whatsappIcon.src = 'assets/images/whatsapp-icon.svg';
+        whatsappIcon.src = 'assets/images/wAppII.png';
         whatsappIcon.alt = 'WhatsApp';
         whatsappIcon.style.width = '20px';
         whatsappIcon.style.height = '20px';
         whatsappIcon.style.verticalAlign = 'middle';
         whatsappIcon.style.marginRight = '6px';
         whatsappIcon.style.display = 'inline-block';
+        
         // Clear existing content and add icon + text
         findGroupButton.innerHTML = '';
         findGroupButton.appendChild(whatsappIcon);
         findGroupButton.appendChild(document.createTextNode(' Find your group'));
+        
+        // Ensure href is set after innerHTML manipulation
+        findGroupButton.href = WHATSAPP_GROUP_LINK;
+        findGroupButton.setAttribute('href', WHATSAPP_GROUP_LINK);
+      } else {
+        console.warn('[Domain Variant] Could not find hero-find-group-btn element');
       }
     }
   }
 
-  // Run when DOM is ready
+  // Run when DOM is ready, with a small delay to ensure all scripts have run
+  function init() {
+    // Small delay to ensure DOM is fully ready and other scripts have run
+    setTimeout(updateButtonsForDomain, 100);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateButtonsForDomain);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
     // DOM already loaded
-    updateButtonsForDomain();
+    init();
   }
 })();
