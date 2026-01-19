@@ -69,6 +69,12 @@ function getAppName(event) {
   const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
   const hostLower = host.toLowerCase();
   
+  // Check for to-lgbtq domain first (more specific)
+  if (hostLower.includes('to-lgbtq')) {
+    return 'to-lgbtq';
+  }
+  
+  // Check for eplanner domain
   if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
     return 'eplanner';
   }
