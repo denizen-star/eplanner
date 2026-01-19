@@ -50,8 +50,8 @@
         const whatsappIcon = document.createElement('img');
         whatsappIcon.src = 'assets/images/wAppII.png';
         whatsappIcon.alt = 'WhatsApp';
-        whatsappIcon.style.width = '20px';
-        whatsappIcon.style.height = '20px';
+        whatsappIcon.style.width = '22px';
+        whatsappIcon.style.height = '22px';
         whatsappIcon.style.verticalAlign = 'middle';
         whatsappIcon.style.marginRight = '8px';
         whatsappIcon.style.display = 'inline-block';
