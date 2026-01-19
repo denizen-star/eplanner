@@ -842,11 +842,25 @@ async function saveEventEdit(event) {
   const errorDiv = document.getElementById('editError');
   errorDiv.style.display = 'none';
 
+  console.log('[MANAGE] Sending update request:', {
+    runId,
+    formData: {
+      ...formData,
+      picture: formData.picture ? `[base64 image, ${formData.picture.length} chars]` : undefined
+    }
+  });
+
   try {
     const response = await fetch(`/api/runs/${runId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
+    });
+
+    console.log('[MANAGE] Response received:', {
+      status: response.status,
+      ok: response.ok,
+      statusText: response.statusText
     });
 
     const data = await response.json();

@@ -740,6 +740,18 @@ app.put('/api/runs/:runId', async (req, res) => {
     const { runId } = req.params;
     const { location, pacerName, title, dateTime, maxParticipants, coordinates, picture, description } = req.body;
 
+    console.log('[RUN UPDATE] Request received:', {
+      runId,
+      bodyKeys: Object.keys(req.body),
+      location: location ? location.substring(0, 50) : location,
+      pacerName: pacerName,
+      title: title,
+      dateTime: dateTime,
+      maxParticipants: maxParticipants,
+      hasPicture: !!picture,
+      description: description ? description.substring(0, 50) : description
+    });
+
     // Verify run exists
     const existingRun = await runs.getById(runId);
     if (!existingRun) {
@@ -770,6 +782,19 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (coordinates !== undefined) updates.coordinates = coordinates;
     if (picture !== undefined) updates.picture = picture;
     if (description !== undefined) updates.description = description;
+    
+    console.log('[RUN UPDATE] Updates prepared:', {
+      updateKeys: Object.keys(updates),
+      hasLocation: updates.location !== undefined,
+      hasPlannerName: updates.plannerName !== undefined,
+      plannerNameValue: updates.plannerName,
+      hasTitle: updates.title !== undefined,
+      hasDateTime: updates.dateTime !== undefined,
+      dateTimeValue: updates.dateTime,
+      hasMaxParticipants: updates.maxParticipants !== undefined,
+      hasPicture: updates.picture !== undefined,
+      hasDescription: updates.description !== undefined
+    });
     if (maxParticipants !== undefined) {
       if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
         return res.status(400).json({ error: 'Max participants must be a positive integer' });
@@ -821,7 +846,19 @@ app.put('/api/runs/:runId', async (req, res) => {
     console.log('[RUN UPDATE] Will send emails:', Object.keys(changes).length > 0);
 
     // Update in database
+    console.log('[RUN UPDATE] Calling runs.update with:', {
+      runId,
+      updateKeys: Object.keys(updates),
+      updatesCount: Object.keys(updates).length
+    });
     const updatedRun = await runs.update(runId, updates);
+    console.log('[RUN UPDATE] Database update completed. Updated run:', {
+      id: updatedRun?.id,
+      location: updatedRun?.location?.substring(0, 50),
+      plannerName: updatedRun?.plannerName,
+      title: updatedRun?.title,
+      dateTime: updatedRun?.dateTime
+    });
 
     // Send update emails if there were changes (non-blocking)
     if (Object.keys(changes).length > 0) {

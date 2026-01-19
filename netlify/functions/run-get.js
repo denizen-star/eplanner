@@ -17,7 +17,27 @@ exports.handler = async (event) => {
   const runIdIndex = pathParts.indexOf('runs');
   const runId = runIdIndex >= 0 && pathParts[runIdIndex + 1] ? pathParts[runIdIndex + 1] : null;
   
-  console.log('[RUN GET] Handler invoked for runId:', runId, 'path:', event.path);
+  console.log('[RUN GET] Handler invoked for runId:', runId, 'path:', event.path, 'method:', event.httpMethod);
+  
+  // If method is PUT or PATCH, delegate to server.js wrapper (handles updates)
+  if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
+    const serverless = require('serverless-http');
+    const path = require('path');
+    process.env.NETLIFY = 'true';
+    
+    const app = require(path.join(__dirname, '../../server'));
+    const handler = serverless(app, {
+      binary: ['image/*', 'application/pdf']
+    });
+    
+    console.log('[RUN GET] Delegating PUT/PATCH to server.js wrapper');
+    return await handler(event);
+  }
+  
+  // Handle GET requests only
+  if (event.httpMethod !== 'GET') {
+    return jsonResponse(405, { error: 'Method Not Allowed. Use PUT for updates.' });
+  }
   
   if (!runId) {
     console.error('[RUN GET] No runId provided');
