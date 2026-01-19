@@ -246,8 +246,10 @@ body {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background: rgba(247, 243, 237, 0.85); /* Semi-transparent cream */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 243, 237, 0.5); /* Cream accent border */
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   min-width: 220px;

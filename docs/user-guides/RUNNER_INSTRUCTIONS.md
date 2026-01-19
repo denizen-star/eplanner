@@ -1,11 +1,11 @@
-# Guide for Participants: Signing Up for an Event
+# Guide for Attendees: Signing Up for an Event
 
-Welcome to Event Planner! This guide will help you sign up for an event. The signup process is quick and easy, and you'll be ready to join your fellow participants in no time.
+Welcome to Event Planner! This guide will help you sign up for an event. The signup process is quick and easy, and you'll be ready to join your fellow attendees in no time.
 
 ## Overview
 
 To sign up for an event, you'll need:
-- A signup link from the planner (the person organizing the event)
+- A signup link from the activity coordinator (the person organizing the event)
 - Your name and phone number (required)
 - A few minutes to read and accept the waiver
 
@@ -15,7 +15,7 @@ The signup process takes just a few minutes and ensures you're registered and ha
 
 ### Step 1: Access the Signup Link
 
-1. You'll receive a signup link from the planner organizing the event
+1. You'll receive a signup link from the activity coordinator organizing the event
    - This link may be shared via WhatsApp, Instagram, email, or other communication channels
    - The link will look something like: `https://yourwebsite.com/signup.html?id=abc123`
    - When shared on social media, the link will show a preview with event details (thanks to Open Graph tags)
@@ -23,23 +23,23 @@ The signup process takes just a few minutes and ensures you're registered and ha
 2. Click on the signup link or copy and paste it into your web browser
 
 3. The signup page will load and display information about the event
-   - You'll see the event title (if the planner provided one), location, planner name, date/time, and spots available
+   - You'll see the event title (if the activity coordinator provided one), location, activity coordinator name, date/time, and spots available
 
-[SCREENSHOT: Signup page showing run details - run title, location, pacer name, date/time, and spots available]
-[SCREENSHOT: Social media preview showing Open Graph card with run information]
+[SCREENSHOT: Signup page showing event details - event title, location, activity coordinator name, date/time, and spots available]
+[SCREENSHOT: Social media preview showing Open Graph card with event information]
 
 ### Step 2: Review Event Details
 
 Before signing up, take a moment to review the event information displayed on the page:
 
 - **Location**: Where the event will start
-- **Planner**: The name of the person organizing the event
+- **Activity Coordinator**: The name of the person organizing the event
 - **Date & Time**: When the event is scheduled
 - **Spots Available**: How many spots are remaining (e.g., "5 of 10")
 
 You'll also see a map showing the exact location where the event will start.
 
-[SCREENSHOT: Map display showing the run location with a pin marker]
+[SCREENSHOT: Map display showing the event location with a pin marker]
 
 **Important**: Make sure the date, time, and location work for you before proceeding with signup.
 
@@ -57,8 +57,8 @@ The registration form has several fields. Here's what you need to know:
 #### Phone Number *
 - Enter your phone number
 - This field is required
-- **Privacy Note**: We will only use your number to verify you are human and for WhatsApp messages about this run
-- The pacer may use this to contact you about the run
+- **Privacy Note**: We will only use your number to verify you are human and for WhatsApp messages about this event
+- The activity coordinator may use this to contact you about the event
 - Format: You can enter it with or without dashes (e.g., "305-555-1234" or "3055551234")
 
 [SCREENSHOT: Phone number field in the registration form with privacy notice visible]
@@ -66,14 +66,14 @@ The registration form has several fields. Here's what you need to know:
 #### Email Address (Optional)
 - Enter your email address if you'd like to receive updates via email
 - This field is optional - you can leave it blank if you prefer
-- If provided, the pacer may use this to contact you
+- If provided, the activity coordinator may use this to contact you
 
 [SCREENSHOT: Email field showing it's optional]
 
 #### Instagram Handle (Optional)
 - Enter your Instagram username (without the @ symbol)
 - This field is optional
-- Example: If your Instagram is @runningmike, enter "runningmike"
+- Example: If your Instagram is @eventmike, enter "eventmike"
 - This helps the community connect on social media
 
 [SCREENSHOT: Instagram field showing it's optional with example]
@@ -106,13 +106,13 @@ Before you can complete your registration, you must read and accept the Electron
 
 [SCREENSHOT: Sign Up button enabled and ready to click]
 
-4. After successful submission, you'll see a success message: **"Successfully signed up for the run!"**
+4. After successful submission, you'll see a success message: **"Successfully signed up for the event!"**
 
 [SCREENSHOT: Success message displayed after registration]
 
-5. The form will reset, and the run information will update to show the new number of spots available
+5. The form will reset, and the event information will update to show the new number of spots available
 
-**Congratulations!** You're now registered for the run. The pacer will be able to see your information in their management dashboard.
+**Congratulations!** You're now registered for the event. The activity coordinator will be able to see your information in their management dashboard.
 
 ## Additional Features
 
@@ -120,7 +120,7 @@ Before you can complete your registration, you must read and accept the Electron
 
 The platform is fully mobile-friendly:
 - **Hamburger Menu**: On mobile devices, tap the ☰ icon in the top right to access the menu
-- **User Guides**: Access the Runner Guide directly from the navigation menu
+- **User Guides**: Access the Participant Guide directly from the navigation menu
 - **Touch-Optimized**: All form fields and buttons are optimized for mobile use
 
 ### Quick Guides on Page
@@ -132,38 +132,38 @@ The signup page includes an inline quick guide:
 
 ### Social Sharing
 
-When pacers share signup links on social media:
-- The link will automatically show a preview card with run details
-- Includes run title, location, date/time, and other information
-- Makes it easier to identify and share runs on platforms like WhatsApp, Instagram, and Facebook
+When activity coordinators share signup links on social media:
+- The link will automatically show a preview card with event details
+- Includes event title, location, date/time, and other information
+- Makes it easier to identify and share events on platforms like WhatsApp, Instagram, and Facebook
 
 ### Privacy and Security
 
-- **Phone Number Privacy**: Your phone number is only used for verification and WhatsApp communication about the run
+- **Phone Number Privacy**: Your phone number is only used for verification and WhatsApp communication about the event
 - **Secure Registration**: All data is securely stored and protected
 - **Waiver Protection**: Your waiver acceptance is recorded for safety and legal compliance
 
-## Tips for Runners
+## Tips for Attendees
 
 ### Before Signing Up
 
-- **Check your schedule**: Make sure you're available for the date and time of the run
-- **Review the location**: Ensure you know where the run is starting and how to get there
-- **Check spots available**: If the run is full, you may need to wait for another run or contact the pacer
+- **Check your schedule**: Make sure you're available for the date and time of the event
+- **Review the location**: Ensure you know where the event is starting and how to get there
+- **Check spots available**: If the event is full, you may need to wait for another event or contact the activity coordinator
 
 ### After Signing Up
 
-- **Save the date**: Add the run to your calendar
+- **Save the date**: Add the event to your calendar
 - **Plan your route**: Know how you're getting to the starting location
 - **Arrive on time**: Be punctual - the group will likely start on time
-- **Bring essentials**: Water, appropriate running gear, and a positive attitude!
+- **Bring essentials**: Water, appropriate gear for the activity, and a positive attitude!
 
 ### Best Practices
 
 - **Be respectful**: Follow the code of conduct and treat all participants with respect
-- **Communicate**: If you need to cancel, try to let the pacer know in advance
-- **Stay safe**: Follow traffic laws and safety guidelines during the run
-- **Have fun**: Enjoy the community and the run!
+- **Communicate**: If you need to cancel, try to let the activity coordinator know in advance
+- **Stay safe**: Follow safety guidelines during the event
+- **Have fun**: Enjoy the community and the event!
 
 ## Troubleshooting
 
@@ -171,14 +171,14 @@ When pacers share signup links on social media:
 
 - Make sure you copied the entire link correctly
 - Try opening the link in a different web browser
-- Check if the link has expired or if the run has been cancelled
-- Contact the pacer for a new link if needed
+- Check if the link has expired or if the event has been cancelled
+- Contact the activity coordinator for a new link if needed
 
-### The run shows as "Full"
+### The event shows as "Full"
 
-- The run has reached its maximum number of participants
-- You may see a message saying "Run is Full" instead of the signup form
-- Contact the pacer to see if there's a waiting list or if another run is scheduled
+- The event has reached its maximum number of participants
+- You may see a message saying "Event is Full" instead of the signup form
+- Contact the activity coordinator to see if there's a waiting list or if another event is scheduled
 
 ### I can't see the map
 
@@ -190,25 +190,25 @@ When pacers share signup links on social media:
 
 - Make sure you've filled in your name and phone number (required fields)
 - Check that you've accepted the waiver by checking the checkbox
-- Verify that spots are still available (the run may have filled up)
+- Verify that spots are still available (the event may have filled up)
 - Try refreshing the page and filling out the form again
 
 ### I need to change my information after signing up
 
-- Contact the pacer directly to update your information
+- Contact the activity coordinator directly to update your information
 - If you're an administrator, you can manage signups through the admin dashboard
 
 ### I accidentally signed up twice
 
-- Contact the pacer - they can remove duplicate signups from their management dashboard
+- Contact the activity coordinator - they can remove duplicate signups from their management dashboard
 
 ## WhatsApp Quick Guide
 
-🏃 **Quick Guide: Signing Up for a Run**
+📱 **Quick Guide: Signing Up for an Event**
 
-1️⃣ Click the signup link from the pacer
+1️⃣ Click the signup link from the activity coordinator
 
-2️⃣ Review run details:
+2️⃣ Review event details:
    • Location & map
    • Date & time
    • Spots available
@@ -223,11 +223,11 @@ When pacers share signup links on social media:
 
 5️⃣ Click "Sign Up"
 
-✅ You're registered! The pacer will see your info.
+✅ You're registered! The activity coordinator will see your info.
 
 💡 Tip: Save the date in your calendar and arrive on time!
 
 ---
 
-*Need help? Contact the pacer or check the full guide for detailed instructions.*
+*Need help? Contact the activity coordinator or check the full guide for detailed instructions.*
 

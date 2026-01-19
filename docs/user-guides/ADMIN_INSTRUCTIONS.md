@@ -13,7 +13,7 @@ The Admin Dashboard provides you with:
 - Delete events
 - Remove individual signups
 - **Event Report**: View and sort all events with detailed statistics
-- **Participants Report**: View participant participation statistics and engagement metrics
+- **Attendees Report**: View attendee participation statistics and engagement metrics
 
 This guide will walk you through each of these features in detail.
 
@@ -27,7 +27,7 @@ This guide will walk you through each of these features in detail.
 **Note**: The Admin Dashboard is organized into collapsible sections that you can expand or collapse as needed:
 - **Admin Dashboard**: Main event management interface
 - **Event Report**: Detailed report of all events with sorting capabilities
-- **Participants Report**: Statistics about participant participation
+- **Attendees Report**: Statistics about attendee participation
 
 [SCREENSHOT: Admin Dashboard showing collapsible sections]
 [SCREENSHOT: Mobile view showing hamburger menu]
@@ -41,15 +41,15 @@ The main Admin Dashboard section contains the event management interface. Click 
 The Admin Dashboard displays all events in a compact list format. Each event shows:
 
 - **Location**: Where the event is taking place
-- **Event Title**: The optional title given to the event (if provided by the planner)
-- **Planner Name**: The person organizing the event
+- **Event Title**: The optional title given to the event (if provided by the activity coordinator)
+- **Activity Coordinator Name**: The person organizing the event
 - **Date & Time**: When the event is scheduled
 - **Signups**: Current number of signups vs. maximum participants (e.g., "5 / 10")
 - **Status**: "Open" (spots available) or "Full" (no spots remaining)
 
 Events are sorted by date/time, with the newest events appearing first.
 
-[SCREENSHOT: List of runs showing all the information columns]
+[SCREENSHOT: List of events showing all the information columns]
 
 ### Understanding the Event List
 
@@ -57,47 +57,47 @@ Events are sorted by date/time, with the newest events appearing first.
 - **Red "Full" badge**: The event has reached its maximum capacity
 - Each row is clickable and contains action buttons
 
-## Creating a New Run
+## Creating a New Event
 
-You can create a new run directly from the Admin Dashboard:
+You can create a new event directly from the Admin Dashboard:
 
 1. Expand the **"Admin Dashboard"** section if it's collapsed
-2. Click the **"Create New Run"** button at the top of the dashboard
+2. Click the **"Create New Event"** button at the top of the dashboard
 3. This will take you to the "Coordinate an Event" page
-4. Follow the same process as pacers (see the Pacer Instructions guide for detailed steps)
-5. After creating the run, you'll be returned to the Admin Dashboard where you can see your new run
+4. Follow the same process as activity coordinators (see the Activity Coordinator Instructions guide for detailed steps)
+5. After creating the event, you'll be returned to the Admin Dashboard where you can see your new event
 
-[SCREENSHOT: "Create New Run" button in the Admin Dashboard section]
+[SCREENSHOT: "Create New Event" button in the Admin Dashboard section]
 
-**Note**: Creating a run from the Admin Dashboard works exactly the same as when pacers create runs. You'll receive signup and management links just like any other pacer.
+**Note**: Creating an event from the Admin Dashboard works exactly the same as when activity coordinators create events. You'll receive signup and management links just like any other activity coordinator.
 
-## Viewing Run Details and Signups
+## Viewing Event Details and Signups
 
-For each run in the list, you can view detailed information and signups:
+For each event in the list, you can view detailed information and signups:
 
 ### Viewing Links
 
-1. Click the **"Links"** button on any run row
+1. Click the **"Links"** button on any event row
 2. A dropdown will expand showing:
-   - **Signup Link**: The public link for runners to register
-   - **Management Link**: The private link for the pacer to manage signups
+   - **Signup Link**: The public link for attendees to register
+   - **Management Link**: The private link for the activity coordinator to manage signups
 3. You can click on either link to open it, or click the **"Copy"** button to copy the link to your clipboard
 
 [SCREENSHOT: Links dropdown showing both signup and management links with copy buttons]
 
 ### Viewing Signups
 
-1. Click the **"Signups"** button on any run row
-2. A dropdown will expand showing a list of all registered runners
+1. Click the **"Signups"** button on any event row
+2. A dropdown will expand showing a list of all registered attendees
 3. Each signup displays:
-   - Runner's name
+   - Attendee's name
    - Phone number (clickable to call)
    - Email address (if provided)
    - Instagram handle (if provided, clickable to view profile)
    - Signup date and time
    - Waiver acceptance status
 
-[SCREENSHOT: Signups dropdown showing list of registered runners with all their information]
+[SCREENSHOT: Signups dropdown showing list of registered attendees with all their information]
 
 **Tip**: Use the "Links" and "Signups" buttons to quickly access information without leaving the dashboard.
 
@@ -129,9 +129,9 @@ You can edit any run's details directly from the Admin Dashboard:
 
 ## Copying Links
 
-You can easily copy links for any run:
+You can easily copy links for any event:
 
-1. Click the **"Links"** button on a run
+1. Click the **"Links"** button on an event
 2. In the dropdown, you'll see both the Signup Link and Management Link
 3. Click the **"Copy"** button next to the link you want to copy
 4. A confirmation will appear that the link has been copied to your clipboard
@@ -140,112 +140,112 @@ You can easily copy links for any run:
 [SCREENSHOT: Copy button being clicked with confirmation message]
 
 **Use Cases:**
-- Share the signup link with runners if the pacer needs help distributing it
-- Provide the management link to a pacer who lost their original link
+- Share the signup link with attendees if the activity coordinator needs help distributing it
+- Provide the management link to an activity coordinator who lost their original link
 - Copy links for documentation or communication purposes
 
-## Deleting a Run
+## Deleting an Event
 
-If you need to remove a run from the system:
+If you need to remove an event from the system:
 
-1. Click the **"Delete"** button on the run you want to remove
-2. A confirmation dialog will appear asking: "Are you sure you want to delete this run? This action cannot be undone."
-3. Click **"OK"** to confirm deletion, or **"Cancel"** to keep the run
+1. Click the **"Delete"** button on the event you want to remove
+2. A confirmation dialog will appear asking: "Are you sure you want to delete this event? This action cannot be undone."
+3. Click **"OK"** to confirm deletion, or **"Cancel"** to keep the event
 
 [SCREENSHOT: Delete confirmation dialog]
 
-**Warning**: Deleting a run is permanent and cannot be undone. All signups associated with that run will also be deleted.
+**Warning**: Deleting an event is permanent and cannot be undone. All signups associated with that event will also be deleted.
 
 **When to Delete:**
-- A run was created by mistake
-- A run needs to be cancelled and removed from the system
-- Cleaning up old or expired runs
+- An event was created by mistake
+- An event needs to be cancelled and removed from the system
+- Cleaning up old or expired events
 
-**Alternative**: Instead of deleting, you could edit the run to change the date or other details if you just need to modify it.
+**Alternative**: Instead of deleting, you could edit the event to change the date or other details if you just need to modify it.
 
 ## Managing Individual Signups
 
 While you can view signups from the Admin Dashboard, to delete individual signups you'll need to:
 
 1. Click the **"Signups"** button to view the list of signups
-2. Click on the **Management Link** for that run (or use the "Links" button to get it)
-3. This will take you to the run management page
+2. Click on the **Management Link** for that event (or use the "Links" button to get it)
+3. This will take you to the event management page
 4. Expand the "Signups" section
-5. Click the **"Delete"** button next to the runner you want to remove
+5. Click the **"Delete"** button next to the attendee you want to remove
 6. Confirm the deletion
 
 [SCREENSHOT: Management page showing delete button next to a signup]
 
-**Note**: The Admin Dashboard shows signups in read-only mode. To delete individual signups, use the management link for that specific run.
+**Note**: The Admin Dashboard shows signups in read-only mode. To delete individual signups, use the management link for that specific event.
 
-## Run Report Section
+## Event Report Section
 
-The Run Report provides a comprehensive view of all runs with advanced sorting and filtering capabilities.
+The Event Report provides a comprehensive view of all events with advanced sorting and filtering capabilities.
 
-### Accessing the Run Report
+### Accessing the Event Report
 
-1. Click on the **"Run Report"** section header to expand it
-2. The report will load and display all runs in a table format
+1. Click on the **"Event Report"** section header to expand it
+2. The report will load and display all events in a table format
 
-[SCREENSHOT: Run Report section expanded]
+[SCREENSHOT: Event Report section expanded]
 
-### Run Report Features
+### Event Report Features
 
-The Run Report table includes the following columns:
-- **City**: The city where the run is located
-- **Created (EST)**: When the run was created
-- **Scheduled Date**: When the run is scheduled to occur
-- **Pacer**: The name of the pacer organizing the run
-- **Status**: Whether the run is "Open" or "Full"
-- **Title**: The optional run title (if provided)
+The Event Report table includes the following columns:
+- **City**: The city where the event is located
+- **Created (EST)**: When the event was created
+- **Scheduled Date**: When the event is scheduled to occur
+- **Activity Coordinator**: The name of the activity coordinator organizing the event
+- **Status**: Whether the event is "Open" or "Full"
+- **Title**: The optional event title (if provided)
 - **Location**: The full location address
-- **Manage**: Link to manage the run
+- **Manage**: Link to manage the event
 
-### Sorting the Run Report
+### Sorting the Event Report
 
 You can sort the report by clicking on any column header:
 - Click **"City"** to sort by location
 - Click **"Created (EST)"** to sort by creation date
-- Click **"Scheduled Date"** to sort by run date
-- Click **"Pacer"** to sort by pacer name
+- Click **"Scheduled Date"** to sort by event date
+- Click **"Activity Coordinator"** to sort by activity coordinator name
 - Click **"Status"** to sort by availability
 
 Click the same header again to reverse the sort order. An arrow indicator (↑ or ↓) shows the current sort direction.
 
-[SCREENSHOT: Run Report table with sortable column headers]
+[SCREENSHOT: Event Report table with sortable column headers]
 
-## Runners Report Section
+## Attendees Report Section
 
-The Runners Report provides detailed statistics about runner participation and engagement.
+The Attendees Report provides detailed statistics about attendee participation and engagement.
 
-### Accessing the Runners Report
+### Accessing the Attendees Report
 
-1. Click on the **"Runners Report"** section header to expand it
-2. The report will load and display all runners with their participation statistics
+1. Click on the **"Attendees Report"** section header to expand it
+2. The report will load and display all attendees with their participation statistics
 
-[SCREENSHOT: Runners Report section expanded]
+[SCREENSHOT: Attendees Report section expanded]
 
-### Runners Report Features
+### Attendees Report Features
 
-The Runners Report shows:
-- **Runner Name**: The name of the runner
-- **Email**: The runner's email address (if provided)
-- **Phone Number**: The runner's phone number (used as unique identifier)
-- **# of Runs**: Total number of runs the runner has signed up for
-- **# of Pacers**: Number of different pacers the runner has run with
+The Attendees Report shows:
+- **Attendee Name**: The name of the attendee
+- **Email**: The attendee's email address (if provided)
+- **Phone Number**: The attendee's phone number (used as unique identifier)
+- **# of Events**: Total number of events the attendee has signed up for
+- **# of Activity Coordinators**: Number of different activity coordinators the attendee has participated with
 
-### Sorting the Runners Report
+### Sorting the Attendees Report
 
 You can sort the report by clicking on any column header:
-- Click **"Runner Name"** to sort alphabetically by name
+- Click **"Attendee Name"** to sort alphabetically by name
 - Click **"Email"** to sort by email address
 - Click **"Phone Number"** to sort by phone
-- Click **"# of Runs"** to sort by participation (most active runners first)
-- Click **"# of Pacers"** to sort by diversity of pacers
+- Click **"# of Events"** to sort by participation (most active attendees first)
+- Click **"# of Activity Coordinators"** to sort by diversity of activity coordinators
 
-[SCREENSHOT: Runners Report table showing runner statistics]
+[SCREENSHOT: Attendees Report table showing attendee statistics]
 
-**Note**: Phone number is used as the unique identifier for tracking runner participation across multiple runs.
+**Note**: Phone number is used as the unique identifier for tracking attendee participation across multiple events.
 
 ## Refreshing the Dashboard
 
@@ -255,8 +255,8 @@ To see the latest updates:
 2. Click the **"Refresh"** button at the top of the dashboard
 3. The page will reload and show the most current information
 4. This is useful if:
-   - New runs have been created
-   - Signups have been added to runs
+   - New events have been created
+   - Signups have been added to events
    - You want to see updated status badges
 
 [SCREENSHOT: Refresh button location in Admin Dashboard section]
@@ -278,45 +278,45 @@ The platform is fully mobile-friendly:
 - **User Guides**: Access all instruction guides directly from the navigation menu
 - **Touch-Optimized**: All buttons and tables are optimized for mobile interaction
 
-### Run Title Display
+### Event Title Display
 
-Runs may now include an optional title:
-- Titles appear in the run list and reports
-- Help identify runs more easily
+Events may now include an optional title:
+- Titles appear in the event list and reports
+- Help identify events more easily
 - Displayed prominently in the signup pages
-- Useful for organizing and finding specific runs
+- Useful for organizing and finding specific events
 
 ## Tips for Administrators
 
 ### Daily Management
 
-- **Check regularly**: Review the dashboard daily to monitor run activity
-- **Monitor capacity**: Keep an eye on runs that are getting full
-- **Verify information**: Ensure run details (location, time) are accurate
-- **Stay organized**: Use the dashboard to keep track of all upcoming runs
+- **Check regularly**: Review the dashboard daily to monitor event activity
+- **Monitor capacity**: Keep an eye on events that are getting full
+- **Verify information**: Ensure event details (location, time) are accurate
+- **Stay organized**: Use the dashboard to keep track of all upcoming events
 
 ### Best Practices
 
-- **Verify locations**: When editing runs, always check that the map shows the correct location
-- **Communicate changes**: If you edit a run, consider notifying the pacer and registered runners
-- **Backup important data**: Before deleting runs, ensure you have any needed information saved
-- **Help pacers**: Be ready to assist pacers who need help accessing their management links
+- **Verify locations**: When editing events, always check that the map shows the correct location
+- **Communicate changes**: If you edit an event, consider notifying the activity coordinator and registered attendees
+- **Backup important data**: Before deleting events, ensure you have any needed information saved
+- **Help activity coordinators**: Be ready to assist activity coordinators who need help accessing their management links
 
-### Working with Pacers
+### Working with Activity Coordinators
 
-- **Respect pacer autonomy**: Pacers manage their own runs through their management links
-- **Provide support**: Help pacers who have lost their management links by providing them from the dashboard
-- **Coordinate when needed**: Use the dashboard to coordinate between multiple pacers and runs
+- **Respect activity coordinator autonomy**: Activity coordinators manage their own events through their management links
+- **Provide support**: Help activity coordinators who have lost their management links by providing them from the dashboard
+- **Coordinate when needed**: Use the dashboard to coordinate between multiple activity coordinators and events
 
 ### Data Management
 
-- **Regular cleanup**: Periodically review and delete old or cancelled runs
-- **Monitor signups**: Keep an eye on signup patterns to help plan future runs
-- **Track capacity**: Use the dashboard to understand which runs are popular and adjust accordingly
+- **Regular cleanup**: Periodically review and delete old or cancelled events
+- **Monitor signups**: Keep an eye on signup patterns to help plan future events
+- **Track capacity**: Use the dashboard to understand which events are popular and adjust accordingly
 
 ## Troubleshooting
 
-### I can't see any runs in the dashboard
+### I can't see any events in the dashboard
 
 - Click the **"Refresh"** button to reload the data
 - Check your internet connection
@@ -331,12 +331,12 @@ Runs may now include an optional title:
 - Ensure the location is valid (the map should display it)
 - Try refreshing the page and editing again
 
-### I can't delete a run
+### I can't delete an event
 
 - Make sure you clicked "OK" in the confirmation dialog
 - Check your internet connection
 - Try refreshing the page and attempting again
-- Some runs may be protected from deletion (contact technical support if needed)
+- Some events may be protected from deletion (contact technical support if needed)
 
 ### The map isn't showing in the edit form
 
@@ -356,32 +356,32 @@ Runs may now include an optional title:
 
 - Click the **"Refresh"** button to reload the latest data
 - Signups update in real-time, but you may need to refresh to see changes
-- Check the individual run's management link for the most up-to-date signup count
+- Check the individual event's management link for the most up-to-date signup count
 
 ## WhatsApp Quick Guide
 
 👨‍💼 **Quick Guide: Admin Dashboard**
 
-**Viewing Runs:**
-📋 See all runs with status (Open/Full)
+**Viewing Events:**
+📋 See all events with status (Open/Full)
 🔄 Click "Refresh" for latest updates
 
 **Creating Events:**
-➕ Click "Create New Run" button
+➕ Click "Create New Event" button
 📝 Fill form & get signup/management links
 
-**Managing Runs:**
+**Managing Events:**
 🔗 Click "Links" to view/copy signup & management links
-👥 Click "Signups" to see registered runners
-✏️ Click "Edit" to modify run details
-🗑️ Click "Delete" to remove a run
+👥 Click "Signups" to see registered attendees
+✏️ Click "Edit" to modify event details
+🗑️ Click "Delete" to remove an event
 
 **Quick Actions:**
-📋 Copy links to share with pacers/runners
+📋 Copy links to share with activity coordinators/attendees
 👀 Monitor signup counts & capacity
-✅ Verify run details are accurate
+✅ Verify event details are accurate
 
-💡 Tip: Use "Links" button to quickly help pacers who lost their management link!
+💡 Tip: Use "Links" button to quickly help activity coordinators who lost their management link!
 
 ---
 
