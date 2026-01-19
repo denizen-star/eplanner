@@ -57,6 +57,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/runs/:runId/cancel"
+  to = "/.netlify/functions/runs-cancel"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/runs/:runId"
   to = "/.netlify/functions/run-get"
   status = 200
