@@ -44,9 +44,16 @@ exports.handler = async (event) => {
     const runId = runIdIndex >= 0 && pathParts[runIdIndex + 1] ? pathParts[runIdIndex + 1] : null;
     
     // Check if isAdmin is in query params or headers
-    const isAdmin = event.queryStringParameters?.isAdmin === 'true' || event.headers['x-is-admin'] === 'true';
+    const isAdmin = event.queryStringParameters?.isAdmin === 'true' || event.headers['x-is-admin'] === 'true' || event.headers['X-Is-Admin'] === 'true';
 
-    console.log('[RUNS CANCEL] Request received for runId:', runId, 'isAdmin:', isAdmin);
+    console.log('[RUNS CANCEL] Request received:', {
+      path: event.path,
+      pathParts: pathParts,
+      runId: runId,
+      isAdmin: isAdmin,
+      queryStringParameters: event.queryStringParameters,
+      method: event.httpMethod
+    });
 
     if (!runId) {
       console.error('[RUNS CANCEL] Run ID not found in path');
