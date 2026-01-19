@@ -16,16 +16,44 @@ if (window.SessionManager) {
   sessionManager = new window.SessionManager();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize map
+// Initialize map when DOM and scripts are ready
+function initializeMapWhenReady() {
   const mapContainer = document.getElementById('locationMap');
-  if (mapContainer && typeof initMap === 'function') {
+  
+  // Check if all dependencies are loaded
+  const dependenciesReady = typeof L !== 'undefined' && 
+                            typeof initMap === 'function' && 
+                            typeof MIAMI_COORDINATES !== 'undefined';
+  
+  if (mapContainer && dependenciesReady) {
     try {
       initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+      console.log('[COORDINATE] Map initialized successfully');
     } catch (error) {
       console.error('[COORDINATE] Error initializing map:', error);
+      // Retry once after a delay
+      setTimeout(() => {
+        try {
+          initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+        } catch (retryError) {
+          console.error('[COORDINATE] Map initialization failed after retry:', retryError);
+        }
+      }, 500);
     }
+  } else if (mapContainer) {
+    // Dependencies not ready yet, retry after a short delay
+    console.log('[COORDINATE] Waiting for map dependencies...', {
+      hasL: typeof L !== 'undefined',
+      hasInitMap: typeof initMap !== 'undefined',
+      hasMIAMI_COORDINATES: typeof MIAMI_COORDINATES !== 'undefined'
+    });
+    setTimeout(initializeMapWhenReady, 100);
   }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize map (with retry logic for script loading)
+  initializeMapWhenReady();
 
   // Set default datetime to tomorrow at 6:30 PM
   const dateTimeInput = document.getElementById('dateTime');
