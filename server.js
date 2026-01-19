@@ -788,10 +788,22 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (updates.title !== undefined && updates.title !== existingRun.title) {
       changes['Title'] = `${existingRun.title || '(none)'} → ${updates.title || '(none)'}`;
     }
-    if (updates.dateTime !== undefined && updates.dateTime !== existingRun.dateTime) {
-      const oldDate = new Date(existingRun.dateTime).toLocaleString();
-      const newDate = new Date(updates.dateTime).toLocaleString();
-      changes['Date & Time'] = `${oldDate} → ${newDate}`;
+    // Compare dates by converting to ISO strings to handle different formats
+    if (updates.dateTime !== undefined) {
+      const oldDateObj = new Date(existingRun.dateTime);
+      const newDateObj = new Date(updates.dateTime);
+      // Compare timestamps (in milliseconds) to detect actual changes
+      if (oldDateObj.getTime() !== newDateObj.getTime()) {
+        const oldDate = oldDateObj.toLocaleString();
+        const newDate = newDateObj.toLocaleString();
+        changes['Date & Time'] = `${oldDate} → ${newDate}`;
+        console.log('[RUN UPDATE] Date changed detected:', {
+          oldDate: existingRun.dateTime,
+          newDate: updates.dateTime,
+          oldTimestamp: oldDateObj.getTime(),
+          newTimestamp: newDateObj.getTime()
+        });
+      }
     }
     if (updates.maxParticipants !== undefined && updates.maxParticipants !== existingRun.maxParticipants) {
       changes['Max Participants'] = `${existingRun.maxParticipants} → ${updates.maxParticipants}`;
@@ -802,6 +814,9 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (updates.description !== undefined && updates.description !== existingRun.description) {
       changes['Description'] = 'Updated';
     }
+    
+    console.log('[RUN UPDATE] Changes detected:', Object.keys(changes).length > 0 ? changes : 'No changes');
+    console.log('[RUN UPDATE] Will send emails:', Object.keys(changes).length > 0);
 
     // Update in database
     const updatedRun = await runs.update(runId, updates);
@@ -809,8 +824,10 @@ app.put('/api/runs/:runId', async (req, res) => {
     // Send update emails if there were changes (non-blocking)
     if (Object.keys(changes).length > 0) {
       console.log('[RUN UPDATE] Changes detected, sending update emails...');
+      console.log('[RUN UPDATE] Coordinator email:', updatedRun.coordinatorEmail || 'NOT SET');
       try {
         const emailService = new EmailService();
+        console.log('[RUN UPDATE] Email service enabled:', emailService.isEnabled());
         if (emailService.isEnabled()) {
           // Send email to coordinator
           if (updatedRun.coordinatorEmail && updatedRun.coordinatorEmail.trim()) {
@@ -832,7 +849,10 @@ app.put('/api/runs/:runId', async (req, res) => {
           // Send email to all signups with email addresses
           try {
             const allSignups = await signups.getByRunId(runId);
+            console.log('[RUN UPDATE] Total signups:', allSignups.length);
             const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
+            console.log('[RUN UPDATE] Signups with email:', signupsWithEmail.length);
+            console.log('[RUN UPDATE] Signup emails:', signupsWithEmail.map(s => s.email));
             
             if (signupsWithEmail.length > 0) {
               const emailPromises = signupsWithEmail.map(async (signup) => {
