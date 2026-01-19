@@ -1,4 +1,31 @@
 const { runs, signups } = require('../../lib/databaseClient');
+const serverless = require('serverless-http');
+const path = require('path');
+
+// Initialize serverless handler for PUT/PATCH delegation (outside handler to avoid re-initialization)
+let updateHandler = null;
+let updateHandlerError = null;
+function getUpdateHandler() {
+  if (updateHandlerError) {
+    throw updateHandlerError;
+  }
+  if (!updateHandler) {
+    try {
+      process.env.NETLIFY = 'true';
+      console.log('[RUN GET] Initializing update handler...');
+      const app = require(path.join(__dirname, '../../server'));
+      updateHandler = serverless(app, {
+        binary: ['image/*', 'application/pdf']
+      });
+      console.log('[RUN GET] Update handler initialized successfully');
+    } catch (error) {
+      console.error('[RUN GET] Error initializing update handler:', error);
+      updateHandlerError = error;
+      throw error;
+    }
+  }
+  return updateHandler;
+}
 
 function jsonResponse(statusCode, body) {
   return {
@@ -11,7 +38,7 @@ function jsonResponse(statusCode, body) {
   };
 }
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   // Extract runId from path: /api/runs/:runId
   const pathParts = event.path.split('/').filter(p => p);
   const runIdIndex = pathParts.indexOf('runs');
@@ -21,17 +48,23 @@ exports.handler = async (event) => {
   
   // If method is PUT or PATCH, delegate to server.js wrapper (handles updates)
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
-    const serverless = require('serverless-http');
-    const path = require('path');
-    process.env.NETLIFY = 'true';
-    
-    const app = require(path.join(__dirname, '../../server'));
-    const handler = serverless(app, {
-      binary: ['image/*', 'application/pdf']
-    });
-    
-    console.log('[RUN GET] Delegating PUT/PATCH to server.js wrapper');
-    return await handler(event);
+    try {
+      console.log('[RUN GET] Delegating PUT/PATCH to server.js wrapper');
+      const handler = getUpdateHandler();
+      const result = await handler(event, context);
+      console.log('[RUN GET] Delegation completed:', {
+        statusCode: result?.statusCode,
+        hasBody: !!result?.body
+      });
+      return result;
+    } catch (error) {
+      console.error('[RUN GET] Error delegating PUT/PATCH:', error);
+      console.error('[RUN GET] Error stack:', error.stack);
+      return jsonResponse(500, {
+        error: 'Failed to process update request',
+        message: error.message
+      });
+    }
   }
   
   // Handle GET requests only
