@@ -4,9 +4,10 @@ This guide documents the implementation of place name extraction and domain filt
 
 ## Overview
 
-This implementation adds two main features:
+This implementation adds three main features:
 1. **Enhanced Place Name Extraction**: Extracts venue/bar/restaurant names from multiple Nominatim geocoding fields
 2. **Domain Filtering**: Filters events by `app_name` so each domain only shows its own events
+3. **Public Calendar Page**: Weekly calendar view showing public events filtered by domain
 
 ## Key Learnings & Patterns
 
@@ -209,7 +210,45 @@ const appName = getAppName(event);
 const events = await runs.getPublicEvents(startDate, endDate, appName);
 ```
 
-### Phase 4: Map Loading Fix
+### Phase 4: Calendar Page Implementation
+
+- [ ] **Create `calendar.html`**
+  - Copy structure from EventPlan or create new
+  - Include hero section, week navigation, calendar grid
+  - Add loading, error, and no-events states
+  - Include required scripts: `format-utils.js`, `calendar-view.js`
+
+- [ ] **Create `assets/js/format-utils.js`**
+  - `formatTime(date, timezone)`: Format time as "HH:MM AM/PM"
+  - `formatTimeRange(startDate, endDate, timezone)`: Format time range
+  - `formatLocationDisplay(placeName, address)`: Format location as "Place Name: Address"
+  - `formatEventDisplayString(event)`: Format full event display string
+
+- [ ] **Create `assets/js/calendar-view.js`**
+  - `getWeekRange(date)`: Calculate week start/end dates
+  - `fetchPublicEvents(startDate, endDate)`: Fetch from `/api/runs/public-calendar`
+  - `groupEventsByDay(events)`: Group events by day of week
+  - `renderCalendar(eventsByDay, currentWeekStart)`: Render calendar grid
+  - `loadCalendar(date)`: Main function to load calendar
+  - Event listeners for Previous/Next Week buttons
+
+- [ ] **Add Calendar CSS Styles** (`assets/css/main.css`)
+  - `.calendar-week`: Grid container for 7 days
+  - `.calendar-day`: Individual day card
+  - `.calendar-day-header`: Date display
+  - `.calendar-event`: Event card styling
+  - `.calendar-event-time`, `.calendar-event-title`, `.calendar-event-location`: Event details
+  - Responsive styles for mobile
+
+- [ ] **Update Navigation** (`index.html`, `coordinate.html`)
+  - Add "Calendar" link to desktop and mobile navigation menus
+  - Link should point to `calendar.html`
+
+- [ ] **Add Netlify Redirect** (`netlify.toml`)
+  - Ensure `/api/runs/public-calendar` redirect exists
+  - Must come BEFORE pattern routes like `/api/runs/:runId`
+
+### Phase 5: Map Loading Fix
 
 - [ ] **Update `assets/js/coordinate.js`**
   - Replace direct map initialization with dependency-checking function
@@ -273,10 +312,23 @@ document.addEventListener('DOMContentLoaded', () => {
 6. **Coordinate Page** (`assets/js/coordinate.js`)
    - Fix map initialization with dependency checking
 
+7. **Navigation** (`index.html`, `coordinate.html`)
+   - Add Calendar link to navigation menus
+
+8. **CSS** (`assets/css/main.css`)
+   - Add calendar week view styles
+   - Add wider container styles for calendar page
+
+9. **Netlify Config** (`netlify.toml`)
+   - Ensure calendar API redirect is before pattern routes
+
 ### Files to Create
 
 1. **Migration** (`lib/migration-add-app-name.sql`)
 2. **Update SQL** (`lib/update-existing-events-app-name.sql`) - Optional, for reference
+3. **Calendar Page** (`calendar.html`)
+4. **Format Utils** (`assets/js/format-utils.js`)
+5. **Calendar View** (`assets/js/calendar-view.js`)
 
 ---
 
@@ -358,6 +410,14 @@ After implementation, verify:
 - [ ] Existing events default to correct `app_name`
 - [ ] Map loads on coordinate page for all domains
 - [ ] API endpoints filter correctly by `app_name`
+- [ ] Calendar page loads and displays events correctly
+- [ ] Calendar week navigation (Previous/Next) works
+- [ ] Calendar shows correct date range
+- [ ] Calendar displays events with proper formatting (time, title, location, signups)
+- [ ] Calendar shows "No events" message when appropriate
+- [ ] Calendar shows error message on API failure
+- [ ] Navigation menu includes Calendar link
+- [ ] Calendar page is accessible from both desktop and mobile navigation
 
 ---
 
@@ -424,6 +484,84 @@ if (appName) {
 ✅ Place names extracted and displayed correctly  
 ✅ Events filtered by domain correctly  
 ✅ Map loads on all domains  
+✅ Calendar page displays public events correctly  
+✅ Calendar filters events by domain  
+✅ Calendar navigation (Previous/Next Week) works  
+✅ Calendar shows proper formatting (time, location, signups)  
+✅ Navigation includes Calendar link  
 ✅ No breaking changes to existing functionality  
 ✅ Database migration runs successfully  
 ✅ All tests pass
+
+---
+
+## Calendar Page Implementation Details
+
+### Calendar HTML Structure
+
+The calendar page (`calendar.html`) should include:
+
+1. **Hero Section**: Background image with title "Public Events Calendar"
+2. **Week Navigation**: Date range display with Previous/Next Week buttons
+3. **Calendar Grid**: 7-day week view (Sunday through Saturday)
+4. **States**:
+   - Loading state: "Loading events..."
+   - Empty state: "No public events scheduled for this week"
+   - Error state: Error message display
+   - Events state: Calendar grid with events
+
+### Calendar JavaScript Files
+
+**`format-utils.js`** - Reusable formatting functions (DRY principle):
+- Time formatting with timezone support
+- Location display formatting (Place Name: Address)
+- Event display string formatting
+
+**`calendar-view.js`** - Calendar functionality:
+- Fetches events from `/api/runs/public-calendar` endpoint
+- Groups events by day of week
+- Renders calendar grid with events
+- Handles week navigation
+- Displays event details: time, title, location, signup count
+
+### Calendar CSS Styles
+
+Key CSS classes to implement:
+- `.calendar-week`: Grid container (7 columns on desktop, stacked on mobile)
+- `.calendar-day`: Individual day card with border and padding
+- `.calendar-day-header`: Date display (day name, number, month)
+- `.calendar-event`: Event card with hover effects
+- `.calendar-event-time`: Time display
+- `.calendar-event-title`: Event title (clickable link)
+- `.calendar-event-location`: Location display
+- `.calendar-event-signups`: Signup count display
+
+### Calendar API Endpoint
+
+The calendar uses `/api/runs/public-calendar` which:
+- Accepts optional `startDate` and `endDate` query parameters
+- Defaults to current week if not provided
+- Filters events by `app_name` based on request domain
+- Returns events with signup counts
+
+### Netlify Redirect Order
+
+**CRITICAL**: The calendar API redirect must come BEFORE pattern routes:
+
+```toml
+# ✅ CORRECT - Specific route before pattern
+[[redirects]]
+  from = "/api/runs/public-calendar"
+  to = "/.netlify/functions/runs-public-calendar"
+  status = 200
+  force = true
+
+# Pattern routes come after
+[[redirects]]
+  from = "/api/runs/:runId"
+  to = "/.netlify/functions/run-get"
+  status = 200
+  force = true
+```
+
+**Why**: Pattern routes like `/api/runs/:runId` would match `/api/runs/public-calendar` first, causing 404 errors.
