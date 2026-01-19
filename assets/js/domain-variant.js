@@ -43,6 +43,9 @@
         findGroupButton.setAttribute('target', '_blank');
         findGroupButton.setAttribute('rel', 'noopener noreferrer');
         
+        // Add tooltip
+        findGroupButton.setAttribute('title', 'Find your group in WhatsApp');
+        
         // Add WhatsApp icon before the text
         const whatsappIcon = document.createElement('img');
         whatsappIcon.src = 'assets/images/wAppII.png';
@@ -50,13 +53,13 @@
         whatsappIcon.style.width = '20px';
         whatsappIcon.style.height = '20px';
         whatsappIcon.style.verticalAlign = 'middle';
-        whatsappIcon.style.marginRight = '6px';
+        whatsappIcon.style.marginRight = '8px';
         whatsappIcon.style.display = 'inline-block';
         
-        // Clear existing content and add icon + text
+        // Clear existing content and add icon + separator + text
         findGroupButton.innerHTML = '';
         findGroupButton.appendChild(whatsappIcon);
-        findGroupButton.appendChild(document.createTextNode(' Find your group'));
+        findGroupButton.appendChild(document.createTextNode(' - Find your group'));
         
         // Ensure href is set after innerHTML manipulation
         findGroupButton.href = WHATSAPP_GROUP_LINK;
