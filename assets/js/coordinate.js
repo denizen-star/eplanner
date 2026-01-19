@@ -17,17 +17,25 @@ if (window.SessionManager) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize map
   const mapContainer = document.getElementById('locationMap');
-  if (mapContainer) {
-    initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+  if (mapContainer && typeof initMap === 'function') {
+    try {
+      initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+    } catch (error) {
+      console.error('[COORDINATE] Error initializing map:', error);
+    }
   }
 
   // Set default datetime to tomorrow at 6:30 PM
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(18, 30, 0, 0);
-  const defaultDateTime = tomorrow.toISOString().slice(0, 16);
-  document.getElementById('dateTime').value = defaultDateTime;
+  const dateTimeInput = document.getElementById('dateTime');
+  if (dateTimeInput) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(18, 30, 0, 0);
+    const defaultDateTime = tomorrow.toISOString().slice(0, 16);
+    dateTimeInput.value = defaultDateTime;
+  }
 
   // Handle radio card selection visual state
   // The label wrapper should handle clicks naturally, we just need to update visual state
@@ -43,32 +51,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Update visual state when any radio changes
-  document.querySelectorAll('input[name="eventVisibility"]').forEach(radio => {
-    radio.addEventListener('change', updateRadioCardVisualState);
-    radio.addEventListener('click', updateRadioCardVisualState);
-  });
+  const visibilityRadios = document.querySelectorAll('input[name="eventVisibility"]');
+  if (visibilityRadios.length > 0) {
+    visibilityRadios.forEach(radio => {
+      radio.addEventListener('change', updateRadioCardVisualState);
+      radio.addEventListener('click', updateRadioCardVisualState);
+    });
+    
+    // Set initial state
+    updateRadioCardVisualState();
+  }
   
-  // Set initial state
-  updateRadioCardVisualState();
-});
-
-document.getElementById('location').addEventListener('input', (e) => {
-  clearTimeout(locationUpdateTimeout);
-  const locationText = e.target.value.trim();
-  
-  // Clear validation when location changes
-  validatedAddress = null;
-  validatedCoordinates = null;
-  validatedAddressComponents = null;
-  validatedPlaceName = null;
-  document.getElementById('locationValidation').style.display = 'none';
-  
-  if (locationText.length > 3) {
-    locationUpdateTimeout = setTimeout(() => {
-      updateMapForLocationWithValidation('locationMap', locationText, false, MIAMI_COORDINATES);
-    }, 500);
-  } else {
-    initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+  // Set up location input handler
+  const locationInput = document.getElementById('location');
+  if (locationInput) {
+    locationInput.addEventListener('input', (e) => {
+      clearTimeout(locationUpdateTimeout);
+      const locationText = e.target.value.trim();
+      
+      // Clear validation when location changes
+      validatedAddress = null;
+      validatedCoordinates = null;
+      validatedAddressComponents = null;
+      validatedPlaceName = null;
+      const locationValidation = document.getElementById('locationValidation');
+      if (locationValidation) locationValidation.style.display = 'none';
+      
+      if (locationText.length > 3) {
+        locationUpdateTimeout = setTimeout(() => {
+          if (typeof updateMapForLocationWithValidation === 'function') {
+            updateMapForLocationWithValidation('locationMap', locationText, false, MIAMI_COORDINATES);
+          }
+        }, 500);
+      } else {
+        const mapContainer = document.getElementById('locationMap');
+        if (mapContainer && typeof initMap === 'function') {
+          initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+        }
+      }
+    });
   }
 });
 
@@ -587,8 +608,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     document.getElementById('dateTime').value = tomorrow.toISOString().slice(0, 16);
     
     // Reset end time
-    const endTimeInput = document.getElementById('endTime');
-    if (endTimeInput) endTimeInput.value = '';
+    const endTimeInputReset = document.getElementById('endTime');
+    if (endTimeInputReset) endTimeInputReset.value = '';
     
     // Reset event visibility to public (default) - use setTimeout to ensure form reset completes first
     setTimeout(() => {
