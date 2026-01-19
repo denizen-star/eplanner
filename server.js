@@ -947,24 +947,34 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
         const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
 
         if (signupsWithEmail.length > 0) {
+          // Build BCC list: info@kervinapps.com + coordinator email (if valid)
+          const bccRecipients = ['info@kervinapps.com'];
+          if (cancelledRun.coordinatorEmail && cancelledRun.coordinatorEmail.trim()) {
+            const coordinatorEmail = cancelledRun.coordinatorEmail.trim();
+            if (coordinatorEmail.includes('@')) {
+              bccRecipients.push(coordinatorEmail);
+            }
+          }
+
           const emailPromises = signupsWithEmail.map(async (signup) => {
             try {
               const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup);
               await emailService.sendEmail({
                 to: signup.email.trim(),
+                bcc: bccRecipients,
                 subject: cancellationEmailContent.subject,
                 html: cancellationEmailContent.html,
                 text: cancellationEmailContent.text,
                 fromName: cancellationEmailContent.fromName,
               });
-              console.log(`[CANCEL] Cancellation email sent to signup ${signup.id}`);
+              console.log(`[CANCEL] Cancellation email sent to signup ${signup.id} with BCC to ${bccRecipients.join(', ')}`);
             } catch (signupEmailError) {
               console.error(`[CANCEL] Error sending email to signup ${signup.id}:`, signupEmailError.message);
             }
           });
 
           await Promise.all(emailPromises);
-          console.log(`[CANCEL] Cancellation emails sent to ${signupsWithEmail.length} signup(s)`);
+          console.log(`[CANCEL] Cancellation emails sent to ${signupsWithEmail.length} signup(s) with BCC copies`);
         } else {
           console.log('[CANCEL] No signups with email addresses found');
         }
