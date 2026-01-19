@@ -58,13 +58,70 @@
 
             <div id="runInfo" style="display: none;">
                 <h1 id="runTitle">Event Management</h1>
-                <div style="margin-bottom: 24px;">
-                    <p><strong>Location:</strong> <span id="runLocation"></span></p>
-                    <p><strong>Planner:</strong> <span id="runPacerName">-</span></p>
-                    <p><strong>Date & Time:</strong> <span id="runDateTime"></span></p>
-                    <p><strong>Max Participants:</strong> <span id="runMax"></span></p>
-                    <p><strong>Current Signups:</strong> <span id="runCurrent"></span></p>
-                    <p><strong>Created:</strong> <span id="runCreated">-</span></p>
+                <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                    <div style="flex: 1;">
+                        <p><strong>Location:</strong> <span id="runLocation"></span></p>
+                        <p><strong>Planner:</strong> <span id="runPacerName">-</span></p>
+                        <p><strong>Date & Time:</strong> <span id="runDateTime"></span></p>
+                        <p><strong>Max Participants:</strong> <span id="runMax"></span></p>
+                        <p><strong>Current Signups:</strong> <span id="runCurrent"></span></p>
+                        <p><strong>Created:</strong> <span id="runCreated">-</span></p>
+                    </div>
+                    <div>
+                        <button id="editEventButton" class="button button-primary" onclick="editEvent()" style="display: none;" data-track-cta="edit_event_click">Edit Event</button>
+                    </div>
+                </div>
+
+                <div id="editFormSection" style="display: none; margin-top: 24px; margin-bottom: 24px; padding: 20px; background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
+                    <h2 style="margin-bottom: 16px; background: var(--primary-rainbow); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Edit Event</h2>
+                    <form id="editEventForm" onsubmit="saveEventEdit(event)">
+                        <div class="form-group">
+                            <label for="editTitle">Event Title (Optional)</label>
+                            <input type="text" id="editTitle" placeholder="e.g., Morning Beach Run">
+                        </div>
+                        <div class="form-group">
+                            <label for="editLocation">Location *</label>
+                            <input type="text" id="editLocation" required oninput="updateEditMap()">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPacerName">Planner Name *</label>
+                            <input type="text" id="editPacerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDateTime">Date and Time *</label>
+                            <input type="datetime-local" id="editDateTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMaxParticipants">Max Participants *</label>
+                            <input type="number" id="editMaxParticipants" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDescription">Event Description (Optional)</label>
+                            <textarea id="editDescription" rows="4" placeholder="Add details about your event..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPicture">Event Picture (Optional)</label>
+                            <input type="file" id="editPicture" accept="image/*">
+                            <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Upload a new image or leave empty to keep current</small>
+                            <div id="editPicturePreview" style="margin-top: 12px;">
+                                <div id="editCurrentPicture" style="display: none;">
+                                    <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">Current picture:</p>
+                                    <img id="editCurrentPictureImg" src="" alt="Current picture" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
+                                    <button type="button" class="button button-secondary" onclick="removeEditPicture()" data-track-cta="remove_picture_click">Remove Picture</button>
+                                </div>
+                                <div id="editNewPicturePreview" style="display: none;">
+                                    <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">New picture:</p>
+                                    <img id="editNewPictureImg" src="" alt="New picture preview" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="editMapContainer" class="location-map" style="display: none; margin-bottom: 16px;"></div>
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="button button-primary" data-track-cta="save_edit_click">Save Changes</button>
+                            <button type="button" class="button button-secondary" onclick="cancelEdit()" data-track-cta="cancel_edit_click">Cancel</button>
+                        </div>
+                    </form>
+                    <div id="editError" class="message message-error" style="display: none; margin-top: 12px;"></div>
                 </div>
 
                 <div id="addressDetails" style="margin-bottom: 24px;">

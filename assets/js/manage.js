@@ -206,6 +206,13 @@ async function loadRun() {
     // Add cancel event button
     addCancelEventButton(run);
 
+    // Store run globally for edit functions
+    currentRun = run;
+    window.currentRun = run;
+
+    // Add edit button section
+    addEditEventButton(run);
+
     const signupList = document.getElementById('signupList');
     if (run.signups.length === 0) {
       signupList.innerHTML = '<li style="padding: 16px; text-align: center; color: #2f3b52;">No signups yet</li>';
@@ -527,3 +534,327 @@ async function deleteSignup(signupIndex) {
   }
 }
 
+// Store picture data for edit form
+let editPicture = undefined;
+
+// Debounce timeout for map updates
+let editMapUpdateTimeout = null;
+
+/**
+ * Add edit event button to the page
+ */
+function addEditEventButton(run) {
+  const editButton = document.getElementById('editEventButton');
+  if (!editButton) return;
+
+  // Check if event can be edited (24-hour restriction)
+  const eventStartTime = new Date(run.dateTime);
+  const now = new Date();
+  const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+  const canEdit = hoursUntilEvent >= 24 && run.status !== 'cancelled';
+
+  if (canEdit) {
+    editButton.style.display = 'inline-block';
+    editButton.disabled = false;
+    editButton.title = '';
+  } else {
+    editButton.style.display = 'inline-block';
+    editButton.disabled = true;
+    if (run.status === 'cancelled') {
+      editButton.title = 'Event has been cancelled.';
+    } else if (hoursUntilEvent < 24) {
+      editButton.title = 'Event cannot be modified within 24 hours of start time.';
+    } else {
+      editButton.title = 'Event cannot be edited.';
+    }
+  }
+}
+
+/**
+ * Open edit form and populate with current event data
+ */
+function editEvent() {
+  if (!currentRun) {
+    alert('Event data not loaded. Please refresh the page.');
+    return;
+  }
+
+  // Populate form fields
+  document.getElementById('editTitle').value = currentRun.title || '';
+  document.getElementById('editLocation').value = currentRun.location || '';
+  document.getElementById('editPacerName').value = currentRun.pacerName || '';
+  
+  // Convert date to local datetime-local format
+  const date = new Date(currentRun.dateTime);
+  const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('editDateTime').value = localDateTime;
+  
+  document.getElementById('editMaxParticipants').value = currentRun.maxParticipants || 1;
+  document.getElementById('editDescription').value = currentRun.description || '';
+  
+  // Handle picture - show existing if present
+  const currentPictureDiv = document.getElementById('editCurrentPicture');
+  const currentPictureImg = document.getElementById('editCurrentPictureImg');
+  if (currentRun.picture) {
+    currentPictureImg.src = 'data:image/jpeg;base64,' + currentRun.picture;
+    currentPictureDiv.style.display = 'block';
+    editPicture = currentRun.picture; // Store existing picture
+  } else {
+    currentPictureDiv.style.display = 'none';
+    editPicture = null;
+  }
+  
+  // Hide new picture preview
+  document.getElementById('editNewPicturePreview').style.display = 'none';
+  
+  // Setup picture file input handler
+  const pictureInput = document.getElementById('editPicture');
+  pictureInput.onchange = handlePictureUpload;
+  
+  // Clear any previous errors
+  document.getElementById('editError').style.display = 'none';
+  
+  // Show edit form
+  document.getElementById('editFormSection').style.display = 'block';
+  document.getElementById('editEventButton').style.display = 'none';
+  
+  // Initialize map if location exists
+  const mapContainer = document.getElementById('editMapContainer');
+  if (currentRun.location) {
+    mapContainer.style.display = 'block';
+    // Use requestAnimationFrame to ensure the container has dimensions
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        // Check if we have cached coordinates to avoid re-geocoding
+        if (currentRun.coordinates && Array.isArray(currentRun.coordinates) && currentRun.coordinates.length === 2) {
+          // Use cached coordinates for faster rendering
+          if (typeof initMap !== 'undefined') {
+            initMap('editMapContainer', currentRun.coordinates, currentRun.location, true);
+          } else {
+            updateMapForLocation('editMapContainer', currentRun.location, true);
+          }
+        } else {
+          updateMapForLocation('editMapContainer', currentRun.location, true);
+        }
+      }, 50);
+    });
+  } else {
+    mapContainer.style.display = 'none';
+  }
+  
+  // Scroll to form
+  document.getElementById('editFormSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/**
+ * Handle picture file upload
+ */
+function handlePictureUpload(e) {
+  const file = e.target.files[0];
+  const newPreview = document.getElementById('editNewPicturePreview');
+  const newImg = document.getElementById('editNewPictureImg');
+  const errorDiv = document.getElementById('editError');
+  
+  if (!file) {
+    newPreview.style.display = 'none';
+    editPicture = editPicture || null; // Keep existing if no new file
+    return;
+  }
+  
+  try {
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Image file size must be less than 5MB');
+    }
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Please select a valid image file');
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate new dimensions (max 1200px width, maintain aspect ratio)
+        let width = img.width;
+        let height = img.height;
+        const maxWidth = 1200;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with quality compression (0.8 = 80% quality)
+        const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        
+        // Check final size (max 2MB after compression)
+        const sizeInMB = (base64.length * 3) / 4 / 1024 / 1024;
+        if (sizeInMB > 2) {
+          throw new Error(`Image is still too large after compression (${sizeInMB.toFixed(2)}MB). Please use a smaller image.`);
+        }
+        
+        editPicture = base64;
+        newImg.src = 'data:image/jpeg;base64,' + base64;
+        newPreview.style.display = 'block';
+        errorDiv.style.display = 'none';
+      };
+      img.onerror = () => {
+        throw new Error('Failed to load image');
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = () => {
+      throw new Error('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.style.display = 'block';
+    e.target.value = '';
+  }
+}
+
+/**
+ * Remove picture from edit form
+ */
+function removeEditPicture() {
+  editPicture = null; // Set to null to remove picture
+  const currentPictureDiv = document.getElementById('editCurrentPicture');
+  const newPreview = document.getElementById('editNewPicturePreview');
+  const pictureInput = document.getElementById('editPicture');
+  
+  if (currentPictureDiv) currentPictureDiv.style.display = 'none';
+  if (newPreview) newPreview.style.display = 'none';
+  if (pictureInput) pictureInput.value = '';
+}
+
+/**
+ * Update map preview when location changes
+ */
+function updateEditMap() {
+  const locationInput = document.getElementById('editLocation');
+  const mapContainer = document.getElementById('editMapContainer');
+  
+  if (!locationInput || !mapContainer) return;
+  
+  const locationText = locationInput.value.trim();
+  
+  // Clear existing timeout
+  if (editMapUpdateTimeout) {
+    clearTimeout(editMapUpdateTimeout);
+  }
+  
+  // Debounce map updates - wait 500ms after user stops typing
+  editMapUpdateTimeout = setTimeout(() => {
+    if (locationText) {
+      mapContainer.style.display = 'block';
+      updateMapForLocation('editMapContainer', locationText, true);
+    } else {
+      mapContainer.style.display = 'none';
+    }
+  }, 500);
+}
+
+/**
+ * Cancel editing and close form
+ */
+function cancelEdit() {
+  document.getElementById('editFormSection').style.display = 'none';
+  document.getElementById('editEventButton').style.display = 'inline-block';
+  document.getElementById('editError').style.display = 'none';
+  
+  // Hide map when canceling edit
+  const mapContainer = document.getElementById('editMapContainer');
+  if (mapContainer) {
+    mapContainer.style.display = 'none';
+  }
+  
+  // Clear picture data
+  editPicture = undefined;
+  
+  // Clear new picture preview
+  const newPreview = document.getElementById('editNewPicturePreview');
+  if (newPreview) newPreview.style.display = 'none';
+  
+  // Reset file input
+  const pictureInput = document.getElementById('editPicture');
+  if (pictureInput) pictureInput.value = '';
+}
+
+/**
+ * Save event edits
+ */
+async function saveEventEdit(event) {
+  event.preventDefault();
+
+  if (!currentRun) {
+    alert('Event data not loaded. Please refresh the page.');
+    return;
+  }
+
+  // Check if event can be edited (24-hour restriction)
+  const eventStartTime = new Date(currentRun.dateTime);
+  const now = new Date();
+  const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+  
+  if (hoursUntilEvent < 24) {
+    const errorDiv = document.getElementById('editError');
+    errorDiv.textContent = 'Event cannot be modified within 24 hours of the event start time.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  if (currentRun.status === 'cancelled') {
+    const errorDiv = document.getElementById('editError');
+    errorDiv.textContent = 'This event has been cancelled.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  const description = document.getElementById('editDescription')?.value.trim() || null;
+  const picture = editPicture !== undefined ? editPicture : undefined;
+  
+  const formData = {
+    title: document.getElementById('editTitle').value.trim(),
+    location: document.getElementById('editLocation').value.trim(),
+    pacerName: document.getElementById('editPacerName').value.trim(),
+    dateTime: document.getElementById('editDateTime').value,
+    maxParticipants: parseInt(document.getElementById('editMaxParticipants').value),
+    description: description
+  };
+  
+  // Only include picture if it was changed
+  if (picture !== undefined) {
+    formData.picture = picture;
+  }
+
+  const errorDiv = document.getElementById('editError');
+  errorDiv.style.display = 'none';
+
+  try {
+    const response = await fetch(`/api/runs/${runId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update event');
+    }
+
+    // Success - reload the page to show updated data
+    alert('Event updated successfully!');
+    window.location.reload();
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.style.display = 'block';
+  }
+}
