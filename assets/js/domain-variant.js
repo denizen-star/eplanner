@@ -34,18 +34,41 @@
       const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
       existingFavicons.forEach(link => link.remove());
       
-      // Add new favicon for LGBTQ domain
-      const faviconLink = document.createElement('link');
-      faviconLink.rel = 'icon';
-      faviconLink.type = 'image/png';
-      faviconLink.href = LGBTQ_FAVICON;
-      document.head.appendChild(faviconLink);
+      // Add new favicon for LGBTQ domain with multiple sizes for better quality
+      const faviconLink16 = document.createElement('link');
+      faviconLink16.rel = 'icon';
+      faviconLink16.type = 'image/png';
+      faviconLink16.href = LGBTQ_FAVICON;
+      faviconLink16.sizes = '16x16';
+      document.head.appendChild(faviconLink16);
       
-      // Also add apple-touch-icon for better mobile support
+      const faviconLink32 = document.createElement('link');
+      faviconLink32.rel = 'icon';
+      faviconLink32.type = 'image/png';
+      faviconLink32.href = LGBTQ_FAVICON;
+      faviconLink32.sizes = '32x32';
+      document.head.appendChild(faviconLink32);
+      
+      const faviconLink64 = document.createElement('link');
+      faviconLink64.rel = 'icon';
+      faviconLink64.type = 'image/png';
+      faviconLink64.href = LGBTQ_FAVICON;
+      faviconLink64.sizes = '64x64';
+      document.head.appendChild(faviconLink64);
+      
+      // Also add apple-touch-icon for better mobile support (larger size)
       const appleIcon = document.createElement('link');
       appleIcon.rel = 'apple-touch-icon';
       appleIcon.href = LGBTQ_FAVICON;
+      appleIcon.sizes = '180x180';
       document.head.appendChild(appleIcon);
+      
+      // Add shortcut icon as well
+      const shortcutIcon = document.createElement('link');
+      shortcutIcon.rel = 'shortcut icon';
+      shortcutIcon.type = 'image/png';
+      shortcutIcon.href = LGBTQ_FAVICON;
+      document.head.appendChild(shortcutIcon);
     }
   }
 
@@ -56,6 +79,9 @@
     if (isLGBTQDomain()) {
       const logoIcons = document.querySelectorAll('.logo-icon');
       logoIcons.forEach(logoIcon => {
+        // Make logo icon bigger
+        logoIcon.style.width = '50px';
+        logoIcon.style.height = '50px';
         // Replace EP text with LGBTQ icon image
         logoIcon.innerHTML = '';
         const iconImg = document.createElement('img');
