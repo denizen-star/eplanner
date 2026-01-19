@@ -73,7 +73,7 @@
   }
 
   /**
-   * Update logo icon (EP) based on domain
+   * Update logo icon (EP) and text based on domain
    */
   function updateLogoIcon() {
     if (isLGBTQDomain()) {
@@ -82,6 +82,10 @@
         // Make logo icon bigger
         logoIcon.style.width = '50px';
         logoIcon.style.height = '50px';
+        // Make background 100% transparent
+        logoIcon.style.background = 'transparent';
+        logoIcon.style.backgroundColor = 'transparent';
+        logoIcon.style.backgroundImage = 'none';
         // Replace EP text with LGBTQ icon image
         logoIcon.innerHTML = '';
         const iconImg = document.createElement('img');
@@ -91,6 +95,28 @@
         iconImg.style.height = '100%';
         iconImg.style.objectFit = 'contain';
         logoIcon.appendChild(iconImg);
+      });
+      
+      // Update logo text from "Event Planner" to "LGBTQ+ Activity Planner"
+      const logoLinks = document.querySelectorAll('a.logo');
+      logoLinks.forEach(link => {
+        // Find text nodes that contain "Event Planner"
+        const textNodes = [];
+        const walker = document.createTreeWalker(
+          link,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
+        let node;
+        while (node = walker.nextNode()) {
+          if (node.textContent && node.textContent.trim() === 'Event Planner') {
+            textNodes.push(node);
+          }
+        }
+        textNodes.forEach(textNode => {
+          textNode.textContent = 'LGBTQ+ Activity Planner';
+        });
       });
     }
   }
