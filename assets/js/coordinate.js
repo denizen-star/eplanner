@@ -29,35 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const defaultDateTime = tomorrow.toISOString().slice(0, 16);
   document.getElementById('dateTime').value = defaultDateTime;
 
-  // Handle radio card selection visual state and make entire card clickable
-  document.querySelectorAll('.radio-card').forEach(card => {
-    const radio = card.querySelector('input[type="radio"]');
-    
-    // Make entire card clickable
-    card.addEventListener('click', (e) => {
-      // Don't trigger if clicking directly on the radio input
-      if (e.target !== radio) {
-        radio.checked = true;
-        radio.dispatchEvent(new Event('change', { bubbles: true }));
+  // Handle radio card selection visual state
+  // The label wrapper should handle clicks naturally, we just need to update visual state
+  function updateRadioCardVisualState() {
+    document.querySelectorAll('.radio-card').forEach(card => {
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio && radio.checked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
       }
     });
-    
-    // Update visual state when radio changes
-    radio.addEventListener('change', () => {
-      document.querySelectorAll('.radio-card').forEach(c => {
-        if (c.querySelector('input').checked) {
-          c.classList.add('selected');
-        } else {
-          c.classList.remove('selected');
-        }
-      });
-    });
-    
-    // Set initial state
-    if (radio.checked) {
-      card.classList.add('selected');
-    }
+  }
+  
+  // Update visual state when any radio changes
+  document.querySelectorAll('input[name="eventVisibility"]').forEach(radio => {
+    radio.addEventListener('change', updateRadioCardVisualState);
+    radio.addEventListener('click', updateRadioCardVisualState);
   });
+  
+  // Set initial state
+  updateRadioCardVisualState();
 });
 
 document.getElementById('location').addEventListener('input', (e) => {
@@ -407,9 +399,17 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       description: eventDescription
     };
     
-    console.log('Form Data being sent (with address fields):', formData);
-    console.log('Coordinator Email in formData:', formData.coordinatorEmail);
-    console.log('FormData keys:', Object.keys(formData));
+    console.log('[COORDINATE] Form Data being sent:', {
+      hasLocation: !!formData.location,
+      hasPlannerName: !!formData.plannerName,
+      hasCoordinatorEmail: !!formData.coordinatorEmail,
+      hasDateTime: !!formData.dateTime,
+      hasEndTime: !!formData.endTime,
+      isPublic: formData.isPublic,
+      hasPlaceName: !!formData.placeName,
+      maxParticipants: formData.maxParticipants,
+      keys: Object.keys(formData)
+    });
 
     const response = await fetch('/api/runs/create', {
       method: 'POST',
@@ -452,7 +452,11 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
         throw new Error('Image file is too large. Please use an image smaller than 2MB or compress it before uploading.');
       }
       if (response.status === 500) {
-        throw new Error('Server error. Please check if the database migration has been run (picture and description columns need to be added).');
+        const errorMsg = data?.message || data?.error || 'Server error';
+        if (errorMsg.includes('is_public') || errorMsg.includes('end_time') || errorMsg.includes('place_name') || errorMsg.includes('signup_link')) {
+          throw new Error('Database migration required: Please run migration-add-public-endtime-place-links.sql in your database.');
+        }
+        throw new Error(`Server error: ${errorMsg}`);
       }
       throw new Error('Invalid response from server');
     }
@@ -586,19 +590,15 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     const endTimeInput = document.getElementById('endTime');
     if (endTimeInput) endTimeInput.value = '';
     
-    // Reset event visibility to public (default)
-    const publicRadio = document.querySelector('input[name="eventVisibility"][value="public"]');
-    if (publicRadio) publicRadio.checked = true;
-    const privateRadio = document.querySelector('input[name="eventVisibility"][value="private"]');
-    if (privateRadio) privateRadio.checked = false;
-    // Update radio card visual state
-    document.querySelectorAll('.radio-card').forEach(card => {
-      if (card.querySelector('input[value="public"]')?.checked) {
-        card.classList.add('selected');
-      } else {
-        card.classList.remove('selected');
+    // Reset event visibility to public (default) - use setTimeout to ensure form reset completes first
+    setTimeout(() => {
+      const publicRadio = document.querySelector('input[name="eventVisibility"][value="public"]');
+      if (publicRadio) {
+        publicRadio.checked = true;
+        // Trigger change event to update visual state
+        publicRadio.dispatchEvent(new Event('change', { bubbles: true }));
       }
-    });
+    }, 0);
     
     // Reset max participants to 10
     document.getElementById('maxParticipants').value = '10';
@@ -612,8 +612,11 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     const descriptionInput = document.getElementById('eventDescription');
     if (descriptionInput) descriptionInput.value = '';
   } catch (error) {
-    errorDiv.textContent = error.message;
+    console.error('[COORDINATE] Form submission error:', error);
+    console.error('[COORDINATE] Error stack:', error.stack);
+    errorDiv.textContent = error.message || 'An error occurred while creating the event. Please check the console for details.';
     errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = 'Create Event';
