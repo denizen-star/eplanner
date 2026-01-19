@@ -161,6 +161,15 @@ exports.handler = async (event) => {
       userAgent: userAgent,
     };
 
+    // Get base URL from event (needed before generating links)
+    const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
+    const protocol = event.headers?.['x-forwarded-proto'] || 'https';
+    const baseUrl = `${protocol}://${host}`;
+    
+    // Generate all event links using helper function (DRY) - MUST be before database insert
+    const links = generateEventLinks(baseUrl, shortId);
+    const { signupLink, manageLink, eventViewLink } = links;
+
     // Save to PlanetScale database
     console.log('[RUNS CREATE] Saving to PlanetScale database...');
     try {
@@ -224,15 +233,6 @@ exports.handler = async (event) => {
       }
       throw new Error(`Failed to save event to database: ${dbError.message}`);
     }
-
-    // Get base URL from event
-    const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
-    const protocol = event.headers?.['x-forwarded-proto'] || 'https';
-    const baseUrl = `${protocol}://${host}`;
-    
-    // Generate all event links using helper function (DRY)
-    const links = generateEventLinks(baseUrl, shortId);
-    const { signupLink, manageLink, eventViewLink } = links;
 
     // Create telemetry record (non-blocking, don't fail if this fails)
     console.log('[RUNS CREATE] Creating telemetry record...');
