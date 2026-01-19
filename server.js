@@ -207,6 +207,17 @@ app.post('/api/runs/create', async (req, res) => {
     const links = generateEventLinks(baseUrl, shortId);
     const { signupLink, manageLink, eventViewLink } = links;
 
+    // Detect app name from domain (for domain-specific event filtering)
+    const host = req.get('host') || '';
+    const hostLower = host.toLowerCase();
+    let appName = 'eplanner'; // Default
+    if (hostLower.includes('to-lgbtq')) {
+      appName = 'to-lgbtq';
+    } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
+      appName = 'eplanner';
+    }
+    console.log('[RUN CREATE] Detected app name:', appName);
+
     // Save to PlanetScale database
     console.log('[RUN CREATE] Saving to PlanetScale database...');
     try {
@@ -224,6 +235,7 @@ app.post('/api/runs/create', async (req, res) => {
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         isPublic: isPublic !== undefined ? isPublic : true, // Default to true
+        appName: appName, // Store app name for domain filtering
         createdAt: createdAt,
         placeName: placeName ? placeName.trim() : null,
         picture: picture || null,
@@ -459,13 +471,25 @@ app.get('/api/runs/public-calendar', async (req, res) => {
       });
     }
 
+    // Detect app name from domain (for domain-specific event filtering)
+    const host = req.get('host') || '';
+    const hostLower = host.toLowerCase();
+    let appName = 'eplanner'; // Default
+    if (hostLower.includes('to-lgbtq')) {
+      appName = 'to-lgbtq';
+    } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
+      appName = 'eplanner';
+    }
+    console.log('[GET PUBLIC CALENDAR] Detected app name:', appName);
+    
     console.log('[GET PUBLIC CALENDAR] Fetching public events:', {
       startDate: startDateObj.toISOString(),
-      endDate: endDateObj.toISOString()
+      endDate: endDateObj.toISOString(),
+      appName: appName
     });
 
-    // Fetch public events for the date range
-    const events = await runs.getPublicEvents(startDateObj.toISOString(), endDateObj.toISOString());
+    // Fetch public events for the date range, filtered by app_name
+    const events = await runs.getPublicEvents(startDateObj.toISOString(), endDateObj.toISOString(), appName);
 
     console.log('[GET PUBLIC CALENDAR] Success! Returning', events.length, 'events');
 

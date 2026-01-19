@@ -30,8 +30,40 @@ async function geocodeLocation(locationText) {
     const lat = parseFloat(result.lat);
     const lon = parseFloat(result.lon);
     
-    // Extract business/place name if available
-    const placeName = result.name || null;
+    // Extract business/place name from multiple Nominatim fields
+    // Priority: name > amenity > shop > leisure > tourism > building > display_name (parsed)
+    let placeName = null;
+    const addr = result.address || {};
+    
+    if (result.name) {
+      placeName = result.name;
+    } else if (addr.amenity) {
+      // Bars, restaurants, cafes, etc.
+      placeName = addr.amenity;
+    } else if (addr.shop) {
+      // Shops, stores
+      placeName = addr.shop;
+    } else if (addr.leisure) {
+      // Parks, recreation facilities
+      placeName = addr.leisure;
+    } else if (addr.tourism) {
+      // Tourist attractions
+      placeName = addr.tourism;
+    } else if (addr.building) {
+      // Building names
+      placeName = addr.building;
+    } else if (result.display_name) {
+      // Fallback: try to extract name from display_name (first part before comma)
+      // Only if it doesn't look like a street address (no numbers)
+      const displayParts = result.display_name.split(',');
+      if (displayParts.length > 0) {
+        const firstPart = displayParts[0].trim();
+        // If first part doesn't start with a number and is not too long, use it
+        if (!/^\d+/.test(firstPart) && firstPart.length < 100) {
+          placeName = firstPart;
+        }
+      }
+    }
     
     // Build full address from Nominatim result, preserving street number
     let fullAddress = '';

@@ -2,6 +2,7 @@ const { runs, telemetry } = require('../../lib/databaseClient');
 const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
 const EmailService = require('../../lib/emailService');
 const { eventCreatedEmail } = require('../../lib/emailTemplates');
+const { getAppName } = require('./utils');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -166,6 +167,10 @@ exports.handler = async (event) => {
     const protocol = event.headers?.['x-forwarded-proto'] || 'https';
     const baseUrl = `${protocol}://${host}`;
     
+    // Detect app name from domain (for domain-specific event filtering)
+    const appName = getAppName(event);
+    console.log('[RUNS CREATE] Detected app name:', appName);
+    
     // Generate all event links using helper function (DRY) - MUST be before database insert
     const links = generateEventLinks(baseUrl, shortId);
     const { signupLink, manageLink, eventViewLink } = links;
@@ -187,6 +192,7 @@ exports.handler = async (event) => {
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         isPublic: isPublic !== undefined ? isPublic : true, // Default to true
+        appName: appName, // Store app name for domain filtering
         createdAt: createdAt,
         // Address component fields
         house_number: house_number || null,
