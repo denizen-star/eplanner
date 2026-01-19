@@ -2,27 +2,30 @@ const { runs, signups } = require('../../lib/databaseClient');
 const serverless = require('serverless-http');
 const path = require('path');
 
-// Initialize serverless handler for PUT/PATCH delegation (outside handler to avoid re-initialization)
+// Set Netlify flag before requiring server (needed for dynamic requires)
+process.env.NETLIFY = 'true';
+
+// Initialize serverless handler for PUT/PATCH delegation (at top level so esbuild can bundle dependencies)
 let updateHandler = null;
 let updateHandlerError = null;
+try {
+  // Require server.js at top level so esbuild can bundle express and other dependencies
+  const app = require(path.join(__dirname, '../../server'));
+  updateHandler = serverless(app, {
+    binary: ['image/*', 'application/pdf']
+  });
+  console.log('[RUN GET] Update handler initialized successfully');
+} catch (error) {
+  console.error('[RUN GET] Error initializing update handler:', error);
+  updateHandlerError = error;
+}
+
 function getUpdateHandler() {
   if (updateHandlerError) {
     throw updateHandlerError;
   }
   if (!updateHandler) {
-    try {
-      process.env.NETLIFY = 'true';
-      console.log('[RUN GET] Initializing update handler...');
-      const app = require(path.join(__dirname, '../../server'));
-      updateHandler = serverless(app, {
-        binary: ['image/*', 'application/pdf']
-      });
-      console.log('[RUN GET] Update handler initialized successfully');
-    } catch (error) {
-      console.error('[RUN GET] Error initializing update handler:', error);
-      updateHandlerError = error;
-      throw error;
-    }
+    throw new Error('Update handler not initialized');
   }
   return updateHandler;
 }
