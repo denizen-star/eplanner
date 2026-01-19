@@ -457,6 +457,12 @@ body {
   overflow-x: hidden;
 }
 
+/* Calendar page - wider container for better event display */
+body:has(.calendar-week) .main-container {
+  max-width: 1400px;
+  padding: 48px 24px;
+}
+
 .card {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-primary);
