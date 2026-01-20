@@ -145,6 +145,12 @@
 
     // Update "Find your Group" button href and text only for LGBTQ domain
     if (isLGBTQDomain()) {
+      // Show hero CTA group on all pages for LGBTQ domain
+      const heroCtaGroup = document.getElementById('hero-cta-group');
+      if (heroCtaGroup) {
+        heroCtaGroup.style.display = 'flex';
+      }
+      
       const findGroupButton = document.getElementById('hero-find-group-btn');
       if (findGroupButton) {
         // Update href using setAttribute for reliability
@@ -158,20 +164,24 @@
         // Add tooltip
         findGroupButton.setAttribute('title', 'Find your group in WhatsApp');
         
-        // Add WhatsApp icon before the text
-        const whatsappIcon = document.createElement('img');
-        whatsappIcon.src = 'assets/images/wAppII.png';
-        whatsappIcon.alt = 'WhatsApp';
-        whatsappIcon.style.width = '22px';
-        whatsappIcon.style.height = '22px';
-        whatsappIcon.style.verticalAlign = 'middle';
-        whatsappIcon.style.marginRight = '8px';
-        whatsappIcon.style.display = 'inline-block';
-        
-        // Clear existing content and add icon + separator + text
-        findGroupButton.innerHTML = '';
-        findGroupButton.appendChild(whatsappIcon);
-        findGroupButton.appendChild(document.createTextNode(' - Find your group'));
+        // Check if WhatsApp icon already exists to avoid duplicates
+        const existingIcon = findGroupButton.querySelector('img');
+        if (!existingIcon) {
+          // Add WhatsApp icon before the text
+          const whatsappIcon = document.createElement('img');
+          whatsappIcon.src = 'assets/images/wAppII.png';
+          whatsappIcon.alt = 'WhatsApp';
+          whatsappIcon.style.width = '22px';
+          whatsappIcon.style.height = '22px';
+          whatsappIcon.style.verticalAlign = 'middle';
+          whatsappIcon.style.marginRight = '8px';
+          whatsappIcon.style.display = 'inline-block';
+          
+          // Clear existing content and add icon + separator + text
+          findGroupButton.innerHTML = '';
+          findGroupButton.appendChild(whatsappIcon);
+          findGroupButton.appendChild(document.createTextNode(' - Find your group'));
+        }
         
         // Ensure href is set after innerHTML manipulation
         findGroupButton.href = WHATSAPP_GROUP_LINK;
@@ -180,13 +190,19 @@
         console.warn('[Domain Variant] Could not find hero-find-group-btn element');
       }
       
-      // Update "Learn more" button to point to WhatsApp community page
+      // Update "Learn more" / "Explore Our Community" button to point to WhatsApp community page
       const learnMoreButton = document.querySelector('a[data-track-cta="hero_learn_more_click"]');
       if (learnMoreButton) {
         learnMoreButton.setAttribute('href', 'whatsapp-community.html');
         learnMoreButton.href = 'whatsapp-community.html';
         learnMoreButton.textContent = 'Explore Our Community';
         learnMoreButton.setAttribute('title', 'Discover our WhatsApp community groups and activities');
+      }
+    } else {
+      // Hide hero CTA group on non-LGBTQ domains (if it exists)
+      const heroCtaGroup = document.getElementById('hero-cta-group');
+      if (heroCtaGroup) {
+        heroCtaGroup.style.display = 'none';
       }
     }
   }
