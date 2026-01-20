@@ -16,8 +16,15 @@
 
   /**
    * Check if current domain matches LGBTQ domain
+   * Also checks for ?lgbtq=true URL parameter for testing
    */
   function isLGBTQDomain() {
+    // Check URL parameter for testing (e.g., ?lgbtq=true)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('lgbtq') === 'true') {
+      return true;
+    }
+    
     const hostname = window.location.hostname.toLowerCase();
     return hostname === LGBTQ_DOMAIN || 
            hostname === 'www.' + LGBTQ_DOMAIN ||
@@ -145,10 +152,29 @@
 
     // Update "Find your Group" button href and text only for LGBTQ domain
     if (isLGBTQDomain()) {
+      console.log('[Domain Variant] LGBTQ domain detected, showing hero buttons');
+      
       // Show hero CTA group on all pages for LGBTQ domain
+      // Remove inline display:none style and set to flex
+      const heroCtaGroups = document.querySelectorAll('.hero-cta-group');
+      console.log('[Domain Variant] Found', heroCtaGroups.length, 'hero CTA groups');
+      heroCtaGroups.forEach((group, index) => {
+        // Remove the inline style attribute that has display:none
+        if (group.hasAttribute('style') && group.style.display === 'none') {
+          group.removeAttribute('style');
+        }
+        group.style.display = 'flex';
+        console.log('[Domain Variant] Showing hero CTA group', index);
+      });
+      
+      // Also try by ID for backwards compatibility
       const heroCtaGroup = document.getElementById('hero-cta-group');
       if (heroCtaGroup) {
+        if (heroCtaGroup.hasAttribute('style') && heroCtaGroup.style.display === 'none') {
+          heroCtaGroup.removeAttribute('style');
+        }
         heroCtaGroup.style.display = 'flex';
+        console.log('[Domain Variant] Showing hero CTA group by ID');
       }
       
       const findGroupButton = document.getElementById('hero-find-group-btn');
@@ -199,9 +225,10 @@
         learnMoreButton.setAttribute('title', 'Discover our WhatsApp community groups and activities');
       }
     } else {
-      // Hide hero CTA group on non-LGBTQ domains (if it exists)
+      // Hide hero CTA group on non-LGBTQ domains (only if it has the ID, meaning it was added for LGBTQ)
       const heroCtaGroup = document.getElementById('hero-cta-group');
-      if (heroCtaGroup) {
+      if (heroCtaGroup && heroCtaGroup.hasAttribute('style') && heroCtaGroup.style.display === 'none') {
+        // Only hide if it was explicitly hidden (has display:none in style attribute)
         heroCtaGroup.style.display = 'none';
       }
     }
