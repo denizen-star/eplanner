@@ -898,7 +898,39 @@ async function saveEventEdit(event) {
       errorDiv.className = 'message message-error';
       errorDiv.style.display = 'block';
       // Continue with update even if geocoding fails
+      // But clear address components if geocoding fails
+      formData.house_number = null;
+      formData.road = null;
+      formData.suburb = null;
+      formData.city = null;
+      formData.county = null;
+      formData.state = null;
+      formData.postcode = null;
+      formData.country = null;
+      formData.country_code = null;
+      formData.neighbourhood = null;
+      formData.city_district = null;
+      formData.village = null;
+      formData.town = null;
+      formData.municipality = null;
     }
+  } else {
+    // If no location text, clear address components
+    console.log('[MANAGE EDIT] No location text, clearing address components');
+    formData.house_number = null;
+    formData.road = null;
+    formData.suburb = null;
+    formData.city = null;
+    formData.county = null;
+    formData.state = null;
+    formData.postcode = null;
+    formData.country = null;
+    formData.country_code = null;
+    formData.neighbourhood = null;
+    formData.city_district = null;
+    formData.village = null;
+    formData.town = null;
+    formData.municipality = null;
   }
 
   console.log('[MANAGE] Sending update request:', {
