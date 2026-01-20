@@ -742,7 +742,12 @@ function removeEditPicture() {
 
 /**
  * Update map preview when location changes
+ * Uses debouncing and minimum length to prevent excessive geocoding requests
  */
+let editMapUpdateTimeout = null;
+let lastGeocodeError = null;
+let geocodeErrorCount = 0;
+
 function updateEditMap() {
   const locationInput = document.getElementById('editLocation');
   const mapContainer = document.getElementById('editMapContainer');
@@ -756,15 +761,33 @@ function updateEditMap() {
     clearTimeout(editMapUpdateTimeout);
   }
   
-  // Debounce map updates - wait 500ms after user stops typing
+  // Don't geocode if location is too short (less than 5 characters)
+  // This prevents unnecessary API calls for partial addresses
+  if (locationText.length < 5) {
+    mapContainer.style.display = 'none';
+    return;
+  }
+  
+  // Debounce map updates - wait 1000ms (1 second) after user stops typing
+  // Increased from 500ms to reduce API calls and avoid rate limiting
   editMapUpdateTimeout = setTimeout(() => {
-    if (locationText) {
+    if (locationText && locationText.length >= 5) {
       mapContainer.style.display = 'block';
-      updateMapForLocation('editMapContainer', locationText, true);
+      // Suppress error logging if we've had recent errors (to avoid spam)
+      const shouldSuppressErrors = geocodeErrorCount > 2;
+      updateMapForLocation('editMapContainer', locationText, true).catch(error => {
+        // Only log error if we haven't had too many recent errors
+        if (!shouldSuppressErrors) {
+          console.warn('[MANAGE] Map update failed (this is normal if geocoding service is temporarily unavailable):', error.message);
+        }
+        geocodeErrorCount++;
+        // Reset error count after 30 seconds
+        setTimeout(() => { geocodeErrorCount = Math.max(0, geocodeErrorCount - 1); }, 30000);
+      });
     } else {
       mapContainer.style.display = 'none';
     }
-  }, 500);
+  }, 1000);
 }
 
 /**

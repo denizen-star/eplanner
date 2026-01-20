@@ -217,9 +217,16 @@ async function updateMapForLocation(mapId, locationText, staticMode = false, def
       mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Unable to display map</div>';
     }
   } catch (error) {
-    console.error('Error updating map:', error);
-    mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Unable to find location on map</div>';
+    // Don't log 503 errors (service unavailable) as they're temporary and spam the console
+    // Only log other errors that might indicate a real problem
+    if (!error.message || (!error.message.includes('503') && !error.message.includes('Service Unavailable'))) {
+      console.error('Error updating map:', error);
+    }
+    // Show a user-friendly message instead of error details
+    mapContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-gray);">Map will update when you save the event</div>';
     mapContainer.style.display = 'block';
+    // Re-throw so calling code can handle it if needed
+    throw error;
   }
 }
 
