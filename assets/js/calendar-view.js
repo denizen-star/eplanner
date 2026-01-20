@@ -131,6 +131,9 @@ function renderEventCard(event) {
   // Check if event is full
   const isFull = maxParticipants > 0 && signupCount >= maxParticipants;
   
+  // Check if event is in the past
+  const isPast = new Date(event.dateTime) < new Date();
+  
   let eventTitle = '';
   if (event.title) {
     const titleClass = isCancelled ? 'calendar-event-title calendar-event-cancelled-title' : 'calendar-event-title';
@@ -151,13 +154,14 @@ function renderEventCard(event) {
   }
   
   const eventCard = `
-    <a href="${isCancelled ? '#' : signupLink}" class="calendar-event ${isCancelled ? 'calendar-event-cancelled' : ''} ${isFull ? 'calendar-event-full' : ''}" ${isCancelled ? 'onclick="return false;"' : ''} data-track-cta="calendar_event_click">
+    <a href="${isCancelled || isPast ? '#' : signupLink}" class="calendar-event ${isCancelled ? 'calendar-event-cancelled' : ''} ${isFull ? 'calendar-event-full' : ''} ${isPast ? 'calendar-event-past' : ''}" ${isCancelled || isPast ? 'onclick="return false;"' : ''} data-track-cta="calendar_event_click">
       <div class="calendar-event-time">${timeRange}</div>
       ${eventTitle}
       <div class="calendar-event-location ${isCancelled ? 'calendar-event-cancelled-location' : ''}">${escapeHtml(location)}</div>
       ${eventDescription}
       ${statusText}
       ${isFull ? '<div class="calendar-event-full-overlay"></div>' : ''}
+      ${isPast ? '<div class="calendar-event-past-overlay"></div>' : ''}
     </a>
   `;
   

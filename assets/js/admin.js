@@ -143,7 +143,7 @@ function renderAdminTable() {
           <th style="padding: 12px; text-align: left; font-weight: 600;">Location</th>
           <th style="padding: 12px; text-align: left; font-weight: 600;">Date/Time</th>
           <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
-          <th style="padding: 12px; text-align: left; font-weight: 600;">Details</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;"></th>
           <th style="padding: 12px; text-align: left; font-weight: 600;">Actions</th>
         </tr>
       </thead>
@@ -209,7 +209,7 @@ function renderAdminTable() {
     const locationDisplay = isCancelled ? `<span style="text-decoration: line-through;">${run.location}</span>` : run.location;
     
     tableHTML += `
-      <tr style="border-bottom: 1px solid var(--border-light);">
+      <tr class="admin-table-row" data-run-id="${run.id}" style="border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="toggleRowDetails('${run.id}', event)">
         <td style="padding: 12px;">${eventNameDisplay}${pacerName ? `<br><span style="font-size: 12px; color: var(--text-gray);">${pacerName}</span>` : ''}</td>
         <td style="padding: 12px; font-size: 14px;">${pacerName || 'N/A'}</td>
         <td style="padding: 12px; font-size: 14px;">${locationDisplay}</td>
@@ -217,48 +217,108 @@ function renderAdminTable() {
         <td style="padding: 12px;">
           <span class="${statusPillClass}" style="${statusPillStyle} padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block;">${statusText}</span>
         </td>
-        <td style="padding: 12px; position: relative;">
-          <button class="button button-secondary button-sm" onclick="toggleDetails('${run.id}')" id="detailsToggle-${run.id}" title="Toggle Details" style="padding: 6px 12px; font-size: 12px;">
-            <span>Details</span>
-            <span class="dropdown-icon" id="detailsIcon-${run.id}">▼</span>
-          </button>
-          <div class="list-item-dropdown" id="detailsDropdown-${run.id}" style="display: none; position: absolute; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; margin-top: 8px; min-width: 300px;">
-            <div class="dropdown-content">
-              <div style="margin-bottom: 16px;">
-                <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">Signups (${signupsArray.length} / ${run.maxParticipants}):</strong>
-                <ul class="signup-list" id="signupList-${run.id}" style="max-height: 200px; overflow-y: auto;"></ul>
-              </div>
-              <div style="margin-bottom: 12px; padding-top: 12px; border-top: 1px solid var(--border-gray);">
-                <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Signup Link:</strong>
-                ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
-                <div class="link-display" style="margin: 0;">
-                  ${isDisabled ? 
-                    `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</span>` :
-                    `<a href="${signupLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</a>`
-                  }
-                  ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_signup_link_click">Copy</button>` : ''}
+        <td style="padding: 12px;">
+          <span class="admin-row-expand-icon" id="rowExpandIcon-${run.id}">▶</span>
+        </td>
+        <td style="padding: 12px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <button class="button button-secondary" onclick="event.stopPropagation(); editRun('${run.id}')" id="editButton-${run.id}" ${!canEdit ? 'disabled title="Event cannot be modified within 24 hours of start time"' : ''} data-track-cta="edit_button_click" style="padding: 6px 12px; font-size: 12px;">Edit</button>
+            <div class="admin-dropdown" style="position: relative;">
+              <button class="button button-secondary button-sm admin-dropdown-toggle" onclick="event.stopPropagation(); toggleActions('${run.id}')" id="actionsToggle-${run.id}" style="padding: 6px 12px; font-size: 12px;">
+                Actions <span class="dropdown-icon" id="actionsIcon-${run.id}">▼</span>
+              </button>
+              <div class="admin-dropdown-menu" id="actionsDropdown-${run.id}" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; min-width: 120px;">
+                <div class="dropdown-content">
+                  <button class="button button-danger-pill" onclick="event.stopPropagation(); cancelEvent('${run.id}')" id="cancelButton-${run.id}" ${run.status === 'cancelled' || eventStartTime < now ? 'disabled title="' + (run.status === 'cancelled' ? 'Event already cancelled' : 'Event cannot be cancelled after it has started') + '"' : ''} data-track-cta="cancel_button_click" style="width: 100%; margin-bottom: 4px; padding: 6px 12px; font-size: 12px; background: rgba(239, 68, 68, 0.2); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 20px;">Cancel</button>
+                  <button class="button button-primary-pill" onclick="event.stopPropagation(); deleteRun('${run.id}')" data-track-cta="delete_button_click" style="width: 100%; padding: 6px 12px; font-size: 12px; background: rgba(59, 130, 246, 0.2); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px;">Delete</button>
                 </div>
               </div>
-              <div style="margin-bottom: 12px;">
-                <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Management Link:</strong>
-                ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
-                <div class="link-display" style="margin: 0;">
-                  ${isDisabled ? 
-                    `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</span>` :
-                    `<a href="${manageLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</a>`
-                  }
-                  ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_manage_link_click">Copy</button>` : ''}
-                </div>
-              </div>
-              ${whatsappMessageHtml}
             </div>
           </div>
         </td>
-        <td style="padding: 12px;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" ${!canEdit ? 'disabled title="Event cannot be modified within 24 hours of start time"' : ''} data-track-cta="edit_button_click" style="padding: 6px 12px; font-size: 12px;">Edit</button>
-            <button class="button button-secondary" onclick="cancelEvent('${run.id}')" id="cancelButton-${run.id}" ${run.status === 'cancelled' || eventStartTime < now ? 'disabled title="' + (run.status === 'cancelled' ? 'Event already cancelled' : 'Event cannot be cancelled after it has started') + '"' : ''} data-track-cta="cancel_button_click" style="padding: 6px 12px; font-size: 12px; background: rgba(239, 68, 68, 0.2); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3);">Cancel</button>
-            <button class="button button-secondary" onclick="deleteRun('${run.id}')" data-track-cta="delete_button_click" style="padding: 6px 12px; font-size: 12px; background: rgba(59, 130, 246, 0.2); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3);">Delete</button>
+      </tr>
+      <tr class="admin-table-details-row" id="rowDetails-${run.id}" style="display: none; background: var(--bg-secondary);">
+        <td colspan="7" style="padding: 20px;">
+          <div style="max-width: 800px;">
+            <div style="margin-bottom: 16px;">
+              <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">Signups (${signupsArray.length} / ${run.maxParticipants}):</strong>
+              <ul class="signup-list" id="signupList-${run.id}" style="max-height: 200px; overflow-y: auto; list-style: none; padding: 0;"></ul>
+            </div>
+            <div style="margin-bottom: 12px; padding-top: 12px; border-top: 1px solid var(--border-gray);">
+              <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Signup Link:</strong>
+              ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
+              <div class="link-display" style="margin: 0;">
+                ${isDisabled ? 
+                  `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</span>` :
+                  `<a href="${signupLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</a>`
+                }
+                ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_signup_link_click">Copy</button>` : ''}
+              </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Management Link:</strong>
+              ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
+              <div class="link-display" style="margin: 0;">
+                ${isDisabled ? 
+                  `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</span>` :
+                  `<a href="${manageLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</a>`
+                }
+                ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_manage_link_click">Copy</button>` : ''}
+              </div>
+            </div>
+            ${whatsappMessageHtml}
+          </div>
+        </td>
+      </tr>
+      <tr class="admin-table-edit-row" id="editFormContainer-${run.id}" style="display: none; background: var(--bg-secondary);">
+        <td colspan="7" style="padding: 20px;">
+          <div style="max-width: 800px; margin: 0 auto;">
+            <h2 style="margin-bottom: 16px;">Edit Event</h2>
+            <form onsubmit="saveRunEdit(event, '${run.id}')" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-gray);">
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editTitle-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Event Title (Optional)</label>
+                <input type="text" id="editTitle-${run.id}" placeholder="e.g., Morning Beach Run" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editLocation-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Location *</label>
+                <input type="text" id="editLocation-${run.id}" required oninput="updateEditMap('${run.id}')" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editPacerName-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Planner Name *</label>
+                <input type="text" id="editPacerName-${run.id}" required style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editDateTime-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Date and Time *</label>
+                <input type="datetime-local" id="editDateTime-${run.id}" required style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editMaxParticipants-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Max Participants *</label>
+                <input type="number" id="editMaxParticipants-${run.id}" required min="1" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editDescription-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Description (Optional)</label>
+                <textarea id="editDescription-${run.id}" rows="4" placeholder="Event description..." style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px; resize: vertical;"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 4px; font-weight: 500;">Event Picture</label>
+                <div id="editCurrentPicture-${run.id}" style="margin-bottom: 8px; display: none;">
+                  <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">Current Picture:</p>
+                  <img id="editCurrentPictureImg-${run.id}" style="max-width: 200px; border-radius: 4px; border: 1px solid var(--border-gray);">
+                  <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;">Remove</button>
+                </div>
+                <input type="file" id="editPicture-${run.id}" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                <div id="editNewPicturePreview-${run.id}" style="margin-top: 8px; display: none;">
+                  <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">New Picture Preview:</p>
+                  <img id="editNewPictureImg-${run.id}" style="max-width: 200px; border-radius: 4px; border: 1px solid var(--border-gray);">
+                </div>
+              </div>
+              <div id="locationMap-${run.id}" style="width: 100%; height: 300px; margin-bottom: 16px; display: none; border: 1px solid var(--border-gray); border-radius: 4px;"></div>
+              <div id="editError-${run.id}" class="message message-error" style="display: none; margin-bottom: 16px;"></div>
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button type="button" class="button button-secondary" onclick="cancelEdit('${run.id}')" style="padding: 8px 16px;">Cancel</button>
+                <button type="submit" class="button button-primary" style="padding: 8px 16px;">Save Changes</button>
+              </div>
+            </form>
           </div>
         </td>
       </tr>
@@ -283,7 +343,48 @@ function renderAdminTable() {
   }
 }
 
-// Toggle details dropdown (combines signups and links)
+// Toggle row details expansion
+function toggleRowDetails(runId, event) {
+  // Don't expand if clicking on buttons, links, or inputs
+  if (event && (event.target.tagName === 'BUTTON' || event.target.tagName === 'A' || event.target.tagName === 'INPUT' || event.target.closest('button') || event.target.closest('a'))) {
+    return;
+  }
+  
+  const detailsRow = document.getElementById(`rowDetails-${runId}`);
+  const expandIcon = document.getElementById(`rowExpandIcon-${runId}`);
+  
+  if (!detailsRow || !expandIcon) return;
+  
+  const isHidden = detailsRow.style.display === 'none' || !detailsRow.style.display;
+  detailsRow.style.display = isHidden ? 'table-row' : 'none';
+  expandIcon.textContent = isHidden ? '▼' : '▶';
+}
+
+// Toggle actions dropdown
+function toggleActions(runId) {
+  const dropdown = document.getElementById(`actionsDropdown-${runId}`);
+  const icon = document.getElementById(`actionsIcon-${runId}`);
+  
+  if (!dropdown || !icon) return;
+  
+  // Close all other dropdowns
+  document.querySelectorAll('.admin-dropdown-menu').forEach(menu => {
+    if (menu.id !== `actionsDropdown-${runId}`) {
+      menu.style.display = 'none';
+    }
+  });
+  document.querySelectorAll('.dropdown-icon').forEach(ic => {
+    if (ic.id !== `actionsIcon-${runId}`) {
+      ic.textContent = '▼';
+    }
+  });
+  
+  const isHidden = dropdown.style.display === 'none' || !dropdown.style.display;
+  dropdown.style.display = isHidden ? 'block' : 'none';
+  icon.textContent = isHidden ? '▲' : '▼';
+}
+
+// Toggle details dropdown (combines signups and links) - kept for backward compatibility
 function toggleDetails(runId) {
   const dropdown = document.getElementById(`detailsDropdown-${runId}`);
   const icon = document.getElementById(`detailsIcon-${runId}`);
@@ -431,18 +532,14 @@ function editRun(runId) {
     }
   };
 
-  // Show edit form and hide edit button, ensure details are expanded
-  const detailsContainer = document.getElementById(`details-${runId}`);
-  if (detailsContainer) {
-    detailsContainer.style.display = 'block';
-    const listItem = detailsContainer.closest('.list-item');
-    if (listItem) {
-      listItem.classList.add('expanded');
-    }
-  }
-  document.getElementById(`editFormContainer-${runId}`).style.display = 'block';
-  document.getElementById(`editButton-${runId}`).style.display = 'none';
-  document.getElementById(`editError-${runId}`).style.display = 'none';
+  // Show edit form and hide edit button
+  const editFormContainer = document.getElementById(`editFormContainer-${runId}`);
+  const editButton = document.getElementById(`editButton-${runId}`);
+  const editError = document.getElementById(`editError-${runId}`);
+  
+  if (editFormContainer) editFormContainer.style.display = 'table-row';
+  if (editButton) editButton.style.display = 'none';
+  if (editError) editError.style.display = 'none';
   
   // Initialize map after container is visible - use requestAnimationFrame to ensure DOM is ready
   const mapContainer = document.getElementById(`locationMap-${runId}`);
@@ -471,9 +568,13 @@ function editRun(runId) {
 }
 
 function cancelEdit(runId) {
-  document.getElementById(`editFormContainer-${runId}`).style.display = 'none';
-  document.getElementById(`editButton-${runId}`).style.display = 'inline-block';
-  document.getElementById(`editError-${runId}`).style.display = 'none';
+  const editFormContainer = document.getElementById(`editFormContainer-${runId}`);
+  const editButton = document.getElementById(`editButton-${runId}`);
+  const editError = document.getElementById(`editError-${runId}`);
+  
+  if (editFormContainer) editFormContainer.style.display = 'none';
+  if (editButton) editButton.style.display = 'inline-block';
+  if (editError) editError.style.display = 'none';
   
   // Hide map when canceling edit
   const mapContainer = document.getElementById(`locationMap-${runId}`);

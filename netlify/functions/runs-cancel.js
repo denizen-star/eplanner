@@ -120,52 +120,132 @@ exports.handler = async (event) => {
     const cancelledRun = await runs.getById(runId);
 
     // Send cancellation emails to all signups (non-blocking)
-    console.log('[RUNS CANCEL] Sending cancellation emails...');
+    console.log('[RUNS CANCEL] ===== STARTING CANCELLATION EMAIL PROCESS =====');
+    console.log('[RUNS CANCEL] Event ID:', runId);
+    console.log('[RUNS CANCEL] Event Title:', cancelledRun.title || 'N/A');
+    
     try {
       const emailService = new EmailService();
-      if (emailService.isEnabled()) {
+      const isEmailEnabled = emailService.isEnabled();
+      console.log('[RUNS CANCEL] Email service enabled:', isEmailEnabled);
+      
+      if (!isEmailEnabled) {
+        console.warn('[RUNS CANCEL] ⚠️ Email service is DISABLED - cancellation emails will NOT be sent');
+        console.warn('[RUNS CANCEL] Check EMAIL_ENABLED environment variable');
+      } else {
+        console.log('[RUNS CANCEL] Email service is enabled, proceeding with email sending...');
+        
+        // Step 1: Get all signups
+        console.log('[RUNS CANCEL] Step 1: Retrieving all signups for event...');
         const allSignups = await signups.getByRunId(runId);
-        const signupsWithEmail = allSignups.filter(s => s.email && s.email.trim());
-
-        if (signupsWithEmail.length > 0) {
-          // Build BCC list: info@kervinapps.com + coordinator email (if valid)
+        console.log(`[RUNS CANCEL] Total signups retrieved: ${allSignups.length}`);
+        
+        if (allSignups.length === 0) {
+          console.warn('[RUNS CANCEL] ⚠️ No signups found for this event');
+        } else {
+          // Log signup details for debugging
+          allSignups.forEach((signup, index) => {
+            console.log(`[RUNS CANCEL] Signup ${index + 1}: ID=${signup.id}, Name=${signup.name || 'N/A'}, Email=${signup.email ? 'YES' : 'NO'}, EmailValue="${signup.email || 'N/A'}"`);
+          });
+        }
+        
+        // Step 2: Filter signups with email addresses
+        console.log('[RUNS CANCEL] Step 2: Filtering signups with email addresses...');
+        const signupsWithEmail = allSignups.filter(s => {
+          const hasEmail = s.email && typeof s.email === 'string' && s.email.trim().length > 0;
+          if (!hasEmail) {
+            console.log(`[RUNS CANCEL] Signup ${s.id} (${s.name || 'N/A'}) excluded - no email address`);
+          }
+          return hasEmail;
+        });
+        
+        console.log(`[RUNS CANCEL] Signups with email addresses: ${signupsWithEmail.length} out of ${allSignups.length}`);
+        
+        if (signupsWithEmail.length === 0) {
+          console.warn('[RUNS CANCEL] ⚠️ No signups have email addresses - cancellation emails cannot be sent');
+          console.warn('[RUNS CANCEL] This means participants will NOT receive cancellation notifications via email');
+        } else {
+          // Step 3: Build BCC list
+          console.log('[RUNS CANCEL] Step 3: Building BCC recipient list...');
           const bccRecipients = ['info@kervinapps.com'];
           if (cancelledRun.coordinatorEmail && cancelledRun.coordinatorEmail.trim()) {
             const coordinatorEmail = cancelledRun.coordinatorEmail.trim();
             if (coordinatorEmail.includes('@')) {
               bccRecipients.push(coordinatorEmail);
+              console.log(`[RUNS CANCEL] Added coordinator email to BCC: ${coordinatorEmail}`);
+            } else {
+              console.warn(`[RUNS CANCEL] Coordinator email invalid (no @ symbol): ${coordinatorEmail}`);
             }
+          } else {
+            console.warn('[RUNS CANCEL] No coordinator email found for BCC');
           }
+          console.log(`[RUNS CANCEL] BCC recipients: ${bccRecipients.join(', ')}`);
+
+          // Step 4: Send emails to each signup
+          console.log('[RUNS CANCEL] Step 4: Sending cancellation emails to participants...');
+          let successCount = 0;
+          let failureCount = 0;
+          const emailResults = [];
 
           const emailPromises = signupsWithEmail.map(async (signup) => {
+            const signupEmail = signup.email.trim();
+            console.log(`[RUNS CANCEL] Attempting to send email to signup ${signup.id} (${signup.name || 'N/A'}) at ${signupEmail}...`);
+            
             try {
               const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup, cancelledRun.cancellationMessage || null);
+              console.log(`[RUNS CANCEL] Email content generated for signup ${signup.id}, subject: "${cancellationEmailContent.subject}"`);
+              
               await emailService.sendEmail({
-                to: signup.email.trim(),
+                to: signupEmail,
                 bcc: bccRecipients,
                 subject: cancellationEmailContent.subject,
                 html: cancellationEmailContent.html,
                 text: cancellationEmailContent.text,
                 fromName: cancellationEmailContent.fromName,
               });
-              console.log(`[RUNS CANCEL] Cancellation email sent to signup ${signup.id} with BCC to ${bccRecipients.join(', ')}`);
+              
+              successCount++;
+              emailResults.push({ signupId: signup.id, email: signupEmail, status: 'success' });
+              console.log(`[RUNS CANCEL] ✅ SUCCESS: Cancellation email sent to signup ${signup.id} (${signup.name || 'N/A'}) at ${signupEmail} with BCC to ${bccRecipients.join(', ')}`);
             } catch (signupEmailError) {
-              console.error(`[RUNS CANCEL] Error sending email to signup ${signup.id}:`, signupEmailError.message);
+              failureCount++;
+              emailResults.push({ signupId: signup.id, email: signupEmail, status: 'failed', error: signupEmailError.message });
+              console.error(`[RUNS CANCEL] ❌ FAILED: Error sending email to signup ${signup.id} (${signup.name || 'N/A'}) at ${signupEmail}:`, signupEmailError.message);
+              console.error(`[RUNS CANCEL] Error stack:`, signupEmailError.stack);
+              // Continue with other emails even if one fails
             }
           });
 
           await Promise.all(emailPromises);
-          console.log(`[RUNS CANCEL] Cancellation emails sent to ${signupsWithEmail.length} signup(s) with BCC copies`);
-        } else {
-          console.log('[RUNS CANCEL] No signups with email addresses found');
+          
+          // Step 5: Summary
+          console.log('[RUNS CANCEL] ===== EMAIL SENDING SUMMARY =====');
+          console.log(`[RUNS CANCEL] Total signups: ${allSignups.length}`);
+          console.log(`[RUNS CANCEL] Signups with email: ${signupsWithEmail.length}`);
+          console.log(`[RUNS CANCEL] Emails sent successfully: ${successCount}`);
+          console.log(`[RUNS CANCEL] Emails failed: ${failureCount}`);
+          
+          if (failureCount > 0) {
+            console.error(`[RUNS CANCEL] ⚠️ WARNING: ${failureCount} email(s) failed to send. Check logs above for details.`);
+            emailResults.filter(r => r.status === 'failed').forEach(result => {
+              console.error(`[RUNS CANCEL] Failed: Signup ${result.signupId} at ${result.email} - ${result.error}`);
+            });
+          }
+          
+          if (successCount === 0 && signupsWithEmail.length > 0) {
+            console.error(`[RUNS CANCEL] ❌ CRITICAL: All ${signupsWithEmail.length} email(s) failed to send!`);
+          } else if (successCount > 0) {
+            console.log(`[RUNS CANCEL] ✅ Successfully sent ${successCount} cancellation email(s) with BCC copies`);
+          }
         }
-      } else {
-        console.log('[RUNS CANCEL] Email service is disabled, skipping emails');
       }
     } catch (emailError) {
-      console.error('[RUNS CANCEL] Error in email sending process:', emailError.message);
-      // Don't fail the cancellation if email fails
+      console.error('[RUNS CANCEL] ❌ CRITICAL ERROR in email sending process:', emailError.message);
+      console.error('[RUNS CANCEL] Error stack:', emailError.stack);
+      // Don't fail the cancellation if email fails, but log the error clearly
     }
+    
+    console.log('[RUNS CANCEL] ===== CANCELLATION EMAIL PROCESS COMPLETE =====');
 
     console.log('[RUNS CANCEL] Success! Event cancelled:', runId);
     return jsonResponse(200, {
