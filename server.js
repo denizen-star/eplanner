@@ -955,24 +955,35 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
   try {
     const { runId } = req.params;
     const isAdmin = req.query.isAdmin === 'true' || req.headers['x-is-admin'] === 'true';
+    
+    // Extract cancellation data from request body
+    const { coordinatorEmail, cancellationMessage } = req.body;
 
     console.log('[CANCEL] Request received for runId:', runId, 'isAdmin:', isAdmin);
 
     // Verify run exists
-    const run = await runs.getById(runId);
-    if (!run) {
+    const existingRun = await runs.getById(runId);
+    if (!existingRun) {
       console.error('[CANCEL] Run not found:', runId);
       return res.status(404).json({ error: 'Run not found' });
     }
 
+    // Verify coordinator email matches (unless admin)
+    if (!isAdmin) {
+      if (!coordinatorEmail || coordinatorEmail.trim().toLowerCase() !== existingRun.coordinatorEmail.toLowerCase()) {
+        console.error('[CANCEL] Coordinator email does not match:', { provided: coordinatorEmail, expected: existingRun.coordinatorEmail });
+        return res.status(403).json({ error: 'Coordinator email does not match' });
+      }
+    }
+
     // Check if already cancelled
-    if (run.status === 'cancelled') {
+    if (existingRun.status === 'cancelled') {
       console.error('[CANCEL] Event already cancelled:', runId);
       return res.status(400).json({ error: 'This event has already been cancelled.' });
     }
 
     // Check time-based restrictions
-    const eventStartTime = new Date(run.dateTime);
+    const eventStartTime = new Date(existingRun.dateTime);
     const now = new Date();
     const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
 
@@ -990,9 +1001,19 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
       }
     }
 
-    // Update event status to 'cancelled'
+    // Update event status to 'cancelled' with cancellation message and timestamp
+    const cancelledAt = new Date().toISOString();
+    const updateData = { 
+      status: 'cancelled',
+      cancelledAt: cancelledAt
+    };
+
+    if (cancellationMessage && cancellationMessage.trim()) {
+      updateData.cancellationMessage = cancellationMessage.trim();
+    }
+
     console.log('[CANCEL] Updating event status to cancelled...');
-    await runs.update(runId, { status: 'cancelled' });
+    await runs.update(runId, updateData);
     const cancelledRun = await runs.getById(runId);
 
     // Send cancellation emails to all signups (non-blocking)
@@ -1015,7 +1036,7 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
 
           const emailPromises = signupsWithEmail.map(async (signup) => {
             try {
-              const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup);
+              const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup, cancelledRun.cancellationMessage || null);
               await emailService.sendEmail({
                 to: signup.email.trim(),
                 bcc: bccRecipients,

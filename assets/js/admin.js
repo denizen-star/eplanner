@@ -598,28 +598,26 @@ document.addEventListener('click', (e) => {
 });
 
 async function cancelEvent(runId) {
-  if (!confirm('Are you sure you want to cancel this event? All registered participants will be notified via email. This action cannot be undone.')) {
+  const run = currentRuns.find(r => r.id === runId || r.uuid === runId);
+  if (!run || !run.coordinatorEmail) {
+    showErrorModal('Event not found or missing coordinator email');
     return;
   }
 
-  try {
-    const response = await fetch(`/api/runs/${runId}/cancel?isAdmin=true`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to cancel event');
-    }
-
-    alert('Event cancelled successfully. All participants have been notified.');
+  // Set up success callback to reload runs list
+  window.onCancellationSuccess = function() {
     loadRuns();
     loadReport();
-  } catch (error) {
-    alert('Error cancelling event: ' + error.message);
-  }
+  };
+
+  // Initialize cancellation flow with modal (admin mode)
+  initCancellationFlow(runId, run.coordinatorEmail, {
+    isAdmin: true,
+    onSuccess: () => {
+      loadRuns();
+      loadReport();
+    }
+  });
 }
 
 async function deleteRun(runId) {

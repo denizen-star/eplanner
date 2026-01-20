@@ -462,27 +462,23 @@ function addCancelEventButton(run) {
  * Cancel the event (coordinator function)
  */
 async function cancelEvent() {
-  if (!confirm('Are you sure you want to cancel this event? All registered participants will be notified via email. This action cannot be undone.')) {
+  if (!currentRun || !currentRun.coordinatorEmail) {
+    showErrorModal('Event data not loaded. Please refresh the page.');
     return;
   }
 
-  try {
-    const response = await fetch(`/api/runs/${runId}/cancel`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to cancel event');
-    }
-
-    alert('Event cancelled successfully. All participants have been notified.');
+  // Set up success callback to reload page
+  window.onCancellationSuccess = function() {
     window.location.reload();
-  } catch (error) {
-    alert('Error cancelling event: ' + error.message);
-  }
+  };
+
+  // Initialize cancellation flow with modal
+  initCancellationFlow(runId, currentRun.coordinatorEmail, {
+    isAdmin: false,
+    onSuccess: () => {
+      window.location.reload();
+    }
+  });
 }
 
 async function deleteSignup(signupIndex) {
@@ -870,9 +866,10 @@ async function saveEventEdit(event) {
       throw new Error(errorMessage);
     }
 
-    // Success - reload the page to show updated data
-    alert('Event updated successfully!');
-    window.location.reload();
+    // Success - show modal and reload the page
+    showSuccessModal('Event updated successfully!', () => {
+      window.location.reload();
+    });
   } catch (error) {
     console.error('[MANAGE] Error saving event edit:', error);
     const errorMessage = error.message || 'Failed to update event. Please check the console for details.';

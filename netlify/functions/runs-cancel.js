@@ -45,6 +45,10 @@ exports.handler = async (event) => {
     
     // Check if isAdmin is in query params or headers
     const isAdmin = event.queryStringParameters?.isAdmin === 'true' || event.headers['x-is-admin'] === 'true' || event.headers['X-Is-Admin'] === 'true';
+    
+    // Extract cancellation data from request body
+    const body = parseBody(event);
+    const { coordinatorEmail, cancellationMessage } = body;
 
     console.log('[RUNS CANCEL] Request received:', {
       path: event.path,
@@ -61,20 +65,28 @@ exports.handler = async (event) => {
     }
 
     // Verify run exists
-    const run = await runs.getById(runId);
-    if (!run) {
+    const existingRun = await runs.getById(runId);
+    if (!existingRun) {
       console.error('[RUNS CANCEL] Run not found:', runId);
       return jsonResponse(404, { success: false, error: 'Run not found' });
     }
 
+    // Verify coordinator email matches (unless admin)
+    if (!isAdmin) {
+      if (!coordinatorEmail || coordinatorEmail.trim().toLowerCase() !== existingRun.coordinatorEmail.toLowerCase()) {
+        console.error('[RUNS CANCEL] Coordinator email does not match:', { provided: coordinatorEmail, expected: existingRun.coordinatorEmail });
+        return jsonResponse(403, { success: false, error: 'Coordinator email does not match' });
+      }
+    }
+
     // Check if already cancelled
-    if (run.status === 'cancelled') {
+    if (existingRun.status === 'cancelled') {
       console.error('[RUNS CANCEL] Event already cancelled:', runId);
       return jsonResponse(400, { success: false, error: 'This event has already been cancelled.' });
     }
 
     // Check time-based restrictions
-    const eventStartTime = new Date(run.dateTime);
+    const eventStartTime = new Date(existingRun.dateTime);
     const now = new Date();
     const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
 
@@ -92,9 +104,19 @@ exports.handler = async (event) => {
       }
     }
 
-    // Update event status to 'cancelled'
+    // Update event status to 'cancelled' with cancellation message and timestamp
+    const cancelledAt = new Date().toISOString();
+    const updateData = { 
+      status: 'cancelled',
+      cancelledAt: cancelledAt
+    };
+
+    if (cancellationMessage && cancellationMessage.trim()) {
+      updateData.cancellationMessage = cancellationMessage.trim();
+    }
+
     console.log('[RUNS CANCEL] Updating event status to cancelled...');
-    await runs.update(runId, { status: 'cancelled' });
+    await runs.update(runId, updateData);
     const cancelledRun = await runs.getById(runId);
 
     // Send cancellation emails to all signups (non-blocking)
@@ -117,7 +139,7 @@ exports.handler = async (event) => {
 
           const emailPromises = signupsWithEmail.map(async (signup) => {
             try {
-              const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup);
+              const cancellationEmailContent = eventCancelledEmail(cancelledRun, signup, cancelledRun.cancellationMessage || null);
               await emailService.sendEmail({
                 to: signup.email.trim(),
                 bcc: bccRecipients,
