@@ -884,7 +884,16 @@ app.put('/api/runs/:runId', async (req, res) => {
       location: updatedRun?.location?.substring(0, 50),
       plannerName: updatedRun?.plannerName,
       title: updatedRun?.title,
-      dateTime: updatedRun?.dateTime
+      dateTime: updatedRun?.dateTime,
+      addressComponents: {
+        houseNumber: updatedRun?.houseNumber,
+        house_number: updatedRun?.house_number,
+        road: updatedRun?.road,
+        city: updatedRun?.city,
+        state: updatedRun?.state,
+        postcode: updatedRun?.postcode,
+        country: updatedRun?.country
+      }
     });
 
     // Send update emails if there were changes (non-blocking)
