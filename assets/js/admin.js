@@ -672,27 +672,34 @@ async function saveRunEdit(event, runId) {
   formData.dateTime = dateTimeLocal ? new Date(dateTimeLocal).toISOString() : null;
 
   try {
-    // Geocode location if it changed to get address components
+    // Always geocode location to get/update address components
     const locationText = formData.location;
-    let addressComponents = null;
-    let coordinates = null;
-    let placeName = null;
     
-    // Check if location changed
-    const originalLocation = run?.location;
-    if (locationText && locationText.trim() && locationText.trim() !== originalLocation) {
-      errorDiv.textContent = 'Geocoding location...';
+    if (locationText && locationText.trim()) {
+      errorDiv.textContent = 'Geocoding location to update address details...';
       errorDiv.style.display = 'block';
       errorDiv.className = 'message';
       
       try {
+        console.log('[ADMIN EDIT] Geocoding location:', locationText.trim());
         const geocodeResult = await geocodeLocation(locationText.trim());
-        coordinates = geocodeResult.coordinates;
-        placeName = geocodeResult.placeName;
+        console.log('[ADMIN EDIT] Geocoding result:', geocodeResult);
+        
+        const coordinates = geocodeResult.coordinates;
+        const placeName = geocodeResult.placeName;
         const addr = geocodeResult.addressComponents || {};
         
+        console.log('[ADMIN EDIT] Address components extracted:', {
+          house_number: addr.house_number,
+          road: addr.road || addr.street || addr.pedestrian,
+          city: addr.city || addr.town || addr.village || addr.municipality,
+          state: addr.state,
+          postcode: addr.postcode,
+          country: addr.country
+        });
+        
         // Extract address components (same pattern as event creation)
-        addressComponents = {
+        const addressComponents = {
           house_number: addr.house_number || null,
           road: addr.road || addr.street || addr.pedestrian || null,
           suburb: addr.suburb || null,
@@ -713,6 +720,9 @@ async function saveRunEdit(event, runId) {
         formData.placeName = placeName;
         // Add all address component fields to formData
         Object.assign(formData, addressComponents);
+        
+        console.log('[ADMIN EDIT] Address components added to formData:', Object.keys(addressComponents));
+        errorDiv.style.display = 'none';
       } catch (geocodeError) {
         console.error('[ADMIN EDIT] Geocoding error:', geocodeError);
         errorDiv.textContent = `Geocoding failed: ${geocodeError.message}. The location will be updated but address details may not be accurate.`;

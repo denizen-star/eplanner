@@ -810,7 +810,17 @@ app.put('/api/runs/:runId', async (req, res) => {
       dateTimeValue: updates.dateTime,
       hasMaxParticipants: updates.maxParticipants !== undefined,
       hasPicture: updates.picture !== undefined,
-      hasDescription: updates.description !== undefined
+      hasDescription: updates.description !== undefined,
+      hasCoordinates: updates.coordinates !== undefined,
+      hasPlaceName: updates.placeName !== undefined,
+      addressComponents: {
+        hasHouseNumber: updates.house_number !== undefined,
+        hasRoad: updates.road !== undefined,
+        hasCity: updates.city !== undefined,
+        hasState: updates.state !== undefined,
+        hasPostcode: updates.postcode !== undefined,
+        hasCountry: updates.country !== undefined
+      }
     });
     if (maxParticipants !== undefined) {
       if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {

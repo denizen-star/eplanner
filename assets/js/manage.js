@@ -838,20 +838,31 @@ async function saveEventEdit(event) {
   const errorDiv = document.getElementById('editError');
   errorDiv.style.display = 'none';
   
-  // Geocode location if it changed to get address components
+  // Always geocode location to get/update address components
   const locationText = formData.location;
-  const originalLocation = currentRun?.location;
   
-  if (locationText && locationText.trim() && locationText.trim() !== originalLocation) {
-    errorDiv.textContent = 'Geocoding location...';
+  if (locationText && locationText.trim()) {
+    errorDiv.textContent = 'Geocoding location to update address details...';
     errorDiv.style.display = 'block';
     errorDiv.className = 'message';
     
     try {
+      console.log('[MANAGE EDIT] Geocoding location:', locationText.trim());
       const geocodeResult = await geocodeLocation(locationText.trim());
+      console.log('[MANAGE EDIT] Geocoding result:', geocodeResult);
+      
       formData.coordinates = geocodeResult.coordinates;
       formData.placeName = geocodeResult.placeName;
       const addr = geocodeResult.addressComponents || {};
+      
+      console.log('[MANAGE EDIT] Address components extracted:', {
+        house_number: addr.house_number,
+        road: addr.road || addr.street || addr.pedestrian,
+        city: addr.city || addr.town || addr.village || addr.municipality,
+        state: addr.state,
+        postcode: addr.postcode,
+        country: addr.country
+      });
       
       // Extract address components (same pattern as event creation)
       formData.house_number = addr.house_number || null;
@@ -868,6 +879,9 @@ async function saveEventEdit(event) {
       formData.village = addr.village || null;
       formData.town = addr.town || null;
       formData.municipality = addr.municipality || null;
+      
+      console.log('[MANAGE EDIT] Address components added to formData');
+      errorDiv.style.display = 'none';
     } catch (geocodeError) {
       console.error('[MANAGE EDIT] Geocoding error:', geocodeError);
       errorDiv.textContent = `Geocoding failed: ${geocodeError.message}. The location will be updated but address details may not be accurate.`;
