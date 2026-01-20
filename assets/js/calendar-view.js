@@ -122,11 +122,19 @@ function renderEventCard(event) {
   const timeRange = formatTimeRange(event.dateTime, event.endTime, event.timezone);
   const location = formatLocationDisplay(event.placeName, event.location);
   const signupCount = event.signupCount || 0;
+  const maxParticipants = event.maxParticipants || 0;
   const signupLink = event.signupLink || event.signup_link || `signup.html?id=${event.id}`;
+  
+  // Check if event is cancelled
+  const isCancelled = event.cancelledAt || event.status === 'cancelled';
+  
+  // Check if event is full
+  const isFull = maxParticipants > 0 && signupCount >= maxParticipants;
   
   let eventTitle = '';
   if (event.title) {
-    eventTitle = `<div class="calendar-event-title">${escapeHtml(event.title)}</div>`;
+    const titleClass = isCancelled ? 'calendar-event-title calendar-event-cancelled-title' : 'calendar-event-title';
+    eventTitle = `<div class="${titleClass}">${escapeHtml(event.title)}</div>`;
   }
   
   let eventDescription = '';
@@ -134,15 +142,26 @@ function renderEventCard(event) {
     eventDescription = `<div class="calendar-event-description">${escapeHtml(event.description)}</div>`;
   }
   
-  return `
-    <a href="${signupLink}" class="calendar-event" data-track-cta="calendar_event_click">
+  // Status text - "Cancelled" in red if cancelled, otherwise "Attending: X"
+  let statusText = '';
+  if (isCancelled) {
+    statusText = '<div class="calendar-event-cancelled-status">Cancelled</div>';
+  } else {
+    statusText = `<div class="calendar-event-attending">Attending: ${signupCount}</div>`;
+  }
+  
+  const eventCard = `
+    <a href="${isCancelled ? '#' : signupLink}" class="calendar-event ${isCancelled ? 'calendar-event-cancelled' : ''} ${isFull ? 'calendar-event-full' : ''}" ${isCancelled ? 'onclick="return false;"' : ''} data-track-cta="calendar_event_click">
       <div class="calendar-event-time">${timeRange}</div>
       ${eventTitle}
-      <div class="calendar-event-location">${escapeHtml(location)}</div>
+      <div class="calendar-event-location ${isCancelled ? 'calendar-event-cancelled-location' : ''}">${escapeHtml(location)}</div>
       ${eventDescription}
-      <div class="calendar-event-attending">Attending: ${signupCount}</div>
+      ${statusText}
+      ${isFull ? '<div class="calendar-event-full-overlay"></div>' : ''}
     </a>
   `;
+  
+  return eventCard;
 }
 
 // Simple HTML escape function

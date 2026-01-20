@@ -931,6 +931,11 @@ body:has(.calendar-week) .main-container {
   color: #e40303;
 }
 
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
 .list-item-actions {
   display: flex;
   gap: 6px;
@@ -1862,6 +1867,58 @@ td, th {
   margin-top: var(--space-xs);
   padding-top: var(--space-xs);
   border-top: 1px solid var(--border-light);
+}
+
+/* Cancelled event styles */
+.calendar-event-cancelled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.calendar-event-cancelled:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border-primary);
+  box-shadow: none;
+  transform: none;
+}
+
+.calendar-event-cancelled-title {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+.calendar-event-cancelled-location {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+.calendar-event-cancelled-status {
+  font-size: var(--font-xs);
+  color: #ef4444;
+  font-weight: var(--font-semibold);
+  margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--border-light);
+}
+
+/* Full event overlay styles */
+.calendar-event-full {
+  position: relative;
+}
+
+.calendar-event-full-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(128, 128, 128, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 8px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 @media (max-width: 1024px) {

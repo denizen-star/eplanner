@@ -179,6 +179,15 @@
       } else {
         console.warn('[Domain Variant] Could not find hero-find-group-btn element');
       }
+      
+      // Update "Learn more" button to point to WhatsApp community page
+      const learnMoreButton = document.querySelector('a[data-track-cta="hero_learn_more_click"]');
+      if (learnMoreButton) {
+        learnMoreButton.setAttribute('href', 'whatsapp-community.html');
+        learnMoreButton.href = 'whatsapp-community.html';
+        learnMoreButton.textContent = 'Explore Our Community';
+        learnMoreButton.setAttribute('title', 'Discover our WhatsApp community groups and activities');
+      }
     }
   }
 

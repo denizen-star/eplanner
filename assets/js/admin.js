@@ -15,6 +15,8 @@ let runnersReportData = [];
 let currentRunnersSortColumn = 'name';
 let currentRunnersSortDirection = 'asc';
 let editPictures = {}; // Store base64 picture data for each run being edited
+let adminSortColumn = 'createdAt';
+let adminSortDirection = 'desc'; // Default: newest first
 
 // Toggle collapsible sections
 function toggleSection(sectionId) {
@@ -51,6 +53,248 @@ function toggleSection(sectionId) {
   }
 }
 
+
+// Sort admin dashboard runs
+function sortAdminRuns(column) {
+  // Toggle direction if clicking same column
+  if (adminSortColumn === column) {
+    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    adminSortColumn = column;
+    adminSortDirection = 'asc';
+  }
+  
+  // Sort the runs
+  const sorted = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (column === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (column === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (column === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  currentRuns = sorted;
+  renderAdminTable();
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+// Render admin dashboard as table
+function renderAdminTable() {
+  const runsList = document.getElementById('runsList');
+  if (!runsList) return;
+  
+  // Sort runs based on current sort settings
+  const sortedRuns = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (adminSortColumn === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (adminSortColumn === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (adminSortColumn === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  if (sortedRuns.length === 0) {
+    runsList.innerHTML = '<p>No events created yet. <a href="coordinate.html">Create your first event</a></p>';
+    return;
+  }
+  
+  // Build table HTML
+  let tableHTML = `
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <thead>
+        <tr style="background: var(--light-gray-1); border-bottom: 2px solid var(--border-gray);">
+          <th onclick="sortAdminRuns('eventName')" style="padding: 12px; text-align: left; cursor: pointer; font-weight: 600;">
+            Event Name <span id="adminSortIcon-eventName" class="admin-sort-icon"></span>
+          </th>
+          <th onclick="sortAdminRuns('createdBy')" style="padding: 12px; text-align: left; cursor: pointer; font-weight: 600;">
+            Created By <span id="adminSortIcon-createdBy" class="admin-sort-icon"></span>
+          </th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Location</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Date/Time</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Details</th>
+          <th style="padding: 12px; text-align: left; font-weight: 600;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  sortedRuns.forEach(run => {
+    const date = new Date(run.dateTime);
+    const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const signupsArray = run.signups || [];
+    const spotsLeft = run.maxParticipants - signupsArray.length;
+    const baseUrl = window.location.origin;
+    const signupLink = `${baseUrl}/signup.html?id=${run.id}`;
+    const manageLink = `${baseUrl}/manage.html?id=${run.id}`;
+    const formattedDate = date.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
+    const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
+    const isDisabled = run.status === 'completed' || run.status === 'deleted' || run.status === 'cancelled';
+    const isCancelled = run.status === 'cancelled';
+    const statusText = run.status === 'completed' ? 'Completed' : run.status === 'deleted' ? 'Deleted' : run.status === 'cancelled' ? 'Cancelled' : 'Active';
+    
+    const eventStartTime = new Date(run.dateTime);
+    const now = new Date();
+    const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
+    const canEdit = hoursUntilEvent >= 24 && run.status !== 'cancelled';
+    
+    // Generate WhatsApp message for active runs
+    let whatsappMessageHtml = '';
+    if (!isDisabled) {
+      const whatsappMessage = generateWhatsAppMessage(run, signupLink);
+      const whatsappMessageEscaped = whatsappMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;');
+      whatsappMessageHtml = `
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+          <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">WhatsApp Message:</strong>
+          <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; line-height: 1.4; max-height: 200px; overflow-y: auto;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
+          <button class="button button-primary copy-whatsapp-button" data-message="${whatsappMessageEscaped}" style="width: 100%; padding: 6px 12px; font-size: 12px;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
+        </div>
+      `;
+    }
+    
+    // Status pill styling
+    let statusPillClass = 'status-badge';
+    let statusPillStyle = '';
+    if (isCancelled) {
+      statusPillClass += ' status-cancelled';
+      statusPillStyle = 'background: rgba(239, 68, 68, 0.2); color: #dc2626;';
+    } else if (spotsLeft > 0) {
+      statusPillClass += ' status-open';
+    } else {
+      statusPillClass += ' status-full';
+    }
+    
+    // Event name and location with strikethrough if cancelled
+    const eventNameDisplay = isCancelled ? `<span style="text-decoration: line-through;">${runTitle || 'Untitled Event'}</span>` : (runTitle || 'Untitled Event');
+    const locationDisplay = isCancelled ? `<span style="text-decoration: line-through;">${run.location}</span>` : run.location;
+    
+    tableHTML += `
+      <tr style="border-bottom: 1px solid var(--border-light);">
+        <td style="padding: 12px;">${eventNameDisplay}${pacerName ? `<br><span style="font-size: 12px; color: var(--text-gray);">${pacerName}</span>` : ''}</td>
+        <td style="padding: 12px; font-size: 14px;">${pacerName || 'N/A'}</td>
+        <td style="padding: 12px; font-size: 14px;">${locationDisplay}</td>
+        <td style="padding: 12px; font-size: 14px;">${formattedDate}</td>
+        <td style="padding: 12px;">
+          <span class="${statusPillClass}" style="${statusPillStyle} padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block;">${statusText}</span>
+        </td>
+        <td style="padding: 12px; position: relative;">
+          <button class="button button-secondary button-sm" onclick="toggleDetails('${run.id}')" id="detailsToggle-${run.id}" title="Toggle Details" style="padding: 6px 12px; font-size: 12px;">
+            <span>Details</span>
+            <span class="dropdown-icon" id="detailsIcon-${run.id}">▼</span>
+          </button>
+          <div class="list-item-dropdown" id="detailsDropdown-${run.id}" style="display: none; position: absolute; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; margin-top: 8px; min-width: 300px;">
+            <div class="dropdown-content">
+              <div style="margin-bottom: 16px;">
+                <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">Signups (${signupsArray.length} / ${run.maxParticipants}):</strong>
+                <ul class="signup-list" id="signupList-${run.id}" style="max-height: 200px; overflow-y: auto;"></ul>
+              </div>
+              <div style="margin-bottom: 12px; padding-top: 12px; border-top: 1px solid var(--border-gray);">
+                <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Signup Link:</strong>
+                ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
+                <div class="link-display" style="margin: 0;">
+                  ${isDisabled ? 
+                    `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</span>` :
+                    `<a href="${signupLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</a>`
+                  }
+                  ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_signup_link_click">Copy</button>` : ''}
+                </div>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Management Link:</strong>
+                ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
+                <div class="link-display" style="margin: 0;">
+                  ${isDisabled ? 
+                    `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</span>` :
+                    `<a href="${manageLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</a>`
+                  }
+                  ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_manage_link_click">Copy</button>` : ''}
+                </div>
+              </div>
+              ${whatsappMessageHtml}
+            </div>
+          </div>
+        </td>
+        <td style="padding: 12px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" ${!canEdit ? 'disabled title="Event cannot be modified within 24 hours of start time"' : ''} data-track-cta="edit_button_click" style="padding: 6px 12px; font-size: 12px;">Edit</button>
+            <button class="button button-secondary" onclick="cancelEvent('${run.id}')" id="cancelButton-${run.id}" ${run.status === 'cancelled' || eventStartTime < now ? 'disabled title="' + (run.status === 'cancelled' ? 'Event already cancelled' : 'Event cannot be cancelled after it has started') + '"' : ''} data-track-cta="cancel_button_click" style="padding: 6px 12px; font-size: 12px; background: rgba(239, 68, 68, 0.2); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3);">Cancel</button>
+            <button class="button button-secondary" onclick="deleteRun('${run.id}')" data-track-cta="delete_button_click" style="padding: 6px 12px; font-size: 12px; background: rgba(59, 130, 246, 0.2); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3);">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `;
+    
+    // Load signups for this run
+    setTimeout(() => loadSignupsForRun(run.id, signupsArray), 0);
+  });
+  
+  tableHTML += `
+      </tbody>
+    </table>
+  `;
+  
+  runsList.innerHTML = tableHTML;
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${adminSortColumn}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+// Toggle details dropdown (combines signups and links)
+function toggleDetails(runId) {
+  const dropdown = document.getElementById(`detailsDropdown-${runId}`);
+  const icon = document.getElementById(`detailsIcon-${runId}`);
+  
+  if (!dropdown || !icon) return;
+  
+  const isHidden = dropdown.style.display === 'none' || !dropdown.style.display;
+  dropdown.style.display = isHidden ? 'block' : 'none';
+  icon.textContent = isHidden ? '▲' : '▼';
+}
+
 loadRuns();
 
 async function loadRuns() {
@@ -68,183 +312,8 @@ async function loadRuns() {
     if (currentRuns.length === 0) {
       runsList.innerHTML = '<p>No events created yet. <a href="coordinate.html">Create your first event</a></p>';
     } else {
-      // Sort runs by date/time, newest first
-      const sortedRuns = [...currentRuns].sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-      
-      runsList.innerHTML = '<div class="compact-list">' + sortedRuns.map(run => {
-        const date = new Date(run.dateTime);
-        // Use stored timezone if available, otherwise use browser timezone
-        const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-        // Ensure signups array exists (default to empty array if missing)
-        const signupsArray = run.signups || [];
-        const spotsLeft = run.maxParticipants - signupsArray.length;
-        const baseUrl = window.location.origin;
-        const signupLink = `${baseUrl}/signup.html?id=${run.id}`;
-        const manageLink = `${baseUrl}/manage.html?id=${run.id}`;
-        const formattedDate = date.toLocaleString('en-US', {
-          timeZone: timezone,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
-        const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
-        const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
-        const isDisabled = run.status === 'completed' || run.status === 'deleted' || run.status === 'cancelled';
-        const statusText = run.status === 'completed' ? 'Completed' : run.status === 'deleted' ? 'Deleted' : run.status === 'cancelled' ? 'Cancelled' : '';
-        
-        // Check if event is within 24 hours (cannot be edited)
-        const eventStartTime = new Date(run.dateTime);
-        const now = new Date();
-        const hoursUntilEvent = (eventStartTime - now) / (1000 * 60 * 60);
-        const canEdit = hoursUntilEvent >= 24 && run.status !== 'cancelled';
-        
-        // Format created timestamp in EST
-        let createdTimestamp = '';
-        if (run.createdAt) {
-          const createdDate = new Date(run.createdAt);
-          const estDate = new Date(createdDate.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-          createdTimestamp = estDate.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: 'numeric', 
-            minute: '2-digit',
-            timeZoneName: 'short'
-          });
-        }
-        
-        // Generate WhatsApp message for active runs
-        let whatsappMessageHtml = '';
-        if (!isDisabled) {
-          const whatsappMessage = generateWhatsAppMessage(run, signupLink);
-          const whatsappMessageEscaped = whatsappMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;');
-          whatsappMessageHtml = `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
-              <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">WhatsApp Message:</strong>
-              <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; line-height: 1.4; max-height: 200px; overflow-y: auto;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
-              <button class="button button-primary copy-whatsapp-button" data-message="${whatsappMessageEscaped}" style="width: 100%; padding: 6px 12px; font-size: 12px;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
-            </div>
-          `;
-        }
-        
-        return `
-          <div class="list-item">
-            <div class="list-item-location">
-              ${runTitle ? `<strong>${runTitle}</strong><br>` : ''}${run.location}${pacerName ? `<br><span class="list-item-pacer">${pacerName}</span>` : ''}
-            </div>
-            <div class="list-item-date">${formattedDate}</div>
-            <div class="list-item-signups">${signupsArray.length} / ${run.maxParticipants}</div>
-            <div class="list-item-status">
-              <span class="status-badge ${spotsLeft > 0 ? 'status-open' : 'status-full'}">${spotsLeft > 0 ? 'Open' : 'Full'}</span>
-              ${statusText ? `<br><span style="font-size: 11px; color: var(--text-gray);">${statusText}</span>` : ''}
-            </div>
-            <div class="list-item-created" style="font-size: 12px; color: var(--text-gray);">${createdTimestamp}</div>
-            <div class="list-item-actions">
-              <button class="button button-secondary button-sm" onclick="toggleLinks('${run.id}')" id="linksToggle-${run.id}" title="Toggle Links">
-                <span>Links</span>
-                <span class="dropdown-icon" id="linksIcon-${run.id}">▼</span>
-              </button>
-              <button class="button button-secondary button-sm" onclick="toggleSignups('${run.id}')" id="signupsToggle-${run.id}" title="Toggle Signups">
-                <span>Signups</span>
-                <span class="dropdown-icon" id="signupsIcon-${run.id}">▼</span>
-              </button>
-              <button class="button button-secondary" onclick="editRun('${run.id}')" id="editButton-${run.id}" ${!canEdit ? 'disabled title="Event cannot be modified within 24 hours of start time"' : ''} data-track-cta="edit_button_click">Edit</button>
-              <button class="button button-secondary" onclick="cancelEvent('${run.id}')" id="cancelButton-${run.id}" ${run.status === 'cancelled' || eventStartTime < now ? 'disabled title="' + (run.status === 'cancelled' ? 'Event already cancelled' : 'Event cannot be cancelled after it has started') + '"' : ''} data-track-cta="cancel_button_click">Cancel</button>
-              <button class="button button-secondary" onclick="deleteRun('${run.id}')" data-track-cta="delete_button_click">Delete</button>
-            </div>
-            <div class="list-item-dropdown" id="linksDropdown-${run.id}" style="display: none;">
-              <div class="dropdown-content">
-                <div style="margin-bottom: 12px;">
-                  <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Signup Link:</strong>
-                  ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Event ${statusText.toLowerCase()}</div>` : ''}
-                  <div class="link-display" style="margin: 0;">
-                    ${isDisabled ? 
-                      `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</span>` :
-                      `<a href="${signupLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${signupLink}</a>`
-                    }
-                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${signupLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_signup_link_click">Copy</button>` : ''}
-                  </div>
-                </div>
-                <div style="margin-bottom: 12px;">
-                  <strong style="display: block; margin-bottom: 4px; color: var(--text-dark);">Management Link:</strong>
-                  ${isDisabled ? `<div style="color: var(--text-gray); font-size: 12px; margin-bottom: 4px;">Run ${statusText.toLowerCase()}</div>` : ''}
-                  <div class="link-display" style="margin: 0;">
-                    ${isDisabled ? 
-                      `<span style="font-size: 12px; color: #999; text-decoration: line-through; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</span>` :
-                      `<a href="${manageLink}" target="_blank" style="font-size: 12px; color: var(--text-gray); text-decoration: underline; font-family: 'Courier New', monospace; word-break: break-all;">${manageLink}</a>`
-                    }
-                    ${!isDisabled ? `<button class="button button-secondary copy-button" data-link="${manageLink}" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;" data-track-cta="copy_manage_link_click">Copy</button>` : ''}
-                  </div>
-                </div>
-                ${whatsappMessageHtml}
-              </div>
-            </div>
-            <div class="list-item-dropdown" id="signupsDropdown-${run.id}" style="display: none;">
-              <div class="dropdown-content">
-                <ul class="signup-list" id="signupList-${run.id}"></ul>
-              </div>
-            </div>
-            <div class="list-item-details" id="details-${run.id}" style="display: none;">
-              <div id="locationMap-${run.id}" class="location-map" style="display: none; margin-top: 16px; margin-bottom: 16px;" data-location="${run.location ? run.location.replace(/"/g, '&quot;') : ''}" data-coordinates="${run.coordinates ? JSON.stringify(run.coordinates) : ''}"></div>
-              <div id="editFormContainer-${run.id}" style="display: none; margin-top: 16px; padding: 20px; background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
-                <h3 style="margin-bottom: 16px; background: var(--primary-rainbow); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Edit Run</h3>
-                <form id="editForm-${run.id}" onsubmit="saveRunEdit(event, '${run.id}')">
-                  <div class="form-group">
-                    <label for="editTitle-${run.id}">Run Title (Optional)</label>
-                    <input type="text" id="editTitle-${run.id}" placeholder="e.g., Morning Beach Run">
-                  </div>
-                  <div class="form-group">
-                    <label for="editLocation-${run.id}">Location *</label>
-                    <input type="text" id="editLocation-${run.id}" required oninput="updateEditMap('${run.id}')">
-                  </div>
-                  <div class="form-group">
-                    <label for="editPacerName-${run.id}">Planner Name *</label>
-                    <input type="text" id="editPacerName-${run.id}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editDateTime-${run.id}">Date and Time *</label>
-                    <input type="datetime-local" id="editDateTime-${run.id}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editMaxParticipants-${run.id}">Max Participants *</label>
-                    <input type="number" id="editMaxParticipants-${run.id}" required min="1">
-                  </div>
-                  <div class="form-group">
-                    <label for="editDescription-${run.id}">Event Description (Optional)</label>
-                    <textarea id="editDescription-${run.id}" rows="4" placeholder="Add details about your event..."></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="editPicture-${run.id}">Event Picture (Optional)</label>
-                    <input type="file" id="editPicture-${run.id}" accept="image/*">
-                    <small style="display: block; margin-top: 4px; color: var(--text-gray); font-size: 14px;">Upload a new image or leave empty to keep current</small>
-                    <div id="editPicturePreview-${run.id}" style="margin-top: 12px;">
-                      <div id="editCurrentPicture-${run.id}" style="display: none;">
-                        <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">Current picture:</p>
-                        <img id="editCurrentPictureImg-${run.id}" src="" alt="Current picture" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray); margin-bottom: 8px;">
-                        <button type="button" class="button button-secondary" onclick="removeEditPicture('${run.id}')" data-track-cta="remove_picture_click">Remove Picture</button>
-                      </div>
-                      <div id="editNewPicturePreview-${run.id}" style="display: none;">
-                        <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">New picture:</p>
-                        <img id="editNewPictureImg-${run.id}" src="" alt="New picture preview" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
-                      </div>
-                    </div>
-                  </div>
-                  <div style="display: flex; gap: 12px;">
-                    <button type="submit" class="button button-primary" data-track-cta="save_edit_click">Save Changes</button>
-                    <button type="button" class="button button-secondary" onclick="cancelEdit('${run.id}')" data-track-cta="cancel_edit_click">Cancel</button>
-                  </div>
-                </form>
-                <div id="editError-${run.id}" class="message message-error" style="display: none; margin-top: 12px;"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('') + '</div>';
-      
-      // No longer need click handlers for row expansion since we have dropdown buttons
+      runsList.style.display = 'block';
+      renderAdminTable();
     }
 
     loading.style.display = 'none';
@@ -511,7 +580,51 @@ async function saveRunEdit(event, runId) {
     }
 
     cancelEdit(runId);
-    loadRuns();
+    
+// Sort admin dashboard runs
+function sortAdminRuns(column) {
+  // Toggle direction if clicking same column
+  if (adminSortColumn === column) {
+    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    adminSortColumn = column;
+    adminSortDirection = 'asc';
+  }
+  
+  // Sort the runs
+  const sorted = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (column === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (column === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (column === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  currentRuns = sorted;
+  renderAdminTable();
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+loadRuns();
     loadReport();
   } catch (error) {
     errorDiv.textContent = error.message;
@@ -606,7 +719,51 @@ async function cancelEvent(runId) {
 
   // Set up success callback to reload runs list
   window.onCancellationSuccess = function() {
-    loadRuns();
+    
+// Sort admin dashboard runs
+function sortAdminRuns(column) {
+  // Toggle direction if clicking same column
+  if (adminSortColumn === column) {
+    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    adminSortColumn = column;
+    adminSortDirection = 'asc';
+  }
+  
+  // Sort the runs
+  const sorted = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (column === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (column === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (column === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  currentRuns = sorted;
+  renderAdminTable();
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+loadRuns();
     loadReport();
   };
 
@@ -614,7 +771,51 @@ async function cancelEvent(runId) {
   initCancellationFlow(runId, run.coordinatorEmail, {
     isAdmin: true,
     onSuccess: () => {
-      loadRuns();
+      
+// Sort admin dashboard runs
+function sortAdminRuns(column) {
+  // Toggle direction if clicking same column
+  if (adminSortColumn === column) {
+    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    adminSortColumn = column;
+    adminSortDirection = 'asc';
+  }
+  
+  // Sort the runs
+  const sorted = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (column === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (column === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (column === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  currentRuns = sorted;
+  renderAdminTable();
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+loadRuns();
       loadReport();
     }
   });
@@ -635,7 +836,51 @@ async function deleteRun(runId) {
       throw new Error(data.error || 'Failed to delete event');
     }
 
-    loadRuns();
+    
+// Sort admin dashboard runs
+function sortAdminRuns(column) {
+  // Toggle direction if clicking same column
+  if (adminSortColumn === column) {
+    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    adminSortColumn = column;
+    adminSortDirection = 'asc';
+  }
+  
+  // Sort the runs
+  const sorted = [...currentRuns].sort((a, b) => {
+    let aVal, bVal;
+    
+    if (column === 'eventName') {
+      aVal = (a.title || '').toLowerCase();
+      bVal = (b.title || '').toLowerCase();
+    } else if (column === 'createdBy') {
+      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
+      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
+    } else if (column === 'createdAt') {
+      aVal = new Date(a.createdAt || 0).getTime();
+      bVal = new Date(b.createdAt || 0).getTime();
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  currentRuns = sorted;
+  renderAdminTable();
+  
+  // Update sort icons
+  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
+  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
+  if (activeIcon) {
+    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+}
+
+loadRuns();
     loadReport();
   } catch (error) {
     alert('Error deleting event: ' + error.message);
