@@ -953,9 +953,10 @@ async function saveEventEdit(event) {
       }
     });
 
-    // Success - show modal and reload the page
+    // Success - reload the page with cache busting to ensure fresh data
     showSuccessModal('Event updated successfully!', () => {
-      window.location.reload();
+      // Force a hard reload to bypass cache and get fresh data
+      window.location.href = window.location.href.split('?')[0] + '?id=' + runId + '&t=' + Date.now();
     });
   } catch (error) {
     console.error('[MANAGE] Error saving event edit:', error);
