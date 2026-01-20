@@ -196,7 +196,17 @@ async function loadRun() {
     }
 
     // Display address details
+    console.log('[MANAGE] About to display address details, run object:', {
+      houseNumber: run.houseNumber,
+      house_number: run.house_number,
+      road: run.road,
+      city: run.city,
+      state: run.state,
+      postcode: run.postcode,
+      country: run.country
+    });
     displayAddressDetails(run);
+    console.log('[MANAGE] Address details displayed');
 
     // Add calendar links section (after map is loaded)
     setTimeout(() => {
@@ -898,6 +908,16 @@ async function saveEventEdit(event) {
       picture: formData.picture ? `[base64 image, ${formData.picture.length} chars]` : undefined
     }
   });
+  
+  // Log address components being sent
+  console.log('[MANAGE] Address components in formData:', {
+    house_number: formData.house_number,
+    road: formData.road,
+    city: formData.city,
+    state: formData.state,
+    postcode: formData.postcode,
+    country: formData.country
+  });
 
   try {
     const response = await fetch(`/api/runs/${runId}`, {
@@ -918,6 +938,20 @@ async function saveEventEdit(event) {
       const errorMessage = data.message || data.error || `Failed to update event (${response.status})`;
       throw new Error(errorMessage);
     }
+
+    console.log('[MANAGE] Update successful, response data:', {
+      id: data.run?.id,
+      location: data.run?.location,
+      addressComponents: {
+        houseNumber: data.run?.houseNumber,
+        house_number: data.run?.house_number,
+        road: data.run?.road,
+        city: data.run?.city,
+        state: data.run?.state,
+        postcode: data.run?.postcode,
+        country: data.run?.country
+      }
+    });
 
     // Success - show modal and reload the page
     showSuccessModal('Event updated successfully!', () => {
