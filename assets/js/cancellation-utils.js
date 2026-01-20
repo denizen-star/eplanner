@@ -17,13 +17,24 @@ function initCancellationFlow(runId, coordinatorEmail, options = {}) {
     return;
   }
   
-  showEmailVerificationModal(runId, coordinatorEmail, { isAdmin, onSuccess });
+  // Skip email verification for admins since backend doesn't require it
+  if (isAdmin) {
+    showCancellationConfirmationModal(runId, coordinatorEmail, { isAdmin, onSuccess });
+  } else {
+    showEmailVerificationModal(runId, coordinatorEmail, { isAdmin, onSuccess });
+  }
 }
 
 function showEmailVerificationModal(runId, coordinatorEmail, options = {}) {
   const { isAdmin, onSuccess } = options;
   
-  // Escape coordinatorEmail for use in HTML
+  // Store the original (unescaped) email for comparison
+  // Use a data attribute or closure to pass the unescaped email
+  const modalId = 'emailVerification_' + Date.now();
+  window[modalId + '_expectedEmail'] = coordinatorEmail;
+  window[modalId + '_onSuccess'] = onSuccess;
+  
+  // Escape coordinatorEmail for use in HTML display only
   const escapedEmail = escapeHtml(coordinatorEmail);
   
   const content = `
@@ -42,7 +53,7 @@ function showEmailVerificationModal(runId, coordinatorEmail, options = {}) {
     </div>
     <div class="modal-actions">
       <button class="button" onclick="hideModal()">Cancel</button>
-      <button class="button button-primary" onclick="window.verifyEmailAndProceed('${runId}', ${isAdmin}, '${escapedEmail}')">Continue</button>
+      <button class="button button-primary" onclick="window.verifyEmailAndProceed('${runId}', ${isAdmin}, '${modalId}')">Continue</button>
     </div>
   `;
   showModal(content);
@@ -53,7 +64,7 @@ function showEmailVerificationModal(runId, coordinatorEmail, options = {}) {
       input.focus();
       input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-          window.verifyEmailAndProceed(runId, isAdmin, coordinatorEmail);
+          window.verifyEmailAndProceed(runId, isAdmin, modalId);
         }
       });
     }
@@ -61,7 +72,11 @@ function showEmailVerificationModal(runId, coordinatorEmail, options = {}) {
 }
 
 // Make functions globally accessible for onclick handlers
-window.verifyEmailAndProceed = async function(runId, isAdmin, expectedEmail) {
+window.verifyEmailAndProceed = async function(runId, isAdmin, modalIdOrEmail) {
+  // If modalId is passed, get the stored email; otherwise use the email directly
+  const expectedEmail = window[modalIdOrEmail + '_expectedEmail'] || modalIdOrEmail;
+  const onSuccess = window[modalIdOrEmail + '_onSuccess'];
+  
   const enteredEmail = document.getElementById('emailVerificationInput')?.value.trim() || '';
   
   if (enteredEmail.toLowerCase() !== expectedEmail.toLowerCase()) {
@@ -69,11 +84,22 @@ window.verifyEmailAndProceed = async function(runId, isAdmin, expectedEmail) {
     return;
   }
   
-  showCancellationConfirmationModal(runId, expectedEmail, { isAdmin });
+  // Clean up stored values
+  if (window[modalIdOrEmail + '_expectedEmail']) {
+    delete window[modalIdOrEmail + '_expectedEmail'];
+    delete window[modalIdOrEmail + '_onSuccess'];
+  }
+  
+  showCancellationConfirmationModal(runId, expectedEmail, { isAdmin, onSuccess });
 };
 
 function showCancellationConfirmationModal(runId, coordinatorEmail, options = {}) {
-  const { isAdmin } = options;
+  const { isAdmin, onSuccess } = options;
+  
+  // Store onSuccess callback and original email for use in confirmCancellation
+  const confirmId = 'confirmCancellation_' + Date.now();
+  window[confirmId + '_onSuccess'] = onSuccess;
+  window[confirmId + '_originalEmail'] = coordinatorEmail;
   
   // Escape coordinatorEmail for use in HTML
   const escapedEmail = escapeHtml(coordinatorEmail);
@@ -95,7 +121,7 @@ function showCancellationConfirmationModal(runId, coordinatorEmail, options = {}
     </div>
     <div class="modal-actions">
       <button class="button" onclick="hideModal()">No, Keep Event</button>
-      <button class="button button-primary" onclick="window.confirmCancellation('${runId}', '${escapedEmail}', ${isAdmin})" style="background-color: #ef4444;">
+      <button class="button button-primary" onclick="window.confirmCancellation('${runId}', ${isAdmin}, '${confirmId}')" style="background-color: #ef4444;">
         Yes, Cancel Event
       </button>
     </div>
@@ -103,8 +129,17 @@ function showCancellationConfirmationModal(runId, coordinatorEmail, options = {}
   showModal(content);
 }
 
-window.confirmCancellation = async function(runId, coordinatorEmail, isAdmin) {
+window.confirmCancellation = async function(runId, isAdmin, confirmId) {
   const cancellationMessage = document.getElementById('cancellationMessageInput')?.value.trim() || null;
+  
+  // Get the original unescaped email for the API call
+  const originalEmail = window[confirmId + '_originalEmail'];
+  const onSuccess = window[confirmId + '_onSuccess'];
+  
+  if (!originalEmail) {
+    showErrorModal('Unable to retrieve coordinator email. Please try again.');
+    return;
+  }
   
   const url = isAdmin 
     ? `/api/runs/${runId}/cancel?isAdmin=true`
@@ -115,7 +150,7 @@ window.confirmCancellation = async function(runId, coordinatorEmail, isAdmin) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        coordinatorEmail: coordinatorEmail,
+        coordinatorEmail: originalEmail,
         cancellationMessage: cancellationMessage
       })
     });
@@ -128,8 +163,18 @@ window.confirmCancellation = async function(runId, coordinatorEmail, isAdmin) {
 
     hideModal();
     
-    // Call success callback or show cancelled screen
-    if (window.onCancellationSuccess) {
+    // Clean up stored values
+    if (window[confirmId + '_originalEmail']) {
+      delete window[confirmId + '_originalEmail'];
+    }
+    if (window[confirmId + '_onSuccess']) {
+      delete window[confirmId + '_onSuccess'];
+    }
+    
+    // Call onSuccess callback if provided, otherwise use window.onCancellationSuccess, otherwise show cancelled screen
+    if (onSuccess && typeof onSuccess === 'function') {
+      onSuccess();
+    } else if (window.onCancellationSuccess) {
       window.onCancellationSuccess(runId, isAdmin);
     } else {
       showEventCancelledScreen();
