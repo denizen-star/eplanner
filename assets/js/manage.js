@@ -543,9 +543,6 @@ async function deleteSignup(signupIndex) {
 // Store picture data for edit form
 let editPicture = undefined;
 
-// Debounce timeout for map updates
-let editMapUpdateTimeout = null;
-
 /**
  * Add edit event button to the page
  */
