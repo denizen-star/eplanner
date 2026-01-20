@@ -837,6 +837,45 @@ async function saveEventEdit(event) {
 
   const errorDiv = document.getElementById('editError');
   errorDiv.style.display = 'none';
+  
+  // Geocode location if it changed to get address components
+  const locationText = formData.location;
+  const originalLocation = currentRun?.location;
+  
+  if (locationText && locationText.trim() && locationText.trim() !== originalLocation) {
+    errorDiv.textContent = 'Geocoding location...';
+    errorDiv.style.display = 'block';
+    errorDiv.className = 'message';
+    
+    try {
+      const geocodeResult = await geocodeLocation(locationText.trim());
+      formData.coordinates = geocodeResult.coordinates;
+      formData.placeName = geocodeResult.placeName;
+      const addr = geocodeResult.addressComponents || {};
+      
+      // Extract address components (same pattern as event creation)
+      formData.house_number = addr.house_number || null;
+      formData.road = addr.road || addr.street || addr.pedestrian || null;
+      formData.suburb = addr.suburb || null;
+      formData.city = addr.city || addr.town || addr.village || addr.municipality || null;
+      formData.county = addr.county || null;
+      formData.state = addr.state || null;
+      formData.postcode = addr.postcode || null;
+      formData.country = addr.country || null;
+      formData.country_code = addr.country_code || null;
+      formData.neighbourhood = addr.neighbourhood || null;
+      formData.city_district = addr.city_district || null;
+      formData.village = addr.village || null;
+      formData.town = addr.town || null;
+      formData.municipality = addr.municipality || null;
+    } catch (geocodeError) {
+      console.error('[MANAGE EDIT] Geocoding error:', geocodeError);
+      errorDiv.textContent = `Geocoding failed: ${geocodeError.message}. The location will be updated but address details may not be accurate.`;
+      errorDiv.className = 'message message-error';
+      errorDiv.style.display = 'block';
+      // Continue with update even if geocoding fails
+    }
+  }
 
   console.log('[MANAGE] Sending update request:', {
     runId,

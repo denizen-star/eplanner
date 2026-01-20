@@ -667,7 +667,61 @@ async function saveRunEdit(event, runId) {
   const errorDiv = document.getElementById(`editError-${runId}`);
   errorDiv.style.display = 'none';
 
+  // Convert datetime-local value to ISO string (required by backend)
+  const dateTimeLocal = formData.dateTime;
+  formData.dateTime = dateTimeLocal ? new Date(dateTimeLocal).toISOString() : null;
+
   try {
+    // Geocode location if it changed to get address components
+    const locationText = formData.location;
+    let addressComponents = null;
+    let coordinates = null;
+    let placeName = null;
+    
+    // Check if location changed
+    const originalLocation = run?.location;
+    if (locationText && locationText.trim() && locationText.trim() !== originalLocation) {
+      errorDiv.textContent = 'Geocoding location...';
+      errorDiv.style.display = 'block';
+      errorDiv.className = 'message';
+      
+      try {
+        const geocodeResult = await geocodeLocation(locationText.trim());
+        coordinates = geocodeResult.coordinates;
+        placeName = geocodeResult.placeName;
+        const addr = geocodeResult.addressComponents || {};
+        
+        // Extract address components (same pattern as event creation)
+        addressComponents = {
+          house_number: addr.house_number || null,
+          road: addr.road || addr.street || addr.pedestrian || null,
+          suburb: addr.suburb || null,
+          city: addr.city || addr.town || addr.village || addr.municipality || null,
+          county: addr.county || null,
+          state: addr.state || null,
+          postcode: addr.postcode || null,
+          country: addr.country || null,
+          country_code: addr.country_code || null,
+          neighbourhood: addr.neighbourhood || null,
+          city_district: addr.city_district || null,
+          village: addr.village || null,
+          town: addr.town || null,
+          municipality: addr.municipality || null
+        };
+        
+        formData.coordinates = coordinates;
+        formData.placeName = placeName;
+        // Add all address component fields to formData
+        Object.assign(formData, addressComponents);
+      } catch (geocodeError) {
+        console.error('[ADMIN EDIT] Geocoding error:', geocodeError);
+        errorDiv.textContent = `Geocoding failed: ${geocodeError.message}. The location will be updated but address details may not be accurate.`;
+        errorDiv.className = 'message message-error';
+        errorDiv.style.display = 'block';
+        // Continue with update even if geocoding fails
+      }
+    }
+
     const response = await fetch(`/api/runs/${runId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -681,54 +735,10 @@ async function saveRunEdit(event, runId) {
     }
 
     cancelEdit(runId);
-    
-// Sort admin dashboard runs
-function sortAdminRuns(column) {
-  // Toggle direction if clicking same column
-  if (adminSortColumn === column) {
-    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    adminSortColumn = column;
-    adminSortDirection = 'asc';
-  }
-  
-  // Sort the runs
-  const sorted = [...currentRuns].sort((a, b) => {
-    let aVal, bVal;
-    
-    if (column === 'eventName') {
-      aVal = (a.title || '').toLowerCase();
-      bVal = (b.title || '').toLowerCase();
-    } else if (column === 'createdBy') {
-      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
-      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
-    } else if (column === 'createdAt') {
-      aVal = new Date(a.createdAt || 0).getTime();
-      bVal = new Date(b.createdAt || 0).getTime();
-    } else {
-      return 0;
-    }
-    
-    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
-    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
-  
-  currentRuns = sorted;
-  renderAdminTable();
-  
-  // Update sort icons
-  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
-  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
-  if (activeIcon) {
-    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
-  }
-}
-
-loadRuns();
-    loadReport();
+    loadRuns();
   } catch (error) {
     errorDiv.textContent = error.message;
+    errorDiv.className = 'message message-error';
     errorDiv.style.display = 'block';
   }
 }
