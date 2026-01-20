@@ -784,21 +784,71 @@ app.put('/api/runs/:runId', async (req, res) => {
     if (description !== undefined) updates.description = description;
     if (req.body.placeName !== undefined) updates.placeName = req.body.placeName ? req.body.placeName.trim() : null;
     
-    // Address component fields
-    if (req.body.house_number !== undefined) updates.house_number = req.body.house_number ? req.body.house_number.trim() : null;
-    if (req.body.road !== undefined) updates.road = req.body.road ? req.body.road.trim() : null;
-    if (req.body.suburb !== undefined) updates.suburb = req.body.suburb ? req.body.suburb.trim() : null;
-    if (req.body.city !== undefined) updates.city = req.body.city ? req.body.city.trim() : null;
-    if (req.body.county !== undefined) updates.county = req.body.county ? req.body.county.trim() : null;
-    if (req.body.state !== undefined) updates.state = req.body.state ? req.body.state.trim() : null;
-    if (req.body.postcode !== undefined) updates.postcode = req.body.postcode ? req.body.postcode.trim() : null;
-    if (req.body.country !== undefined) updates.country = req.body.country ? req.body.country.trim() : null;
-    if (req.body.country_code !== undefined) updates.country_code = req.body.country_code ? req.body.country_code.trim() : null;
-    if (req.body.neighbourhood !== undefined) updates.neighbourhood = req.body.neighbourhood ? req.body.neighbourhood.trim() : null;
-    if (req.body.city_district !== undefined) updates.city_district = req.body.city_district ? req.body.city_district.trim() : null;
-    if (req.body.village !== undefined) updates.village = req.body.village ? req.body.village.trim() : null;
-    if (req.body.town !== undefined) updates.town = req.body.town ? req.body.town.trim() : null;
-    if (req.body.municipality !== undefined) updates.municipality = req.body.municipality ? req.body.municipality.trim() : null;
+    // Address component fields - ALWAYS include them if they're in the request body
+    // This ensures address components are updated even if they're null (to clear old values)
+    console.log('[RUN UPDATE] Checking address components in request body:', {
+      has_house_number: req.body.house_number !== undefined,
+      has_road: req.body.road !== undefined,
+      has_city: req.body.city !== undefined,
+      has_state: req.body.state !== undefined,
+      has_postcode: req.body.postcode !== undefined,
+      has_country: req.body.country !== undefined,
+      house_number_value: req.body.house_number,
+      road_value: req.body.road,
+      city_value: req.body.city,
+      state_value: req.body.state,
+      postcode_value: req.body.postcode,
+      country_value: req.body.country
+    });
+    
+    if (req.body.house_number !== undefined) {
+      updates.house_number = req.body.house_number ? req.body.house_number.trim() : null;
+      console.log('[RUN UPDATE] Setting house_number:', updates.house_number);
+    }
+    if (req.body.road !== undefined) {
+      updates.road = req.body.road ? req.body.road.trim() : null;
+      console.log('[RUN UPDATE] Setting road:', updates.road);
+    }
+    if (req.body.suburb !== undefined) {
+      updates.suburb = req.body.suburb ? req.body.suburb.trim() : null;
+    }
+    if (req.body.city !== undefined) {
+      updates.city = req.body.city ? req.body.city.trim() : null;
+      console.log('[RUN UPDATE] Setting city:', updates.city);
+    }
+    if (req.body.county !== undefined) {
+      updates.county = req.body.county ? req.body.county.trim() : null;
+    }
+    if (req.body.state !== undefined) {
+      updates.state = req.body.state ? req.body.state.trim() : null;
+      console.log('[RUN UPDATE] Setting state:', updates.state);
+    }
+    if (req.body.postcode !== undefined) {
+      updates.postcode = req.body.postcode ? req.body.postcode.trim() : null;
+      console.log('[RUN UPDATE] Setting postcode:', updates.postcode);
+    }
+    if (req.body.country !== undefined) {
+      updates.country = req.body.country ? req.body.country.trim() : null;
+      console.log('[RUN UPDATE] Setting country:', updates.country);
+    }
+    if (req.body.country_code !== undefined) {
+      updates.country_code = req.body.country_code ? req.body.country_code.trim() : null;
+    }
+    if (req.body.neighbourhood !== undefined) {
+      updates.neighbourhood = req.body.neighbourhood ? req.body.neighbourhood.trim() : null;
+    }
+    if (req.body.city_district !== undefined) {
+      updates.city_district = req.body.city_district ? req.body.city_district.trim() : null;
+    }
+    if (req.body.village !== undefined) {
+      updates.village = req.body.village ? req.body.village.trim() : null;
+    }
+    if (req.body.town !== undefined) {
+      updates.town = req.body.town ? req.body.town.trim() : null;
+    }
+    if (req.body.municipality !== undefined) {
+      updates.municipality = req.body.municipality ? req.body.municipality.trim() : null;
+    }
     
     console.log('[RUN UPDATE] Updates prepared:', {
       updateKeys: Object.keys(updates),
