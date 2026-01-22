@@ -632,6 +632,11 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
     if (filterEnd) {
       fetchEndDate = new Date(filterEnd);
       fetchEndDate.setHours(23, 59, 59, 999);
+    } else {
+      // If no end date filter, limit to 30 days from start date
+      fetchEndDate = new Date(fetchStartDate);
+      fetchEndDate.setDate(fetchEndDate.getDate() + 30);
+      fetchEndDate.setHours(23, 59, 59, 999);
     }
     
     // Fetch events
@@ -655,6 +660,26 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
         if (filterEnd && eventDate > new Date(filterEnd)) return false;
         return true;
       });
+    }
+    
+    // Limit to 15 events or 30 days, whichever is met first
+    // Sort by date to ensure we get the earliest events
+    filteredEvents.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+    
+    // Calculate 30-day cutoff from start date
+    const maxDate = new Date(fetchStartDate);
+    maxDate.setDate(maxDate.getDate() + 30);
+    maxDate.setHours(23, 59, 59, 999);
+    
+    // Filter to events within 30 days and limit to 15 events
+    filteredEvents = filteredEvents.filter(event => {
+      const eventDate = new Date(event.dateTime);
+      return eventDate <= maxDate;
+    });
+    
+    // Limit to 15 events (whichever comes first: 15 events or 30 days)
+    if (filteredEvents.length > 15) {
+      filteredEvents = filteredEvents.slice(0, 15);
     }
     
     // Hide loading
