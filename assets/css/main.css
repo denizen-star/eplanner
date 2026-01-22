@@ -2318,6 +2318,68 @@ td, th {
   }
 }
 
+/* Filter Toggle Pill */
+.filter-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.filter-toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-gray);
+  border-radius: 50px;
+  font-size: var(--font-base);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.filter-toggle-pill:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-rainbow);
+}
+
+.filter-toggle-icon {
+  font-size: var(--font-sm);
+  transition: transform 0.2s ease;
+}
+
+.filter-toggle-pill.expanded .filter-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.filter-section {
+  transition: all 0.3s ease;
+  width: 50%;
+  margin-bottom: var(--space-lg);
+}
+
+.filter-section.collapsed {
+  display: none;
+}
+
+.filter-section.collapsed .collapsible-content {
+  display: none !important;
+}
+
+.filter-section.expanded {
+  display: block;
+}
+
+.filter-section.expanded .collapsible-content {
+  display: block !important;
+  background: var(--light-gray-1);
+  border-radius: 8px;
+  border: 1px solid var(--border-gray);
+}
+
 /* Desktop Calendar Enhancements - Suggestions 2 & 3 */
 @media (min-width: 768px) {
   /* Suggestion 2: Two-column layout for event details */

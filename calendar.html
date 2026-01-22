@@ -56,34 +56,37 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); flex-wrap: wrap; gap: var(--space-md);">
                     <h2 class="section-headline" style="margin-bottom: 0;" id="weekTitle">This Week's Events</h2>
-                    <div style="display: flex; gap: var(--space-sm);">
-                        <button id="prevWeekBtn" class="button button-secondary" style="white-space: nowrap;">← Previous Week</button>
-                        <button id="nextWeekBtn" class="button button-secondary" style="white-space: nowrap;">Next Week →</button>
+                    <div id="filterToggleContainer" class="filter-toggle-container">
+                        <button id="filterToggleBtn" class="filter-toggle-pill" type="button">
+                            <span>Filters</span>
+                            <span class="filter-toggle-icon">▼</span>
+                        </button>
                     </div>
                 </div>
 
-                <div style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
-                    <h3 style="margin-bottom: var(--space-md); font-size: var(--font-lg);">Filters</h3>
-                    <div style="display: flex; flex-direction: column; gap: var(--space-md);">
-                        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center;">
-                            <div style="flex: 1; min-width: 200px;">
-                                <label for="filterStartDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Start Date:</label>
-                                <input type="date" id="filterStartDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                <div id="filterSection" class="filter-section collapsible-section" style="margin-bottom: var(--space-lg);">
+                    <div class="collapsible-content" id="filterContent" style="display: none; padding: var(--space-md);">
+                        <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                            <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label for="filterStartDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Start Date:</label>
+                                    <input type="date" id="filterStartDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                                </div>
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label for="filterEndDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">End Date:</label>
+                                    <input type="date" id="filterEndDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                                </div>
+                                <div style="display: flex; align-items: flex-end;">
+                                    <button id="applyDateFilterBtn" class="button button-primary" style="white-space: nowrap;">Apply Date Range</button>
+                                </div>
+                                <div style="display: flex; align-items: flex-end;">
+                                    <button id="clearDateFilterBtn" class="button button-secondary" style="white-space: nowrap;">Clear</button>
+                                </div>
                             </div>
-                            <div style="flex: 1; min-width: 200px;">
-                                <label for="filterEndDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">End Date:</label>
-                                <input type="date" id="filterEndDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                            <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                                <input type="checkbox" id="hideCancelledCheckbox" style="width: 18px; height: 18px;">
+                                <label for="hideCancelledCheckbox" style="font-size: var(--font-sm); cursor: pointer;">Hide cancelled events</label>
                             </div>
-                            <div style="display: flex; align-items: flex-end;">
-                                <button id="applyDateFilterBtn" class="button button-primary" style="white-space: nowrap;">Apply Date Range</button>
-                            </div>
-                            <div style="display: flex; align-items: flex-end;">
-                                <button id="clearDateFilterBtn" class="button button-secondary" style="white-space: nowrap;">Clear</button>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                            <input type="checkbox" id="hideCancelledCheckbox" style="width: 18px; height: 18px;">
-                            <label for="hideCancelledCheckbox" style="font-size: var(--font-sm); cursor: pointer;">Hide cancelled events</label>
                         </div>
                     </div>
                 </div>

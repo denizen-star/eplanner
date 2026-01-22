@@ -717,26 +717,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 250);
   });
   
-  // Handle week navigation
-  const prevWeekBtn = document.getElementById('prevWeekBtn');
-  const nextWeekBtn = document.getElementById('nextWeekBtn');
+  // Handle filter toggle
+  const filterToggleBtn = document.getElementById('filterToggleBtn');
+  const filterSection = document.getElementById('filterSection');
+  const filterContent = document.getElementById('filterContent');
   
-  if (prevWeekBtn) {
-    prevWeekBtn.addEventListener('click', () => {
-      if (currentWeekStart) {
-        const newWeekStart = new Date(currentWeekStart);
-        newWeekStart.setDate(newWeekStart.getDate() - 7);
-        loadCalendar(newWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
-      }
-    });
-  }
-  
-  if (nextWeekBtn) {
-    nextWeekBtn.addEventListener('click', () => {
-      if (currentWeekStart) {
-        const newWeekStart = new Date(currentWeekStart);
-        newWeekStart.setDate(newWeekStart.getDate() + 7);
-        loadCalendar(newWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
+  if (filterToggleBtn && filterSection && filterContent) {
+    // Start collapsed by default
+    filterSection.classList.add('collapsed');
+    filterToggleBtn.classList.remove('expanded');
+    
+    filterToggleBtn.addEventListener('click', () => {
+      const isCollapsed = filterSection.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        // Expand
+        filterSection.classList.remove('collapsed');
+        filterSection.classList.add('expanded');
+        filterToggleBtn.classList.add('expanded');
+        filterContent.style.display = 'block';
+      } else {
+        // Collapse
+        filterSection.classList.remove('expanded');
+        filterSection.classList.add('collapsed');
+        filterToggleBtn.classList.remove('expanded');
+        filterContent.style.display = 'none';
       }
     });
   }
