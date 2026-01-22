@@ -31,6 +31,41 @@ function formatWeekTitle(startDate) {
   return `${startStr} - ${endStr}`;
 }
 
+// Helper function to format date range title from events
+function formatDateRangeTitle(events, filterStart, filterEnd) {
+  const options = { month: 'long', day: 'numeric', year: 'numeric' };
+  
+  // If filters are applied, use filter dates
+  if (filterStart || filterEnd) {
+    const startDate = filterStart ? new Date(filterStart) : (events.length > 0 ? new Date(events[0].dateTime) : new Date());
+    const endDate = filterEnd ? new Date(filterEnd) : (events.length > 0 ? new Date(events[events.length - 1].dateTime) : new Date());
+    
+    const startStr = startDate.toLocaleDateString('en-US', options);
+    const endStr = endDate.toLocaleDateString('en-US', options);
+    
+    return `${startStr} - ${endStr}`;
+  }
+  
+  // If no filters, use actual event date range
+  if (events.length === 0) {
+    return 'Events';
+  }
+  
+  const sortedEvents = [...events].sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+  const firstEventDate = new Date(sortedEvents[0].dateTime);
+  const lastEventDate = new Date(sortedEvents[sortedEvents.length - 1].dateTime);
+  
+  const startStr = firstEventDate.toLocaleDateString('en-US', options);
+  const endStr = lastEventDate.toLocaleDateString('en-US', options);
+  
+  // If all events are on the same day, just show that day
+  if (firstEventDate.toDateString() === lastEventDate.toDateString()) {
+    return startStr;
+  }
+  
+  return `${startStr} - ${endStr}`;
+}
+
 // Group events by day
 function groupEventsByDay(events) {
   const grouped = {};
@@ -615,11 +650,6 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
     currentWeekStart = weekStart;
     const weekRange = getWeekRange(weekStart);
     
-    // Update week title
-    if (weekTitle) {
-      weekTitle.textContent = formatWeekTitle(weekRange.startDate);
-    }
-    
     // Determine date range for fetching events
     let fetchStartDate = weekRange.startDate;
     let fetchEndDate = weekRange.endDate;
@@ -680,6 +710,11 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
     // Limit to 15 events (whichever comes first: 15 events or 30 days)
     if (filteredEvents.length > 15) {
       filteredEvents = filteredEvents.slice(0, 15);
+    }
+    
+    // Update title based on actual displayed events
+    if (weekTitle) {
+      weekTitle.textContent = formatDateRangeTitle(filteredEvents, filterStart, filterEnd);
     }
     
     // Hide loading
