@@ -2357,7 +2357,7 @@ td, th {
 
 .filter-section {
   transition: all 0.3s ease;
-  width: 50%;
+  width: 430px;
   margin-bottom: var(--space-lg);
 }
 
