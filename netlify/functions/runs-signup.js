@@ -183,7 +183,8 @@ exports.handler = async (event) => {
     try {
       const emailService = new EmailService();
       const emailEnabled = emailService.isEnabled();
-      console.log('[RUNS SIGNUP] Email service enabled:', emailEnabled);
+      // Only log boolean value, never log sensitive information
+      console.log('[RUNS SIGNUP] Email service enabled:', !!emailEnabled);
       if (emailEnabled) {
         // Generate event view link
         const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';

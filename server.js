@@ -952,7 +952,8 @@ app.put('/api/runs/:runId', async (req, res) => {
       console.log('[RUN UPDATE] Coordinator email:', updatedRun.coordinatorEmail || 'NOT SET');
       try {
         const emailService = new EmailService();
-        console.log('[RUN UPDATE] Email service enabled:', emailService.isEnabled());
+        // Only log boolean value, never log sensitive information
+        console.log('[RUN UPDATE] Email service enabled:', !!emailService.isEnabled());
         if (emailService.isEnabled()) {
           // Send email to coordinator
           if (updatedRun.coordinatorEmail && updatedRun.coordinatorEmail.trim()) {
@@ -1110,7 +1111,8 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
     try {
       const emailService = new EmailService();
       const isEmailEnabled = emailService.isEnabled();
-      console.log('[CANCEL] Email service enabled:', isEmailEnabled);
+      // Only log boolean value, never log sensitive information
+      console.log('[CANCEL] Email service enabled:', !!isEmailEnabled);
       
       if (!isEmailEnabled) {
         console.warn('[CANCEL] ⚠️ Email service is DISABLED - cancellation emails will NOT be sent');

@@ -127,7 +127,8 @@ exports.handler = async (event) => {
     try {
       const emailService = new EmailService();
       const isEmailEnabled = emailService.isEnabled();
-      console.log('[RUNS CANCEL] Email service enabled:', isEmailEnabled);
+      // Only log boolean value, never log sensitive information
+      console.log('[RUNS CANCEL] Email service enabled:', !!isEmailEnabled);
       
       if (!isEmailEnabled) {
         console.warn('[RUNS CANCEL] ⚠️ Email service is DISABLED - cancellation emails will NOT be sent');
