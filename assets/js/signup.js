@@ -32,6 +32,8 @@ const waiverText = `
 <p>I acknowledge that I have carefully read, fully understand, and agree to all terms of this Electronic Waiver. I am at least 18 years of age (or a parent/guardian signing on behalf of a minor). My electronic acceptance has the same legal force and effect as if I had signed a physical document.</p>
 `;
 
+const EXTERNAL_SIGNUP_DISCLAIMER = 'This event uses an external signup page. You will leave this website to complete signup. The event is not tracked on this site. You must still accept the waiver and provide at least email or phone. You will receive a confirmation email that you are signing up for a non-tracked event.';
+
 // Initialize session manager and device collector
 let sessionManager = null;
 if (window.SessionManager) {
@@ -40,6 +42,8 @@ if (window.SessionManager) {
 
 const urlParams = new URLSearchParams(window.location.search);
 const runId = urlParams.get('id');
+
+let currentRun = null;
 
 if (!runId) {
   document.getElementById('loading').style.display = 'none';
@@ -279,8 +283,28 @@ async function loadRun() {
     }
 
     document.getElementById('waiverText').innerHTML = waiverText;
+    currentRun = run;
     document.getElementById('loading').style.display = 'none';
     document.getElementById('runInfo').style.display = 'block';
+
+    const hasExternalSignup = !!(currentRun.externalSignupEnabled && currentRun.eventWebsite && typeof currentRun.eventWebsite === 'string' && currentRun.eventWebsite.trim());
+    const externalContainer = document.getElementById('externalSignupContainer');
+    const externalCheckbox = document.getElementById('externalSignup');
+    if (hasExternalSignup && externalContainer && externalCheckbox) {
+      externalContainer.style.display = 'block';
+      const fromExternal = urlParams.get('external') === '1';
+      if (fromExternal) {
+        externalCheckbox.checked = true;
+        if (typeof showConfirmModal === 'function') {
+          showConfirmModal('External signup', EXTERNAL_SIGNUP_DISCLAIMER, () => {}, () => { externalCheckbox.checked = false; });
+        }
+      }
+      externalCheckbox.addEventListener('change', function onExternalChange() {
+        if (externalCheckbox.checked && typeof showConfirmModal === 'function') {
+          showConfirmModal('External signup', EXTERNAL_SIGNUP_DISCLAIMER, () => {}, () => { externalCheckbox.checked = false; });
+        }
+      });
+    }
   } catch (error) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('notFound').style.display = 'block';
@@ -360,6 +384,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     sessionInfo = sessionManager.getSessionData();
   }
 
+  const isExternal = !!(currentRun?.externalSignupEnabled && document.getElementById('externalSignup')?.checked && currentRun?.eventWebsite && typeof currentRun.eventWebsite === 'string' && currentRun.eventWebsite.trim());
   const formData = {
     name: document.getElementById('name').value.trim(),
     phone: document.getElementById('phone').value.trim(),
@@ -367,6 +392,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     instagram: instagram || '',
     waiverAccepted: document.getElementById('waiverAccepted').checked,
     waiverText: waiverText,
+    externalSignup: isExternal,
     deviceInfo: deviceInfo,
     sessionInfo: sessionInfo,
     pageUrl: window.location.href,
@@ -391,16 +417,20 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Failed to sign up');
     }
 
-    // Verify we have a valid runId
     if (!runId) {
       throw new Error('Invalid event ID');
     }
 
-    // Redirect to event page with success parameter
-    // Use replace() to prevent back button from going to signup page
-    const redirectUrl = `/event.html?id=${runId}&success=true`;
-    console.log('[SIGNUP] Redirecting to:', redirectUrl);
-    window.location.replace(redirectUrl);
+    if (isExternal && currentRun?.eventWebsite) {
+      const extUrl = currentRun.eventWebsite.trim();
+      window.open(extUrl, '_blank', 'noopener');
+      successDiv.textContent = "You're signed up. We've opened the event coordinator's website in a new tab. Check your email for confirmation.";
+      successDiv.style.display = 'block';
+      document.getElementById('signupForm').style.display = 'none';
+    } else {
+      const redirectUrl = `/event.html?id=${runId}&success=true`;
+      window.location.replace(redirectUrl);
+    }
   } catch (error) {
     errorDiv.textContent = error.message;
     errorDiv.style.display = 'block';

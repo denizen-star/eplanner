@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
     try {
       const body = parseBody(event);
-      const { location, pacerName, plannerName, title, dateTime, endTime, maxParticipants, coordinates, picture, description, eventWebsite, eventInstagram } = body;
+      const { location, pacerName, plannerName, title, dateTime, endTime, maxParticipants, coordinates, picture, description, eventWebsite, eventInstagram, externalSignupEnabled } = body;
 
       console.log('[RUN GET] PUT request received:', {
         runId,
@@ -91,7 +91,13 @@ exports.handler = async (event, context) => {
       if (description !== undefined) updates.description = description;
       if (eventWebsite !== undefined) updates.eventWebsite = eventWebsite ? eventWebsite.trim() : null;
       if (eventInstagram !== undefined) updates.eventInstagram = eventInstagram ? eventInstagram.trim() : null;
-      
+      if (externalSignupEnabled !== undefined) updates.externalSignupEnabled = !!externalSignupEnabled;
+
+      const finalEventWebsite = updates.eventWebsite !== undefined ? updates.eventWebsite : existingRun.eventWebsite;
+      if (updates.externalSignupEnabled && (!finalEventWebsite || !String(finalEventWebsite).trim())) {
+        return jsonResponse(400, { error: 'Event website URL is required when "Use this URL for external signups" is enabled.' });
+      }
+
       if (maxParticipants !== undefined) {
         if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
           return jsonResponse(400, { error: 'Max participants must be a positive integer' });

@@ -63,7 +63,7 @@ exports.handler = async (event) => {
     const runId = runIdIndex >= 0 && pathParts[runIdIndex + 1] ? pathParts[runIdIndex + 1] : null;
     
     const body = parseBody(event);
-    const { name, phone, email, instagram, waiverAccepted, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = body;
+    const { name, phone, email, instagram, waiverAccepted, externalSignup, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = body;
 
     console.log('[RUNS SIGNUP] Request received for runId:', runId);
 
@@ -138,6 +138,7 @@ exports.handler = async (event) => {
         email: email ? email.trim() : null,
         instagram: instagram ? instagram.trim() : '',
         waiverAccepted: true,
+        externalSignup: !!externalSignup,
         signedAt: signedAt,
         metadata: metadata,
       });
@@ -200,7 +201,7 @@ exports.handler = async (event) => {
           try {
             const attendeeEmail = createdSignup.email.trim();
             console.log('[RUNS SIGNUP] Sending confirmation email to:', attendeeEmail);
-            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
+            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink, !!externalSignup);
             const emailResult = await emailService.sendEmail({
               to: attendeeEmail,
               subject: attendeeEmailContent.subject,

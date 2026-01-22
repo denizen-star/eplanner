@@ -300,6 +300,18 @@ function renderAdminTable() {
                 <textarea id="editDescription-${run.id}" rows="4" placeholder="Event description..." style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px; resize: vertical;"></textarea>
               </div>
               <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editWebsite-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Event Website (Optional)</label>
+                <input type="url" id="editWebsite-${run.id}" placeholder="e.g., https://example.com" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                <div style="margin-top: 8px;">
+                  <input type="checkbox" id="editExternalSignupEnabled-${run.id}">
+                  <label for="editExternalSignupEnabled-${run.id}" style="margin-left: 4px;">Use this URL for external signups</label>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="editInstagram-${run.id}" style="display: block; margin-bottom: 4px; font-weight: 500;">Event Instagram (Optional)</label>
+                <input type="text" id="editInstagram-${run.id}" placeholder="e.g., @handle or https://instagram.com/..." style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="display: block; margin-bottom: 4px; font-weight: 500;">Event Picture</label>
                 <div id="editCurrentPicture-${run.id}" style="margin-bottom: 8px; display: none;">
                   <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">Current Picture:</p>
@@ -446,7 +458,13 @@ function editRun(runId) {
   document.getElementById(`editDateTime-${runId}`).value = localDateTime;
   document.getElementById(`editMaxParticipants-${runId}`).value = run.maxParticipants;
   document.getElementById(`editDescription-${runId}`).value = run.description || '';
-  
+  const websiteEl = document.getElementById(`editWebsite-${runId}`);
+  const instagramEl = document.getElementById(`editInstagram-${runId}`);
+  const externalEl = document.getElementById(`editExternalSignupEnabled-${runId}`);
+  if (websiteEl) websiteEl.value = run.eventWebsite || '';
+  if (instagramEl) instagramEl.value = run.eventInstagram || '';
+  if (externalEl) externalEl.checked = !!run.externalSignupEnabled;
+
   // Handle picture - show existing if present
   const currentPictureDiv = document.getElementById(`editCurrentPicture-${runId}`);
   const currentPictureImg = document.getElementById(`editCurrentPictureImg-${runId}`);
@@ -624,6 +642,19 @@ function updateEditMap(runId) {
   }, 500);
 }
 
+function _normWebsite(u) {
+  if (!u || !String(u).trim()) return null;
+  const t = String(u).trim();
+  return /^https?:\/\//i.test(t) ? t : 'https://' + t;
+}
+function _normInstagram(i) {
+  if (!i || !String(i).trim()) return null;
+  const t = String(i).trim();
+  const h = t.replace(/^@+/, '');
+  if (!h) return null;
+  return /^https?:\/\//i.test(t) ? t : 'https://instagram.com/' + h;
+}
+
 async function saveRunEdit(event, runId) {
   event.preventDefault();
 
@@ -649,14 +680,30 @@ async function saveRunEdit(event, runId) {
 
   const description = document.getElementById(`editDescription-${runId}`)?.value.trim() || null;
   const picture = editPictures[runId] !== undefined ? editPictures[runId] : undefined;
-  
+  const websiteInput = document.getElementById(`editWebsite-${runId}`);
+  const instagramInput = document.getElementById(`editInstagram-${runId}`);
+  const externalCheckbox = document.getElementById(`editExternalSignupEnabled-${runId}`);
+  const eventWebsite = websiteInput ? _normWebsite(websiteInput.value) : null;
+  const eventInstagram = instagramInput ? _normInstagram(instagramInput.value) : null;
+  const externalSignupEnabled = !!(externalCheckbox && externalCheckbox.checked);
+
+  const errorDiv = document.getElementById(`editError-${runId}`);
+  if (externalSignupEnabled && !eventWebsite) {
+    errorDiv.textContent = 'Event website URL is required when "Use this URL for external signups" is enabled.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
   const formData = {
     title: document.getElementById(`editTitle-${runId}`).value.trim(),
     location: document.getElementById(`editLocation-${runId}`).value.trim(),
     plannerName: document.getElementById(`editPacerName-${runId}`).value.trim(),
     dateTime: document.getElementById(`editDateTime-${runId}`).value,
     maxParticipants: parseInt(document.getElementById(`editMaxParticipants-${runId}`).value),
-    description: description
+    description: description,
+    eventWebsite: eventWebsite,
+    eventInstagram: eventInstagram,
+    externalSignupEnabled: externalSignupEnabled
   };
   
   // Only include picture if it was changed
@@ -664,7 +711,6 @@ async function saveRunEdit(event, runId) {
     formData.picture = picture;
   }
 
-  const errorDiv = document.getElementById(`editError-${runId}`);
   errorDiv.style.display = 'none';
 
   // Convert datetime-local value to ISO string (required by backend)

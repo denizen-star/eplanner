@@ -1,5 +1,7 @@
 // Event details page functionality
 
+const EXTERNAL_SIGNUP_DISCLAIMER = 'This event uses an external signup page. You will leave this website to complete signup. The event is not tracked on this site. You must still accept the waiver and provide at least email or phone. You will receive a confirmation email that you are signing up for a non-tracked event.';
+
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = urlParams.get('id') || urlParams.get('uuid');
 const showSuccess = urlParams.get('success') === 'true';
@@ -184,6 +186,8 @@ async function loadEvent() {
       addCalendarLinksSection(event);
     }, 100);
 
+    addSignupCtaSection(event);
+
     document.getElementById('loading').style.display = 'none';
     document.getElementById('eventInfo').style.display = 'block';
     
@@ -200,6 +204,49 @@ async function loadEvent() {
   } catch (error) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('notFound').style.display = 'block';
+  }
+}
+
+/**
+ * Add signup CTA section (Sign Up link, optional external checkbox when externalSignupEnabled + eventWebsite)
+ */
+function addSignupCtaSection(event) {
+  const section = document.getElementById('signupCtaSection');
+  if (!section) return;
+  const signupBaseUrl = `signup.html?id=${event.id}`;
+  const hasExternalSignup = !!(event.externalSignupEnabled && event.eventWebsite && typeof event.eventWebsite === 'string' && event.eventWebsite.trim());
+  let html = '<h3 style="margin-bottom: 12px; font-size: 18px;">Sign up</h3><div style="display: flex; flex-direction: column; gap: 12px;">';
+  if (hasExternalSignup) {
+    html += `
+      <div class="checkbox-group" style="margin-bottom: 8px;">
+        <input type="checkbox" id="eventExternalSignup" name="eventExternalSignup">
+        <label for="eventExternalSignup">I will sign up on the event coordinator's website (outside this app)</label>
+      </div>
+    `;
+  }
+  html += `<a id="eventSignupLink" href="${signupBaseUrl}" class="button button-primary" style="display: inline-block; text-align: center; text-decoration: none; align-self: flex-start;" data-track-cta="event_signup_click">Sign Up for This Event</a></div>`;
+  section.innerHTML = html;
+  section.style.display = 'block';
+
+  if (hasExternalSignup) {
+    const externalCheckbox = document.getElementById('eventExternalSignup');
+    const signupLink = document.getElementById('eventSignupLink');
+    if (externalCheckbox && signupLink) {
+      function updateSignupHref() {
+        signupLink.href = externalCheckbox.checked ? `${signupBaseUrl}&external=1` : signupBaseUrl;
+      }
+      externalCheckbox.addEventListener('change', function () {
+        if (externalCheckbox.checked && typeof showConfirmModal === 'function') {
+          showConfirmModal('External signup', EXTERNAL_SIGNUP_DISCLAIMER, updateSignupHref, () => {
+            externalCheckbox.checked = false;
+            updateSignupHref();
+          });
+        } else {
+          updateSignupHref();
+        }
+      });
+      updateSignupHref();
+    }
   }
 }
 

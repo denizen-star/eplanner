@@ -638,11 +638,15 @@ function editEvent() {
   // Populate website and Instagram fields
   const websiteInput = document.getElementById('editWebsite');
   const instagramInput = document.getElementById('editInstagram');
+  const externalSignupCheckbox = document.getElementById('editExternalSignupEnabled');
   if (websiteInput) {
     websiteInput.value = currentRun.eventWebsite || '';
   }
   if (instagramInput) {
     instagramInput.value = currentRun.eventInstagram || '';
+  }
+  if (externalSignupCheckbox) {
+    externalSignupCheckbox.checked = !!currentRun.externalSignupEnabled;
   }
   
   // Sync end time with start time when start time changes (only if end time hasn't been manually changed)
@@ -923,9 +927,18 @@ async function saveEventEdit(event) {
   // Get and normalize website and Instagram
   const websiteInput = document.getElementById('editWebsite');
   const instagramInput = document.getElementById('editInstagram');
+  const externalSignupCheckbox = document.getElementById('editExternalSignupEnabled');
   const eventWebsite = websiteInput ? normalizeWebsiteUrl(websiteInput.value) : null;
   const eventInstagram = instagramInput ? normalizeInstagramUrl(instagramInput.value) : null;
-  
+  const externalSignupEnabled = !!(externalSignupCheckbox && externalSignupCheckbox.checked);
+
+  if (externalSignupEnabled && !eventWebsite) {
+    const err = document.getElementById('editError');
+    err.textContent = 'Event website URL is required when "Use this URL for external signups" is enabled.';
+    err.style.display = 'block';
+    return;
+  }
+
   const formData = {
     title: document.getElementById('editTitle').value.trim(),
     location: document.getElementById('editLocation').value.trim(),
@@ -935,7 +948,8 @@ async function saveEventEdit(event) {
     maxParticipants: parseInt(document.getElementById('editMaxParticipants').value),
     description: description,
     eventWebsite: eventWebsite,
-    eventInstagram: eventInstagram
+    eventInstagram: eventInstagram,
+    externalSignupEnabled: externalSignupEnabled
   };
   
   // Only include picture if it was changed

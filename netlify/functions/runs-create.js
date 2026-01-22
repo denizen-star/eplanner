@@ -90,7 +90,7 @@ exports.handler = async (event) => {
       location, coordinates, plannerName, pacerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
       neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
-      coordinatorEmail, isPublic, placeName, eventWebsite, eventInstagram
+      coordinatorEmail, isPublic, placeName, eventWebsite, eventInstagram, externalSignupEnabled
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -123,6 +123,12 @@ exports.handler = async (event) => {
     if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
       console.error('[RUNS CREATE] Validation failed: Invalid maxParticipants');
       return jsonResponse(400, { success: false, error: 'Max participants must be a positive integer' });
+    }
+
+    const trimmedEventWebsite = eventWebsite ? eventWebsite.trim() : '';
+    if (externalSignupEnabled && !trimmedEventWebsite) {
+      console.error('[RUNS CREATE] Validation failed: External signup enabled but no event website URL');
+      return jsonResponse(400, { success: false, error: 'Event website URL is required when "Use this URL for external signups" is enabled.' });
     }
 
     console.log('[RUNS CREATE] Generating IDs...');
@@ -216,8 +222,9 @@ exports.handler = async (event) => {
         signupLink: signupLink,
         manageLink: manageLink,
         eventViewLink: eventViewLink,
-        eventWebsite: eventWebsite ? eventWebsite.trim() : null,
-        eventInstagram: eventInstagram ? eventInstagram.trim() : null
+        eventWebsite: trimmedEventWebsite || null,
+        eventInstagram: eventInstagram ? eventInstagram.trim() : null,
+        externalSignupEnabled: !!externalSignupEnabled
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {
@@ -225,6 +232,9 @@ exports.handler = async (event) => {
       console.error('[RUNS CREATE] Database error stack:', dbError.stack);
       // Check if it's a column error (database migration not run)
       if (dbError.message && dbError.message.includes('Unknown column')) {
+        if (dbError.message.includes('external_signup_enabled')) {
+          throw new Error('Database migration required: Run migration-add-external-signup-enabled.sql');
+        }
         const missingColumns = [];
         if (dbError.message.includes('is_public')) missingColumns.push('is_public');
         if (dbError.message.includes('end_time')) missingColumns.push('end_time');

@@ -429,9 +429,15 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     // Get and normalize website and Instagram
     const eventWebsiteInput = document.getElementById('eventWebsite');
     const eventInstagramInput = document.getElementById('eventInstagram');
+    const externalSignupCheckbox = document.getElementById('externalSignupEnabled');
     const eventWebsite = eventWebsiteInput ? normalizeWebsiteUrl(eventWebsiteInput.value) : null;
     const eventInstagram = eventInstagramInput ? normalizeInstagramUrl(eventInstagramInput.value) : null;
-    
+    const externalSignupEnabled = !!(externalSignupCheckbox && externalSignupCheckbox.checked);
+
+    if (externalSignupEnabled && !eventWebsite) {
+      throw new Error('Event website URL is required when "Use this URL for external signups" is enabled.');
+    }
+
     const maxParticipantsInput = document.getElementById('maxParticipants');
     const maxParticipantsValue = maxParticipantsInput ? parseInt(maxParticipantsInput.value) : null;
     
@@ -502,7 +508,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       picture: eventPictureBase64 || null,
       description: eventDescription,
       eventWebsite: eventWebsite,
-      eventInstagram: eventInstagram
+      eventInstagram: eventInstagram,
+      externalSignupEnabled: externalSignupEnabled
     };
     
     console.log('[COORDINATE] Form Data being sent:', {

@@ -57,6 +57,38 @@ function showErrorModal(message) {
   showModal(content);
 }
 
+/**
+ * Confirm-style modal with Accept and Cancel. Use for disclaimers or confirmations.
+ * @param {string} title - Modal title
+ * @param {string} message - Body text (HTML-escaped)
+ * @param {function} onAccept - Called when user clicks Accept; hideModal is called after
+ * @param {function} [onCancel] - Optional; called when user clicks Cancel; hideModal is called after
+ */
+function showConfirmModal(title, message, onAccept, onCancel) {
+  const modalId = 'confirmModal_' + Date.now();
+  window[modalId + '_accept'] = () => {
+    hideModal();
+    if (typeof onAccept === 'function') onAccept();
+    delete window[modalId + '_accept'];
+    delete window[modalId + '_cancel'];
+  };
+  window[modalId + '_cancel'] = () => {
+    hideModal();
+    if (typeof onCancel === 'function') onCancel();
+    delete window[modalId + '_accept'];
+    delete window[modalId + '_cancel'];
+  };
+  const content = `
+    <div class="modal-title">${escapeHtml(title)}</div>
+    <div class="modal-message">${escapeHtml(message)}</div>
+    <div class="modal-actions">
+      <button class="button" onclick="window['${modalId}_cancel']()">Cancel</button>
+      <button class="button button-primary" onclick="window['${modalId}_accept']()">Accept</button>
+    </div>
+  `;
+  showModal(content);
+}
+
 // Helper to escape HTML (XSS protection)
 function escapeHtml(text) {
   const div = document.createElement('div');
