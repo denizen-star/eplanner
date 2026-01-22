@@ -172,6 +172,39 @@ async function loadRun() {
         descriptionContainer.style.display = 'none';
       }
     }
+    
+    // Display event website and Instagram links if available
+    const linksContainer = document.getElementById('eventLinksContainer');
+    const linksElement = document.getElementById('eventLinks');
+    if (linksContainer && linksElement) {
+      const links = [];
+      if (run.eventWebsite && typeof run.eventWebsite === 'string' && run.eventWebsite.trim()) {
+        links.push({
+          label: 'Website',
+          url: run.eventWebsite.trim(),
+          icon: '🌐'
+        });
+      }
+      if (run.eventInstagram && typeof run.eventInstagram === 'string' && run.eventInstagram.trim()) {
+        links.push({
+          label: 'Instagram',
+          url: run.eventInstagram.trim(),
+          icon: '📷'
+        });
+      }
+      
+      if (links.length > 0) {
+        linksElement.innerHTML = links.map(link => `
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; color: var(--primary-rainbow); text-decoration: none; font-weight: var(--font-medium); padding: 8px 0;">
+            <span>${link.icon}</span>
+            <span>${link.label}</span>
+          </a>
+        `).join('');
+        linksContainer.style.display = 'block';
+      } else {
+        linksContainer.style.display = 'none';
+      }
+    }
 
     if (run.location) {
       updateMapForLocation('locationMap', run.location, true);

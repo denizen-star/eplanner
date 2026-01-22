@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
     try {
       const body = parseBody(event);
-      const { location, pacerName, plannerName, title, dateTime, maxParticipants, coordinates, picture, description } = body;
+      const { location, pacerName, plannerName, title, dateTime, endTime, maxParticipants, coordinates, picture, description, eventWebsite, eventInstagram } = body;
 
       console.log('[RUN GET] PUT request received:', {
         runId,
@@ -85,9 +85,12 @@ exports.handler = async (event, context) => {
       if (finalPlannerName !== undefined) updates.plannerName = finalPlannerName ? finalPlannerName.trim() : '';
       if (title !== undefined) updates.title = title ? title.trim() : null;
       if (dateTime !== undefined) updates.dateTime = dateTime;
+      if (endTime !== undefined) updates.endTime = endTime;
       if (coordinates !== undefined) updates.coordinates = coordinates;
       if (picture !== undefined) updates.picture = picture;
       if (description !== undefined) updates.description = description;
+      if (eventWebsite !== undefined) updates.eventWebsite = eventWebsite ? eventWebsite.trim() : null;
+      if (eventInstagram !== undefined) updates.eventInstagram = eventInstagram ? eventInstagram.trim() : null;
       
       if (maxParticipants !== undefined) {
         if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {

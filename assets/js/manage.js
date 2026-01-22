@@ -543,6 +543,35 @@ async function deleteSignup(signupIndex) {
 // Store picture data for edit form
 let editPicture = undefined;
 
+// Normalize website URL - ensure it has https:// if missing
+function normalizeWebsiteUrl(url) {
+  if (!url || !url.trim()) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  // If it already starts with http:// or https://, return as is
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  // Otherwise prepend https://
+  return `https://${trimmed}`;
+}
+
+// Normalize Instagram URL - convert handle to URL or ensure full URL
+function normalizeInstagramUrl(input) {
+  if (!input || !input.trim()) return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // If it's already a full URL, return as is
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  // Remove @ if present
+  const handle = trimmed.replace(/^@+/, '');
+  if (!handle) return null;
+  // Convert to Instagram URL
+  return `https://instagram.com/${handle}`;
+}
+
 /**
  * Add edit event button to the page
  */
@@ -592,8 +621,44 @@ function editEvent() {
   const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   document.getElementById('editDateTime').value = localDateTime;
   
+  // Handle end time if available
+  const endTimeInput = document.getElementById('editEndTime');
+  if (endTimeInput && currentRun.endTime) {
+    const endDate = new Date(currentRun.endTime);
+    const localEndDateTime = new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    endTimeInput.value = localEndDateTime;
+  } else if (endTimeInput) {
+    // If no end time, default to start time
+    endTimeInput.value = localDateTime;
+  }
+  
   document.getElementById('editMaxParticipants').value = currentRun.maxParticipants || 1;
   document.getElementById('editDescription').value = currentRun.description || '';
+  
+  // Populate website and Instagram fields
+  const websiteInput = document.getElementById('editWebsite');
+  const instagramInput = document.getElementById('editInstagram');
+  if (websiteInput) {
+    websiteInput.value = currentRun.eventWebsite || '';
+  }
+  if (instagramInput) {
+    instagramInput.value = currentRun.eventInstagram || '';
+  }
+  
+  // Sync end time with start time when start time changes (only if end time hasn't been manually changed)
+  let endTimeManuallyChanged = false;
+  const dateTimeInput = document.getElementById('editDateTime');
+  if (dateTimeInput && endTimeInput) {
+    dateTimeInput.addEventListener('change', () => {
+      if (!endTimeManuallyChanged) {
+        endTimeInput.value = dateTimeInput.value;
+      }
+    });
+    
+    endTimeInput.addEventListener('change', () => {
+      endTimeManuallyChanged = true;
+    });
+  }
   
   // Handle picture - show existing if present
   const currentPictureDiv = document.getElementById('editCurrentPicture');
@@ -851,13 +916,26 @@ async function saveEventEdit(event) {
   const dateTimeLocal = document.getElementById('editDateTime').value;
   const dateTime = dateTimeLocal ? new Date(dateTimeLocal).toISOString() : null;
   
+  // Get end time
+  const endTimeLocal = document.getElementById('editEndTime')?.value;
+  const endTime = endTimeLocal ? new Date(endTimeLocal).toISOString() : null;
+  
+  // Get and normalize website and Instagram
+  const websiteInput = document.getElementById('editWebsite');
+  const instagramInput = document.getElementById('editInstagram');
+  const eventWebsite = websiteInput ? normalizeWebsiteUrl(websiteInput.value) : null;
+  const eventInstagram = instagramInput ? normalizeInstagramUrl(instagramInput.value) : null;
+  
   const formData = {
     title: document.getElementById('editTitle').value.trim(),
     location: document.getElementById('editLocation').value.trim(),
     pacerName: document.getElementById('editPacerName').value.trim(),
     dateTime: dateTime,
+    endTime: endTime,
     maxParticipants: parseInt(document.getElementById('editMaxParticipants').value),
-    description: description
+    description: description,
+    eventWebsite: eventWebsite,
+    eventInstagram: eventInstagram
   };
   
   // Only include picture if it was changed

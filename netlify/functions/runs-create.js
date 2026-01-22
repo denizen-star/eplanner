@@ -90,7 +90,7 @@ exports.handler = async (event) => {
       location, coordinates, plannerName, pacerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
       neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
-      coordinatorEmail, isPublic, placeName
+      coordinatorEmail, isPublic, placeName, eventWebsite, eventInstagram
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -215,7 +215,9 @@ exports.handler = async (event) => {
         // Store links in database
         signupLink: signupLink,
         manageLink: manageLink,
-        eventViewLink: eventViewLink
+        eventViewLink: eventViewLink,
+        eventWebsite: eventWebsite ? eventWebsite.trim() : null,
+        eventInstagram: eventInstagram ? eventInstagram.trim() : null
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {

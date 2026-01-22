@@ -40,7 +40,7 @@
 
     <main style="position: relative; overflow-x: hidden;">
         <!-- Hero Section -->
-        <section class="hero-section" style="background-image: url('assets/images/events.png');">
+        <section class="hero-section calendar-page-hero" style="background-image: url('assets/images/events.png');">
             <div class="hero-content">
                 <h1 class="hero-headline">Public Events Calendar</h1>
                 <p style="color: var(--white); font-size: var(--font-lg); max-width: 600px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Discover upcoming community events and join the gatherings</p>
@@ -59,6 +59,32 @@
                     <div style="display: flex; gap: var(--space-sm);">
                         <button id="prevWeekBtn" class="button button-secondary" style="white-space: nowrap;">← Previous Week</button>
                         <button id="nextWeekBtn" class="button button-secondary" style="white-space: nowrap;">Next Week →</button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
+                    <h3 style="margin-bottom: var(--space-md); font-size: var(--font-lg);">Filters</h3>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label for="filterStartDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Start Date:</label>
+                                <input type="date" id="filterStartDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label for="filterEndDate" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">End Date:</label>
+                                <input type="date" id="filterEndDate" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button id="applyDateFilterBtn" class="button button-primary" style="white-space: nowrap;">Apply Date Range</button>
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button id="clearDateFilterBtn" class="button button-secondary" style="white-space: nowrap;">Clear</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <input type="checkbox" id="hideCancelledCheckbox" style="width: 18px; height: 18px;">
+                            <label for="hideCancelledCheckbox" style="font-size: var(--font-sm); cursor: pointer;">Hide cancelled events</label>
+                        </div>
                     </div>
                 </div>
 

@@ -123,6 +123,39 @@ async function loadEvent() {
       }
     }
     
+    // Display event website and Instagram links if available
+    const linksContainer = document.getElementById('eventLinksContainer');
+    const linksElement = document.getElementById('eventLinks');
+    if (linksContainer && linksElement) {
+      const links = [];
+      if (event.eventWebsite && typeof event.eventWebsite === 'string' && event.eventWebsite.trim()) {
+        links.push({
+          label: 'Website',
+          url: event.eventWebsite.trim(),
+          icon: '🌐'
+        });
+      }
+      if (event.eventInstagram && typeof event.eventInstagram === 'string' && event.eventInstagram.trim()) {
+        links.push({
+          label: 'Instagram',
+          url: event.eventInstagram.trim(),
+          icon: '📷'
+        });
+      }
+      
+      if (links.length > 0) {
+        linksElement.innerHTML = links.map(link => `
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; color: var(--primary-rainbow); text-decoration: none; font-weight: var(--font-medium); padding: 8px 0;">
+            <span>${link.icon}</span>
+            <span>${link.label}</span>
+          </a>
+        `).join('');
+        linksContainer.style.display = 'block';
+      } else {
+        linksContainer.style.display = 'none';
+      }
+    }
+    
     // Display created timestamp in EST
     if (event.createdAt) {
       const createdDate = new Date(event.createdAt);

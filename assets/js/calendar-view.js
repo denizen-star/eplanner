@@ -1,16 +1,19 @@
 // Calendar view functionality for displaying public events in weekly grid
 // Uses format-utils.js for consistent formatting (DRY principle)
 
-// Helper function to get start and end of week for a given date
+// Helper function to get start and end of week for a given date (Monday-Sunday)
 function getWeekRange(date = new Date()) {
   const d = new Date(date);
   const day = d.getDay();
-  const diff = d.getDate() - day; // Sunday = 0, so subtract to get Sunday
-  const startDate = new Date(d.setDate(diff));
+  // Monday = 1, so calculate days to subtract to get to Monday
+  // If day is 0 (Sunday), subtract 6 to get to previous Monday
+  // Otherwise subtract (day - 1) to get to Monday of current week
+  const diff = day === 0 ? -6 : -(day - 1);
+  const startDate = new Date(d.setDate(d.getDate() + diff));
   startDate.setHours(0, 0, 0, 0);
   
   const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + 6); // Add 6 days to get Saturday
+  endDate.setDate(endDate.getDate() + 6); // Add 6 days to get Sunday
   endDate.setHours(23, 59, 59, 999);
   
   return { startDate, endDate };
@@ -76,7 +79,7 @@ function renderCalendarWeek(events, startDate) {
   const groupedEvents = groupEventsByDay(events);
   const days = [];
   
-  // Create 7 days (Sunday to Saturday)
+  // Create 7 days (Monday to Sunday)
   for (let i = 0; i < 7; i++) {
     const dayDate = new Date(startDate);
     dayDate.setDate(startDate.getDate() + i);
@@ -227,8 +230,11 @@ async function fetchPublicEvents(startDate, endDate) {
 
 // Main function to load and display calendar
 let currentWeekStart = null;
+let dateFilterStart = null;
+let dateFilterEnd = null;
+let hideCancelled = false;
 
-async function loadCalendar(weekStart = null) {
+async function loadCalendar(weekStart = null, filterStart = null, filterEnd = null, hideCancelledEvents = false) {
   const loading = document.getElementById('loading');
   const calendarContainer = document.getElementById('calendarContainer');
   const noEvents = document.getElementById('noEvents');
@@ -242,12 +248,13 @@ async function loadCalendar(weekStart = null) {
   errorDiv.style.display = 'none';
   
   try {
-    // Determine week start date
+    // Determine week start date (Monday)
     if (!weekStart) {
       weekStart = new Date();
       const day = weekStart.getDay();
-      const diff = weekStart.getDate() - day;
-      weekStart = new Date(weekStart.setDate(diff));
+      // Monday = 1, so calculate days to subtract to get to Monday
+      const diff = day === 0 ? -6 : -(day - 1);
+      weekStart = new Date(weekStart.setDate(weekStart.getDate() + diff));
       weekStart.setHours(0, 0, 0, 0);
     }
     
@@ -259,16 +266,51 @@ async function loadCalendar(weekStart = null) {
       weekTitle.textContent = formatWeekTitle(weekRange.startDate);
     }
     
+    // Determine date range for fetching events
+    let fetchStartDate = weekRange.startDate;
+    let fetchEndDate = weekRange.endDate;
+    
+    // Apply date filters if provided
+    if (filterStart) {
+      fetchStartDate = new Date(filterStart);
+      fetchStartDate.setHours(0, 0, 0, 0);
+    }
+    if (filterEnd) {
+      fetchEndDate = new Date(filterEnd);
+      fetchEndDate.setHours(23, 59, 59, 999);
+    }
+    
     // Fetch events
-    const events = await fetchPublicEvents(weekRange.startDate, weekRange.endDate);
+    const events = await fetchPublicEvents(fetchStartDate, fetchEndDate);
+    
+    // Apply filters
+    let filteredEvents = events;
+    
+    // Filter out cancelled events if requested
+    if (hideCancelledEvents) {
+      filteredEvents = filteredEvents.filter(event => {
+        return !event.cancelledAt && event.status !== 'cancelled';
+      });
+    }
+    
+    // Filter by date range if provided (additional client-side filtering for precision)
+    if (filterStart || filterEnd) {
+      filteredEvents = filteredEvents.filter(event => {
+        const eventDate = new Date(event.dateTime);
+        if (filterStart && eventDate < new Date(filterStart)) return false;
+        if (filterEnd && eventDate > new Date(filterEnd)) return false;
+        return true;
+      });
+    }
     
     // Hide loading
     loading.style.display = 'none';
     
-    if (events.length === 0) {
+    if (filteredEvents.length === 0) {
       noEvents.style.display = 'block';
     } else {
-      renderCalendarWeek(events, weekRange.startDate);
+      // Render with the original week start for proper day alignment
+      renderCalendarWeek(filteredEvents, weekRange.startDate);
       calendarContainer.style.display = 'block';
     }
   } catch (error) {
@@ -293,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentWeekStart) {
         const newWeekStart = new Date(currentWeekStart);
         newWeekStart.setDate(newWeekStart.getDate() - 7);
-        loadCalendar(newWeekStart);
+        loadCalendar(newWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
       }
     });
   }
@@ -303,8 +345,49 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentWeekStart) {
         const newWeekStart = new Date(currentWeekStart);
         newWeekStart.setDate(newWeekStart.getDate() + 7);
-        loadCalendar(newWeekStart);
+        loadCalendar(newWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
       }
+    });
+  }
+  
+  // Handle date range filter
+  const applyDateFilterBtn = document.getElementById('applyDateFilterBtn');
+  const clearDateFilterBtn = document.getElementById('clearDateFilterBtn');
+  const filterStartDate = document.getElementById('filterStartDate');
+  const filterEndDate = document.getElementById('filterEndDate');
+  
+  if (applyDateFilterBtn) {
+    applyDateFilterBtn.addEventListener('click', () => {
+      const startValue = filterStartDate ? filterStartDate.value : null;
+      const endValue = filterEndDate ? filterEndDate.value : null;
+      
+      if (!startValue && !endValue) {
+        alert('Please select at least a start date or end date');
+        return;
+      }
+      
+      dateFilterStart = startValue;
+      dateFilterEnd = endValue;
+      loadCalendar(currentWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
+    });
+  }
+  
+  if (clearDateFilterBtn) {
+    clearDateFilterBtn.addEventListener('click', () => {
+      dateFilterStart = null;
+      dateFilterEnd = null;
+      if (filterStartDate) filterStartDate.value = '';
+      if (filterEndDate) filterEndDate.value = '';
+      loadCalendar(currentWeekStart, null, null, hideCancelled);
+    });
+  }
+  
+  // Handle hide cancelled checkbox
+  const hideCancelledCheckbox = document.getElementById('hideCancelledCheckbox');
+  if (hideCancelledCheckbox) {
+    hideCancelledCheckbox.addEventListener('change', (e) => {
+      hideCancelled = e.target.checked;
+      loadCalendar(currentWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
     });
   }
 });

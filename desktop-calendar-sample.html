@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desktop Calendar Rendering Sample - Suggestions 2 & 3</title>
+    <style>
+        :root {
+            --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-base: 16px;
+            --font-lg: 18px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --border-gray: #E5E0D8;
+            --text-primary: #2C2C2C;
+            --text-secondary: #5A5A5A;
+            --light-gray-1: #F5F1EB;
+            --primary-rainbow: #FFB6C1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: #F7F3ED;
+            padding: 40px 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 32px;
+            font-size: 32px;
+            color: var(--text-primary);
+        }
+
+        .calendar-day {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: var(--space-lg);
+            border: 1px solid var(--border-gray);
+        }
+
+        .calendar-day-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        .calendar-day-name {
+            font-weight: 600;
+            font-size: var(--font-lg);
+            color: var(--text-primary);
+        }
+
+        .calendar-day-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-rainbow);
+        }
+
+        /* Mobile: Single column layout (unchanged) */
+        .calendar-event {
+            background: var(--light-gray-1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-gray);
+            font-size: var(--font-base);
+            line-height: 1.5;
+        }
+
+        .calendar-event-time {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .calendar-event-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: var(--font-base);
+        }
+
+        .calendar-event-location {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-event-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .calendar-event-attending {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* Desktop: Two-column layout (Suggestion 2) + Enhanced typography (Suggestion 3) */
+        @media (min-width: 768px) {
+            .calendar-event {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                padding: 16px 20px;
+                margin-bottom: 24px;
+                font-size: var(--font-lg);
+                line-height: 1.7;
+                transition: all 0.2s ease;
+            }
+
+            /* Left column: Time, Title, Location */
+            .calendar-event-time,
+            .calendar-event-title,
+            .calendar-event-location {
+                grid-column: 1;
+            }
+
+            .calendar-event-time {
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+
+            .calendar-event-title {
+                font-size: var(--font-lg);
+                margin-bottom: 6px;
+            }
+
+            .calendar-event-location {
+                font-size: 16px;
+                margin-bottom: 0;
+            }
+
+            /* Right column: Description, Status */
+            .calendar-event-description,
+            .calendar-event-attending {
+                grid-column: 2;
+            }
+
+            .calendar-event-description {
+                font-size: 16px;
+                line-height: 1.7;
+                margin-top: 0;
+            }
+
+            .calendar-event-attending {
+                font-size: 16px;
+                margin-top: 8px;
+            }
+
+            /* Enhanced spacing and visual separation (Suggestion 3) */
+            .calendar-day-events .calendar-event:nth-child(even) {
+                background-color: rgba(0, 0, 0, 0.02);
+            }
+
+            .calendar-day-events .calendar-event:nth-child(odd) {
+                background-color: var(--light-gray-1);
+            }
+        }
+
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 32px;
+        }
+
+        .demo-note h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #856404;
+        }
+
+        .demo-note p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Desktop Calendar Rendering - Sample</h1>
+        
+        <div class="demo-note">
+            <h2>Desktop Enhancements (Suggestions 2 & 3)</h2>
+            <p><strong>On desktop (768px+):</strong> Events use a two-column grid layout with enhanced typography and spacing. On mobile, the original single-column layout is preserved.</p>
+        </div>
+
+        <div class="calendar-day">
+            <div class="calendar-day-header">
+                <div class="calendar-day-name">Monday</div>
+                <div class="calendar-day-number">22</div>
+            </div>
+            <div class="calendar-day-events">
+                <a href="#" class="calendar-event" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="calendar-event-time">6:30 PM - 8:00 PM</div>
+                    <div class="calendar-event-title">Pickleball 6ix Sponsored</div>
+                    <div class="calendar-event-location">Miami Beach Community Center</div>
+                    <div class="calendar-event-description">Join us for an evening of pickleball fun! All skill levels welcome. Bring your paddle or borrow one from us.</div>
+                    <div class="calendar-event-attending">Attending: 12</div>
+                </a>
+
+                <a href="#" class="calendar-event" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="calendar-event-time">7:00 PM - 9:00 PM</div>
+                    <div class="calendar-event-title">Beach Volleyball Tournament</div>
+                    <div class="calendar-event-location">South Beach, Volleyball Court 3</div>
+                    <div class="calendar-event-description">Competitive beach volleyball tournament. Teams of 2 required. Registration closes 24 hours before event.</div>
+                    <div class="calendar-event-attending">Attending: 8</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="calendar-day">
+            <div class="calendar-day-header">
+                <div class="calendar-day-name">Tuesday</div>
+                <div class="calendar-day-number">23</div>
+            </div>
+            <div class="calendar-day-events">
+                <a href="#" class="calendar-event" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="calendar-event-time">6:00 PM - 7:30 PM</div>
+                    <div class="calendar-event-title">Morning Run Club</div>
+                    <div class="calendar-event-location">Lincoln Road, Starting Point</div>
+                    <div class="calendar-event-description">Early morning run through South Beach. 5K route with water stations. All paces welcome!</div>
+                    <div class="calendar-event-attending">Attending: 15</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-note" style="margin-top: 32px;">
+            <h2>Key Features</h2>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+                <li><strong>Two-column layout:</strong> Time/Title/Location on left, Description/Status on right</li>
+                <li><strong>Enhanced typography:</strong> Larger font sizes (18px), increased line-height (1.7)</li>
+                <li><strong>Better spacing:</strong> 24px between events, 16px internal padding</li>
+                <li><strong>Visual separation:</strong> Alternating background colors for easier scanning</li>
+                <li><strong>Mobile preserved:</strong> Original single-column layout maintained on mobile devices</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

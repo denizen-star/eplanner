@@ -88,8 +88,14 @@
                             <input type="text" id="editPacerName" required>
                         </div>
                         <div class="form-group">
-                            <label for="editDateTime">Date and Time *</label>
-                            <input type="datetime-local" id="editDateTime" required>
+                            <label for="editDateTime">Date and Start Time *</label>
+                            <input type="datetime-local" id="editDateTime" step="1800" required>
+                            <small>30-minute increments</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEndTime">End Time (Optional)</label>
+                            <input type="datetime-local" id="editEndTime" step="1800">
+                            <small>30-minute increments</small>
                         </div>
                         <div class="form-group">
                             <label for="editMaxParticipants">Max Participants *</label>
@@ -98,6 +104,16 @@
                         <div class="form-group">
                             <label for="editDescription">Event Description (Optional)</label>
                             <textarea id="editDescription" rows="4" placeholder="Add details about your event..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="editWebsite">Event Website (Optional)</label>
+                            <input type="url" id="editWebsite" placeholder="e.g., https://example.com">
+                            <small>Link to the event's website or registration page</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editInstagram">Event Instagram (Optional)</label>
+                            <input type="text" id="editInstagram" placeholder="e.g., @pickleball6ix or https://instagram.com/pickleball6ix">
+                            <small>Instagram handle or full URL</small>
                         </div>
                         <div class="form-group">
                             <label for="editPicture">Event Picture (Optional)</label>

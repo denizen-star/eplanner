@@ -10,6 +10,35 @@ let validatedAddressComponents = null;
 let validatedPlaceName = null;
 let eventPictureBase64 = null;
 
+// Normalize website URL - ensure it has https:// if missing
+function normalizeWebsiteUrl(url) {
+  if (!url || !url.trim()) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  // If it already starts with http:// or https://, return as is
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  // Otherwise prepend https://
+  return `https://${trimmed}`;
+}
+
+// Normalize Instagram URL - convert handle to URL or ensure full URL
+function normalizeInstagramUrl(input) {
+  if (!input || !input.trim()) return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // If it's already a full URL, return as is
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  // Remove @ if present
+  const handle = trimmed.replace(/^@+/, '');
+  if (!handle) return null;
+  // Convert to Instagram URL
+  return `https://instagram.com/${handle}`;
+}
+
 // Initialize session manager and device collector
 let sessionManager = null;
 if (window.SessionManager) {
@@ -57,12 +86,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Set default datetime to tomorrow at 6:30 PM
   const dateTimeInput = document.getElementById('dateTime');
+  const endTimeInput = document.getElementById('endTime');
   if (dateTimeInput) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(18, 30, 0, 0);
     const defaultDateTime = tomorrow.toISOString().slice(0, 16);
     dateTimeInput.value = defaultDateTime;
+    
+    // Set end time to match start time initially
+    if (endTimeInput) {
+      endTimeInput.value = defaultDateTime;
+    }
+  }
+  
+  // Sync end time with start time when start time changes (only if end time hasn't been manually changed)
+  let endTimeManuallyChanged = false;
+  if (dateTimeInput && endTimeInput) {
+    dateTimeInput.addEventListener('change', () => {
+      if (!endTimeManuallyChanged) {
+        endTimeInput.value = dateTimeInput.value;
+      }
+    });
+    
+    endTimeInput.addEventListener('change', () => {
+      endTimeManuallyChanged = true;
+    });
   }
 
   // Handle radio card selection visual state
@@ -377,6 +426,12 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     const runTitle = document.getElementById('runTitle').value.trim();
     const eventDescription = document.getElementById('eventDescription')?.value.trim() || null;
     
+    // Get and normalize website and Instagram
+    const eventWebsiteInput = document.getElementById('eventWebsite');
+    const eventInstagramInput = document.getElementById('eventInstagram');
+    const eventWebsite = eventWebsiteInput ? normalizeWebsiteUrl(eventWebsiteInput.value) : null;
+    const eventInstagram = eventInstagramInput ? normalizeInstagramUrl(eventInstagramInput.value) : null;
+    
     const maxParticipantsInput = document.getElementById('maxParticipants');
     const maxParticipantsValue = maxParticipantsInput ? parseInt(maxParticipantsInput.value) : null;
     
@@ -445,7 +500,9 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       town: addr.town || null,
       municipality: addr.municipality || null,
       picture: eventPictureBase64 || null,
-      description: eventDescription
+      description: eventDescription,
+      eventWebsite: eventWebsite,
+      eventInstagram: eventInstagram
     };
     
     console.log('[COORDINATE] Form Data being sent:', {
@@ -633,11 +690,15 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(18, 30, 0, 0);
-    document.getElementById('dateTime').value = tomorrow.toISOString().slice(0, 16);
+    const defaultDateTime = tomorrow.toISOString().slice(0, 16);
+    document.getElementById('dateTime').value = defaultDateTime;
     
-    // Reset end time
+    // Reset end time to match start time
     const endTimeInputReset = document.getElementById('endTime');
-    if (endTimeInputReset) endTimeInputReset.value = '';
+    if (endTimeInputReset) {
+      endTimeInputReset.value = defaultDateTime;
+      endTimeManuallyChanged = false; // Reset the flag
+    }
     
     // Reset event visibility to public (default) - use setTimeout to ensure form reset completes first
     setTimeout(() => {
@@ -660,6 +721,10 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     eventPictureBase64 = null;
     const descriptionInput = document.getElementById('eventDescription');
     if (descriptionInput) descriptionInput.value = '';
+    const websiteInput = document.getElementById('eventWebsite');
+    if (websiteInput) websiteInput.value = '';
+    const instagramInput = document.getElementById('eventInstagram');
+    if (instagramInput) instagramInput.value = '';
   } catch (error) {
     console.error('[COORDINATE] Form submission error:', error);
     console.error('[COORDINATE] Error stack:', error.stack);
