@@ -179,6 +179,358 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Check if screen is desktop size
+function isDesktop() {
+  return window.innerWidth >= 768;
+}
+
+// Render desktop calendar panel (left: event list, right: event details)
+function renderDesktopCalendarPanel(events, startDate) {
+  const desktopPanel = document.getElementById('desktopCalendarPanel');
+  if (!desktopPanel) return;
+  
+  renderDesktopEventList(events, startDate);
+  
+  // Auto-select first event if available
+  if (events.length > 0) {
+    const firstEvent = events[0];
+    selectDesktopEvent(firstEvent);
+  } else {
+    // Show placeholder
+    const detailsContainer = document.getElementById('desktopEventDetails');
+    if (detailsContainer) {
+      detailsContainer.innerHTML = `
+        <div class="desktop-event-details-placeholder">
+          <p style="text-align: center; color: var(--text-secondary); padding: var(--space-2xl);">
+            Select an event to view details
+          </p>
+        </div>
+      `;
+    }
+  }
+}
+
+// Render left panel with date-grouped events
+function renderDesktopEventList(events, startDate) {
+  const eventListContainer = document.getElementById('desktopEventList');
+  if (!eventListContainer) return;
+  
+  const groupedEvents = groupEventsByDay(events);
+  
+  // Get all days in the date range (not just week, in case filters are applied)
+  // But if no filters, use week range
+  const days = [];
+  const allEventDates = Object.keys(groupedEvents).sort();
+  
+  if (allEventDates.length > 0) {
+    // Use actual event dates
+    allEventDates.forEach(dayKey => {
+      const dayDate = new Date(dayKey + 'T00:00:00');
+      days.push({
+        date: dayDate,
+        key: dayKey,
+        events: groupedEvents[dayKey] || []
+      });
+    });
+  } else {
+    // Fallback to week range if no events
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + i);
+      const dayKey = dayDate.toISOString().split('T')[0];
+      days.push({
+        date: dayDate,
+        key: dayKey,
+        events: groupedEvents[dayKey] || []
+      });
+    }
+  }
+  
+  let html = '';
+  
+  days.forEach(day => {
+    if (day.events.length === 0) return; // Skip days with no events
+    
+    const dayName = getDayName(day.date);
+    const dayNumber = getDayNumber(day.date);
+    const monthName = getMonthName(day.date);
+    const year = day.date.getFullYear();
+    const today = new Date();
+    const isToday = day.key === today.toISOString().split('T')[0];
+    
+    // Format: "Monday, January 22, 2025" or "Today, January 22, 2025"
+    const dateLabel = isToday ? 'Today' : dayName;
+    const formattedDate = `${dateLabel}, ${monthName} ${dayNumber}, ${year}`;
+    
+    html += `
+      <div class="desktop-date-group">
+        <div class="desktop-date-header">${formattedDate}</div>
+        ${day.events.map(event => renderDesktopEventCard(event)).join('')}
+      </div>
+    `;
+  });
+  
+  if (html === '') {
+    html = `
+      <div style="text-align: center; padding: var(--space-2xl); color: var(--text-secondary);">
+        <p>No events scheduled</p>
+      </div>
+    `;
+  }
+  
+  eventListContainer.innerHTML = html;
+  
+  // Attach click handlers
+  eventListContainer.querySelectorAll('.desktop-event-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const eventId = card.dataset.eventId;
+      const event = events.find(e => e.id === eventId || e.uuid === eventId);
+      if (event) {
+        selectDesktopEvent(event);
+      }
+    });
+  });
+}
+
+// Render individual event card for desktop left panel
+function renderDesktopEventCard(event) {
+  const timeRange = formatTimeRange(event.dateTime, event.endTime, event.timezone);
+  const location = formatLocationDisplay(event.placeName, event.location);
+  const signupCount = event.signupCount || 0;
+  const maxParticipants = event.maxParticipants || 0;
+  const isCancelled = event.cancelledAt || event.status === 'cancelled';
+  const isPast = new Date(event.dateTime) < new Date();
+  const eventTitle = event.title ? escapeHtml(event.title) : 'Event';
+  
+  // Truncate location if too long
+  const locationDisplay = location.length > 50 ? location.substring(0, 47) + '...' : location;
+  
+  // Status text
+  let statusText = `Attending: ${signupCount}${maxParticipants > 0 ? ` / ${maxParticipants}` : ''}`;
+  if (isCancelled) {
+    statusText = '<span style="color: #dc2626;">Cancelled</span>';
+  } else if (isPast) {
+    statusText = '<span style="color: var(--text-secondary);">Past Event</span>';
+  }
+  
+  return `
+    <div class="desktop-event-card ${isCancelled ? 'cancelled' : ''}" data-event-id="${event.id || event.uuid}">
+      <div class="desktop-event-time">${timeRange}</div>
+      <div class="desktop-event-title">${eventTitle}${isCancelled ? ' <span style="color: #dc2626;">(Cancelled)</span>' : ''}</div>
+      <div class="desktop-event-location">${escapeHtml(locationDisplay)}</div>
+      <div class="desktop-event-participants">${statusText}</div>
+    </div>
+  `;
+}
+
+// Store currently selected event
+let selectedDesktopEvent = null;
+
+// Handle event card selection
+async function selectDesktopEvent(event) {
+  selectedDesktopEvent = event;
+  
+  // Update active card styling
+  document.querySelectorAll('.desktop-event-card').forEach(card => {
+    card.classList.remove('active');
+    if (card.dataset.eventId === (event.id || event.uuid)) {
+      card.classList.add('active');
+    }
+  });
+  
+  // Always fetch full event data to ensure we have picture, description, links, etc.
+  // Calendar API may return limited fields
+  let fullEvent = event;
+  
+  if (event.id || event.uuid) {
+    try {
+      const eventId = event.id || event.uuid;
+      const response = await fetch(`/api/runs/${eventId}`);
+      if (response.ok) {
+        fullEvent = await response.json();
+      } else {
+        console.warn('[CALENDAR] Could not fetch full event data, using calendar event data');
+      }
+    } catch (error) {
+      console.error('[CALENDAR] Error fetching full event data:', error);
+      // Continue with partial event data from calendar
+    }
+  }
+  
+  renderDesktopEventDetails(fullEvent);
+}
+
+// Render event details in right panel (reusing event.html structure)
+function renderDesktopEventDetails(event) {
+  const detailsContainer = document.getElementById('desktopEventDetails');
+  if (!detailsContainer) return;
+  
+  const eventTitleDisplay = event.title && typeof event.title === 'string' && event.title.trim() ? event.title.trim() : '';
+  const plannerName = event.pacerName || event.plannerName || '';
+  
+  // Format date/time
+  const eventDate = new Date(event.dateTime);
+  const timezone = event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const formattedDateTime = eventDate.toLocaleString('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+  
+  // Format end time if available
+  let formattedEndTime = '';
+  if (event.endTime) {
+    const endDate = new Date(event.endTime);
+    formattedEndTime = endDate.toLocaleString('en-US', {
+      timeZone: timezone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+  
+  // Build title
+  let titleText = eventTitleDisplay || 'Event';
+  if (plannerName) {
+    titleText = eventTitleDisplay ? `${eventTitleDisplay} - ${plannerName}` : `Event with ${plannerName}`;
+  }
+  
+  // Picture HTML
+  let pictureHtml = '';
+  if (event.picture && typeof event.picture === 'string' && event.picture.trim()) {
+    const pictureSrc = event.picture.startsWith('data:') 
+      ? event.picture 
+      : `data:image/jpeg;base64,${event.picture}`;
+    pictureHtml = `
+      <div class="event-picture-container">
+        <img src="${pictureSrc}" alt="Event picture" />
+      </div>
+    `;
+  }
+  
+  // Description HTML
+  let descriptionHtml = '';
+  if (event.description && typeof event.description === 'string' && event.description.trim()) {
+    descriptionHtml = `
+      <div class="event-description-section">
+        <h3>About This Event</h3>
+        <p>${escapeHtml(event.description.trim())}</p>
+      </div>
+    `;
+  }
+  
+  // Links HTML
+  let linksHtml = '';
+  const links = [];
+  if (event.eventWebsite && typeof event.eventWebsite === 'string' && event.eventWebsite.trim()) {
+    links.push({
+      label: 'Website',
+      url: event.eventWebsite.trim(),
+      icon: '🌐'
+    });
+  }
+  if (event.eventInstagram && typeof event.eventInstagram === 'string' && event.eventInstagram.trim()) {
+    links.push({
+      label: 'Instagram',
+      url: event.eventInstagram.trim(),
+      icon: '📷'
+    });
+  }
+  
+  if (links.length > 0) {
+    linksHtml = `
+      <div class="event-links-section">
+        <h3>Event Links</h3>
+        ${links.map(link => `
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer">
+            <span>${link.icon}</span>
+            <span>${link.label}</span>
+          </a>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // Map container (will be populated by updateMapForLocation)
+  const mapContainerId = 'desktopEventMap';
+  
+  // Check if event is cancelled
+  const isCancelled = event.cancelledAt || event.status === 'cancelled';
+  const isPast = new Date(event.dateTime) < new Date();
+  const signupLink = event.signupLink || event.signup_link || (event.id ? `signup.html?id=${event.id}` : null);
+  
+  // Signup button/link
+  let signupButtonHtml = '';
+  if (!isCancelled && !isPast && signupLink) {
+    signupButtonHtml = `
+      <div style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 2px solid var(--border-gray);">
+        <a href="${signupLink}" class="button button-primary" style="display: inline-block; text-decoration: none;" data-track-cta="desktop_calendar_signup_click">
+          Sign Up for This Event
+        </a>
+      </div>
+    `;
+  } else if (isCancelled) {
+    signupButtonHtml = `
+      <div style="margin-top: var(--space-xl); padding: var(--space-md); background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
+        <strong>This event has been cancelled</strong>
+        ${event.cancellationMessage ? `<p style="margin-top: 8px; margin-bottom: 0;">${escapeHtml(event.cancellationMessage)}</p>` : ''}
+      </div>
+    `;
+  } else if (isPast) {
+    signupButtonHtml = `
+      <div style="margin-top: var(--space-xl); padding: var(--space-md); background: var(--light-gray-1); border: 1px solid var(--border-gray); border-radius: 8px; color: var(--text-secondary);">
+        <strong>This event has already occurred</strong>
+      </div>
+    `;
+  }
+  
+  const html = `
+    <div class="desktop-event-details-content active">
+      <h1>${escapeHtml(titleText)}${isCancelled ? ' <span style="color: #dc2626; font-size: 0.7em;">(Cancelled)</span>' : ''}</h1>
+      
+      ${pictureHtml}
+      
+      <div class="event-info-section">
+        <p><strong>Location:</strong> ${escapeHtml(event.location || 'TBD')}</p>
+        <p><strong>Event Planner:</strong> ${escapeHtml(plannerName || '-')}</p>
+        <p><strong>Date & Time:</strong> ${formattedDateTime}${formattedEndTime ? ` - ${formattedEndTime}` : ''}</p>
+        <p><strong>Max Participants:</strong> ${event.maxParticipants || 'Unlimited'}</p>
+        <p><strong>Attending:</strong> ${event.signupCount || 0}${event.maxParticipants ? ` / ${event.maxParticipants}` : ''}</p>
+      </div>
+      
+      ${descriptionHtml}
+      
+      ${linksHtml}
+      
+      <div class="event-map-container">
+        <div id="${mapContainerId}" class="location-map" style="display: none;"></div>
+      </div>
+      
+      ${signupButtonHtml}
+    </div>
+  `;
+  
+  detailsContainer.innerHTML = html;
+  
+  // Render map if location exists
+  if (event.location && typeof updateMapForLocation === 'function') {
+    // Wait a bit longer to ensure DOM is ready and Leaflet is loaded
+    setTimeout(() => {
+      const mapElement = document.getElementById(mapContainerId);
+      if (mapElement) {
+        mapElement.style.display = 'block';
+        updateMapForLocation(mapContainerId, event.location, true).catch(error => {
+          console.warn('[CALENDAR] Map rendering error:', error);
+        });
+      }
+    }, 200);
+  }
+}
+
 // Fetch public events for date range
 async function fetchPublicEvents(startDate, endDate) {
   const startDateStr = startDate.toISOString().split('T')[0];
@@ -246,6 +598,8 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
   calendarContainer.style.display = 'none';
   noEvents.style.display = 'none';
   errorDiv.style.display = 'none';
+  const desktopPanel = document.getElementById('desktopCalendarPanel');
+  if (desktopPanel) desktopPanel.style.display = 'none';
   
   try {
     // Determine week start date (Monday)
@@ -308,10 +662,35 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
     
     if (filteredEvents.length === 0) {
       noEvents.style.display = 'block';
+      // Hide both views when no events
+      calendarContainer.style.display = 'none';
+      const desktopPanel = document.getElementById('desktopCalendarPanel');
+      if (desktopPanel) desktopPanel.style.display = 'none';
+      const desktopEventList = document.getElementById('desktopEventList');
+      if (desktopEventList) {
+        desktopEventList.innerHTML = `
+          <div style="text-align: center; padding: var(--space-2xl); color: var(--text-secondary);">
+            <p>No events scheduled</p>
+          </div>
+        `;
+      }
     } else {
-      // Render with the original week start for proper day alignment
-      renderCalendarWeek(filteredEvents, weekRange.startDate);
-      calendarContainer.style.display = 'block';
+      // Determine which view to show based on screen size
+      if (isDesktop()) {
+        // Desktop: Show panel layout
+        const desktopPanel = document.getElementById('desktopCalendarPanel');
+        if (desktopPanel) {
+          desktopPanel.style.display = 'flex';
+          renderDesktopCalendarPanel(filteredEvents, weekRange.startDate);
+        }
+        calendarContainer.style.display = 'none';
+      } else {
+        // Mobile: Show week grid
+        calendarContainer.style.display = 'block';
+        renderCalendarWeek(filteredEvents, weekRange.startDate);
+        const desktopPanel = document.getElementById('desktopCalendarPanel');
+        if (desktopPanel) desktopPanel.style.display = 'none';
+      }
     }
   } catch (error) {
     console.error('[CALENDAR] Error loading calendar:', error);
@@ -325,6 +704,18 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
 document.addEventListener('DOMContentLoaded', () => {
   // Load current week
   loadCalendar();
+  
+  // Handle window resize to switch between desktop and mobile views
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      // Reload calendar to switch views if needed
+      if (currentWeekStart !== null) {
+        loadCalendar(currentWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
+      }
+    }, 250);
+  });
   
   // Handle week navigation
   const prevWeekBtn = document.getElementById('prevWeekBtn');

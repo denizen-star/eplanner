@@ -92,7 +92,24 @@
                     Loading events...
                 </div>
 
-                <div id="calendarContainer" style="display: none;">
+                <!-- Desktop Panel Layout (hidden on mobile) -->
+                <div id="desktopCalendarPanel" class="desktop-calendar-panel" style="display: none;">
+                    <div class="desktop-calendar-left">
+                        <div id="desktopEventList" class="desktop-event-list"></div>
+                    </div>
+                    <div class="desktop-calendar-right">
+                        <div id="desktopEventDetails" class="desktop-event-details">
+                            <div class="desktop-event-details-placeholder">
+                                <p style="text-align: center; color: var(--text-secondary); padding: var(--space-2xl);">
+                                    Select an event to view details
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile/Tablet Week Grid (hidden on desktop) -->
+                <div id="calendarContainer" class="calendar-week-container" style="display: none;">
                     <div class="calendar-week" id="calendarWeek"></div>
                 </div>
 
@@ -106,6 +123,9 @@
         </div>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="assets/js/map-utils.js"></script>
     <script src="assets/js/dropdown.js"></script>
     <script src="assets/js/device-collector.js"></script>
     <script src="assets/js/format-utils.js"></script>
