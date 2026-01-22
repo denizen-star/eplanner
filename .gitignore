@@ -22,6 +22,9 @@ Thumbs.db
 *.swo
 *~
 
+# Backup files
+*.backup
+
 # Build outputs
 dist/
 build/
