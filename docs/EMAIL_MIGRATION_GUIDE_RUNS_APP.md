@@ -72,7 +72,6 @@ ADD COLUMN coordinator_email VARCHAR(255) NULL;
   "cors": "^2.8.5",
   "dotenv": "^16.6.1",
   "express": "^4.18.2",
-  "node-fetch": "^3.3.2",
   "serverless-http": "^3.2.0"
 }
 ```
@@ -85,7 +84,6 @@ ADD COLUMN coordinator_email VARCHAR(255) NULL;
   "dotenv": "^16.6.1",
   "express": "^4.18.2",
   "js-yaml": "^4.1.0",
-  "node-fetch": "^3.3.2",
   "nodemailer": "^6.9.7",
   "serverless-http": "^3.2.0"
 }
@@ -94,6 +92,7 @@ ADD COLUMN coordinator_email VARCHAR(255) NULL;
 **Changes:**
 - Add `"js-yaml": "^4.1.0"` after `"express"`
 - Add `"nodemailer": "^6.9.7"` after `"js-yaml"`
+- Ensure Node 18+ so native `fetch` is available (no `node-fetch`)
 
 **Action:** Update the dependencies section in `package.json`
 

@@ -52,7 +52,7 @@ The user requested a series of **minor look and feel changes** across the EventP
 1. **Added fallback error handling to `getById()`** - Tried to catch "Unknown column" errors and use a fallback query. This was overly complex and didn't work reliably.
 2. **Added fallback to `getAll()`** - User reverted this, so it still had no fallback
 3. **Simplified `getById()`** - Removed fallback logic, but the root cause (columns in EVENT_SELECT_FIELDS) remained
-4. **Fixed `ipGeolocation.js` ES module issue** - Changed from `require('node-fetch')` to dynamic `import()`, then to native fetch. This was a separate issue but also broke things.
+4. **Fixed `ipGeolocation.js` ES module issue** - Removed `node-fetch` and standardized on native `fetch` (Node 18+). This was a separate issue but also broke things.
 5. **Removed cancellation columns from EVENT_SELECT_FIELDS** - This should have been the FIRST fix, not the last
 
 ### The Hour-Long Debugging Session

@@ -45,9 +45,9 @@ This document provides detailed instructions for implementing a modern cancellat
 #### Issue 2: ES Module Compatibility
 **Problem**: `lib/ipGeolocation.js` was using `require('node-fetch')`, but node-fetch v3 is an ES module and cannot be required in CommonJS.
 
-**Root Cause**: node-fetch v3 requires dynamic `import()` or native fetch, not `require()`.
+**Root Cause**: node-fetch v3 requires ESM import, which doesn't work with `require()`.
 
-**Solution**: Update `ipGeolocation.js` to use native fetch (available in Node 18+) or dynamic import, similar to `googleSheetsClient.js`.
+**Solution**: Remove `node-fetch` and use native `fetch` (Node 18+).
 
 #### Issue 3: Syntax Error (Regex)
 **Problem**: "Invalid regular expression: missing /" error during event creation.
@@ -67,8 +67,8 @@ This document provides detailed instructions for implementing a modern cancellat
 
 2. **Module System Compatibility**
    - Check if dependencies are CommonJS or ES modules before using `require()`
-   - Use native fetch when available (Node 18+)
-   - Use dynamic `import()` for ES modules in CommonJS contexts
+   - Use native `fetch` when available (Node 18+)
+   - Avoid `node-fetch` to prevent ESM/CJS issues
 
 3. **Backward Compatibility**
    - Don't break existing functionality while adding new features
