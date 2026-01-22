@@ -322,7 +322,7 @@ app.post('/api/runs/create', async (req, res) => {
         
         let emailContent;
         try {
-          emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+          emailContent = await eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
           
           // Validate email content
           if (!emailContent || !emailContent.subject || !emailContent.html) {
@@ -629,7 +629,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         // Send confirmation to attendee if they provided an email
         if (createdSignup.email && createdSignup.email.trim()) {
           try {
-            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink);
+            const attendeeEmailContent = await signupConfirmationEmail(run, createdSignup, eventViewLink);
             await emailService.sendEmail({
               to: createdSignup.email.trim(),
               subject: attendeeEmailContent.subject,

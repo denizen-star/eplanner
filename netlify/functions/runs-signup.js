@@ -202,7 +202,7 @@ exports.handler = async (event) => {
           try {
             const attendeeEmail = createdSignup.email.trim();
             console.log('[RUNS SIGNUP] Sending confirmation email to:', attendeeEmail);
-            const attendeeEmailContent = signupConfirmationEmail(run, createdSignup, eventViewLink, !!externalSignup);
+            const attendeeEmailContent = await signupConfirmationEmail(run, createdSignup, eventViewLink, !!externalSignup);
             const emailResult = await emailService.sendEmail({
               to: attendeeEmail,
               subject: attendeeEmailContent.subject,

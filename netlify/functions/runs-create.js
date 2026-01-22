@@ -334,7 +334,7 @@ exports.handler = async (event) => {
         
         let emailContent;
         try {
-          emailContent = eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
+          emailContent = await eventCreatedEmail(runForEmail, trimmedCoordinatorEmail, signupLink, manageLink);
           
           // Validate email content
           if (!emailContent || !emailContent.subject || !emailContent.html) {
