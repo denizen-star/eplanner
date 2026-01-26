@@ -186,7 +186,8 @@ async function loadEvent() {
       addCalendarLinksSection(event);
     }, 100);
 
-    addSignupCtaSection(event);
+    // Signup section removed - this page is for attendees who have already signed up
+    // addSignupCtaSection(event);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('eventInfo').style.display = 'block';

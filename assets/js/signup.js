@@ -34,6 +34,96 @@ const waiverText = `
 
 const EXTERNAL_SIGNUP_DISCLAIMER = 'This event uses an external signup page. You will leave this website to complete signup. The event is not tracked on this site. You must still accept the waiver and provide at least email or phone. You will receive a confirmation email that you are signing up for a non-tracked event.';
 
+/**
+ * Extract domain name from hostname (part before ".kervinapps.com")
+ * @returns {string} Domain name (e.g., "to-lgbtq" or "eplanner")
+ */
+function getDomainName() {
+  const hostname = window.location.hostname.toLowerCase();
+  // Extract part before ".kervinapps.com"
+  const match = hostname.match(/^([^.]+)\.kervinapps\.com$/);
+  return match ? match[1] : 'eplanner'; // Default to 'eplanner'
+}
+
+/**
+ * Get domain-aware waiver text
+ * @param {string} domainName - Domain name (e.g., "to-lgbtq" or "eplanner")
+ * @returns {string} Waiver text with domain-specific replacements
+ */
+function getWaiverText(domainName) {
+  let text = waiverText;
+  
+  if (domainName === 'to-lgbtq') {
+    // Replace all instances for to-lgbtq domain
+    text = text.replace(/Miami Beach Gay Runners \(the "Club"\)/g, 'to-lgbtq hub and any of their affiliates');
+    text = text.replace(/the Club/g, 'to-lgbtq hub and any of their affiliates');
+    text = text.replace(/Club's/g, "to-lgbtq hub's");
+    text = text.replace(/Club activities/g, 'to-lgbtq hub activities');
+    text = text.replace(/the Club's staff/g, "to-lgbtq hub's staff");
+    text = text.replace(/Club's staff/g, "to-lgbtq hub's staff");
+    text = text.replace(/dismissal from the Club/g, 'dismissal from to-lgbtq hub');
+    text = text.replace(/Miami Beach Gay Runners distribution list/g, 'to-lgbtq hub distribution list');
+  }
+  
+  return text;
+}
+
+/**
+ * Show waiver modal with full waiver text
+ * @param {string} waiverText - The full waiver text to display
+ */
+function showWaiverModal(waiverText) {
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modalBody = document.getElementById('modalBody');
+  
+  if (!modalOverlay || !modalContent || !modalBody) {
+    console.error('Modal elements not found');
+    return;
+  }
+  
+  // Create modal content with close button
+  modalBody.innerHTML = `
+    <div style="position: relative;">
+      <button onclick="hideWaiverModal()" style="position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center;">×</button>
+      <div style="max-height: 80vh; overflow-y: auto; padding-right: 10px;">
+        ${waiverText}
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button onclick="hideWaiverModal()" class="button button-primary">Close</button>
+      </div>
+    </div>
+  `;
+  
+  modalOverlay.style.display = 'flex';
+  
+  // Close on overlay click
+  modalOverlay.onclick = function(e) {
+    if (e.target === modalOverlay) {
+      hideWaiverModal();
+    }
+  };
+  
+  // Close on Escape key
+  document.addEventListener('keydown', function escapeHandler(e) {
+    if (e.key === 'Escape') {
+      hideWaiverModal();
+      document.removeEventListener('keydown', escapeHandler);
+    }
+  });
+}
+
+/**
+ * Hide waiver modal
+ */
+function hideWaiverModal() {
+  const modalOverlay = document.getElementById('modalOverlay');
+  if (modalOverlay) {
+    modalOverlay.style.display = 'none';
+    modalOverlay.onclick = null;
+  }
+}
+
 // Initialize session manager and device collector
 let sessionManager = null;
 if (window.SessionManager) {
@@ -282,7 +372,28 @@ async function loadRun() {
       return;
     }
 
-    document.getElementById('waiverText').innerHTML = waiverText;
+    // Get domain-aware waiver text and display as clickable link
+    const domainName = getDomainName();
+    const domainWaiverText = getWaiverText(domainName);
+    
+    // Store waiver text for form submission
+    window.currentWaiverText = domainWaiverText;
+    
+    // Display waiver as clickable link
+    const waiverContainer = document.getElementById('waiverText');
+    if (waiverContainer) {
+      const waiverLink = document.createElement('a');
+      waiverLink.href = '#';
+      waiverLink.textContent = 'Electronic Waiver of Liability, Media Release, Code of Conduct, and Communication Consent.';
+      waiverLink.style.cssText = 'color: #0066cc; text-decoration: underline; cursor: pointer; font-weight: 500;';
+      waiverLink.onclick = function(e) {
+        e.preventDefault();
+        showWaiverModal(domainWaiverText);
+      };
+      waiverContainer.innerHTML = '';
+      waiverContainer.appendChild(waiverLink);
+    }
+    
     currentRun = run;
     document.getElementById('loading').style.display = 'none';
     document.getElementById('runInfo').style.display = 'block';
@@ -385,13 +496,16 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   }
 
   const isExternal = !!(currentRun?.externalSignupEnabled && document.getElementById('externalSignup')?.checked && currentRun?.eventWebsite && typeof currentRun.eventWebsite === 'string' && currentRun.eventWebsite.trim());
+  // Use domain-aware waiver text if available, otherwise fall back to default
+  const waiverTextToSubmit = window.currentWaiverText || getWaiverText(getDomainName());
+  
   const formData = {
     name: document.getElementById('name').value.trim(),
     phone: document.getElementById('phone').value.trim(),
     email: email || '',
     instagram: instagram || '',
     waiverAccepted: document.getElementById('waiverAccepted').checked,
-    waiverText: waiverText,
+    waiverText: waiverTextToSubmit,
     externalSignup: isExternal,
     deviceInfo: deviceInfo,
     sessionInfo: sessionInfo,
