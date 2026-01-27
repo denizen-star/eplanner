@@ -111,29 +111,22 @@ function renderCalendarWeek(events, startDate) {
   const calendarWeek = document.getElementById('calendarWeek');
   if (!calendarWeek) return;
 
+  // Mobile/tablet view: only render dates that actually have events
   const groupedEvents = groupEventsByDay(events);
-  const days = [];
-  
-  // Create 7 days (Monday to Sunday)
-  for (let i = 0; i < 7; i++) {
-    const dayDate = new Date(startDate);
-    dayDate.setDate(startDate.getDate() + i);
-    const dayKey = dayDate.toISOString().split('T')[0];
-    days.push({
-      date: dayDate,
-      key: dayKey,
-      events: groupedEvents[dayKey] || []
-    });
-  }
+  const dayKeys = Object.keys(groupedEvents).sort(); // YYYY-MM-DD
 
   // Build HTML
   let html = '';
   
-  days.forEach(day => {
-    const dayName = getDayName(day.date);
-    const dayNumber = getDayNumber(day.date);
-    const monthName = getMonthName(day.date);
-    const isToday = day.key === new Date().toISOString().split('T')[0];
+  dayKeys.forEach(dayKey => {
+    const dayEvents = groupedEvents[dayKey] || [];
+    if (dayEvents.length === 0) return;
+    
+    const dayDate = new Date(dayKey + 'T00:00:00');
+    const dayName = getDayName(dayDate);
+    const dayNumber = getDayNumber(dayDate);
+    const monthName = getMonthName(dayDate);
+    const isToday = dayKey === new Date().toISOString().split('T')[0];
     
     html += `
       <div class="calendar-day ${isToday ? 'calendar-day-today' : ''}">
@@ -143,10 +136,7 @@ function renderCalendarWeek(events, startDate) {
           <div class="calendar-day-month">${monthName}</div>
         </div>
         <div class="calendar-day-events">
-          ${day.events.length === 0 
-            ? '<div class="calendar-day-empty">No events</div>'
-            : day.events.map(event => renderEventCard(event)).join('')
-          }
+          ${dayEvents.map(event => renderEventCard(event)).join('')}
         </div>
       </div>
     `;
@@ -707,9 +697,10 @@ async function loadCalendar(weekStart = null, filterStart = null, filterEnd = nu
       return eventDate <= maxDate;
     });
     
-    // Limit to 15 events (whichever comes first: 15 events or 30 days)
-    if (filteredEvents.length > 15) {
-      filteredEvents = filteredEvents.slice(0, 15);
+    // Limit events (whichever comes first: max events or 30 days)
+    const maxEvents = isDesktop() ? 15 : 10;
+    if (filteredEvents.length > maxEvents) {
+      filteredEvents = filteredEvents.slice(0, maxEvents);
     }
     
     // Update title based on actual displayed events

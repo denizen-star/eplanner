@@ -148,9 +148,11 @@
    */
   function updateHeroHeadline() {
     if (isLGBTQDomain()) {
-      const heroHeadline = document.querySelector('.hero-headline');
+      // Scope to calendar hero only (avoid changing other pages)
+      const heroHeadline = document.querySelector('.calendar-page-hero .hero-headline');
       if (heroHeadline) {
-        heroHeadline.textContent = 'Start your own revolution. Make your activities turn strangers into new friends & adventure accomplices.';
+        heroHeadline.textContent = 'Start your own revolution. Meet new friends & adventure accomplices';
+        heroHeadline.classList.add('hero-headline--tagline');
       }
     }
   }
