@@ -1126,12 +1126,12 @@ body:has(.calendar-week) .main-container {
   }
 
   .hero-headline {
-    font-size: var(--font-3xl);
+    font-size: var(--font-2xl);
     margin-bottom: var(--space-lg);
   }
 
-  /* Calendar hero tagline: slightly smaller on mobile */
-  .calendar-page-hero .hero-headline--tagline {
+  /* Explicit hook for any extra-long hero headline (calendar + future pages) */
+  .hero-headline--tagline {
     font-size: var(--font-2xl);
   }
 
