@@ -12,6 +12,14 @@
   node_bundler = "esbuild"
   included_files = ["server.js", "lib/**", "package.json"]
 
+# Canonical host redirect (must come before other redirects)
+[[redirects]]
+  from = "/*"
+  to = "https://to.lgbtq-hub.com/:splat"
+  status = 301
+  force = true
+  conditions = { Host = ["toronto.lgbtq-hub.com", "www.toronto.lgbtq-hub.com"] }
+
 [[redirects]]
   from = "/api/analytics/event"
   to = "/.netlify/functions/analytics-event"
