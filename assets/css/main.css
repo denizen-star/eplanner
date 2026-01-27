@@ -1096,6 +1096,22 @@ body:has(.calendar-week) .main-container {
   overflow: hidden;
 }
 
+/* Hero sizing for tablets + landscape phones */
+@media (max-width: 1024px) {
+  .hero-section {
+    min-height: 30vh;
+    padding: 80px 0 40px;
+  }
+
+  .hero-headline {
+    font-size: var(--font-3xl);
+  }
+
+  .hero-headline--tagline {
+    font-size: var(--font-3xl);
+  }
+}
+
 @media (max-width: 768px) {
   .main-container {
     padding: 24px 16px;
@@ -2049,7 +2065,7 @@ td, th {
 }
 
 /* Reduce hero height on calendar page for desktop */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   body:has(.calendar-page-hero) .hero-section,
   .calendar-page-hero.hero-section {
     min-height: 40vh;
