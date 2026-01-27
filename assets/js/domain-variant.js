@@ -8,6 +8,7 @@
 
   // Domain configuration
   const LGBTQ_DOMAIN = 'to-lgbtq.kervinapps.com';
+  const LGBTQ_ALIAS_DOMAIN = 'to.lgbtq-hub.com';
   const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/Fea7OmKCL338wVUsWEajzr';
   const SIGNUP_BUTTON_NEW_TEXT = 'Create your Activity';
   const DEFAULT_FAVICON = 'assets/images/favicon.svg';
@@ -27,8 +28,22 @@
     
     const hostname = window.location.hostname.toLowerCase();
     return hostname === LGBTQ_DOMAIN || 
+           hostname === LGBTQ_ALIAS_DOMAIN ||
            hostname === 'www.' + LGBTQ_DOMAIN ||
+           hostname === 'www.' + LGBTQ_ALIAS_DOMAIN ||
            hostname.includes('to-lgbtq');
+  }
+
+  /**
+   * Normalize page title on LGBTQ domains
+   * Some pages set titles like "Event - Event Planner" in other scripts; this keeps branding consistent.
+   */
+  function updatePageTitle() {
+    if (!isLGBTQDomain()) return;
+    if (!document || typeof document.title !== 'string') return;
+    if (document.title.includes('Event Planner')) {
+      document.title = document.title.replace(/Event Planner/g, 'LGBTQ+ Activity Planner');
+    }
   }
 
   /**
@@ -243,6 +258,8 @@
     updateLogoIcon();
     // Update hero headline
     updateHeroHeadline();
+    // Normalize page title for consistent branding
+    updatePageTitle();
     // Small delay to ensure DOM is fully ready and other scripts have run
     setTimeout(updateButtonsForDomain, 100);
   }

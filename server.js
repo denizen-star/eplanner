@@ -211,8 +211,9 @@ app.post('/api/runs/create', async (req, res) => {
     // Detect app name from domain (for domain-specific event filtering)
     const host = req.get('host') || '';
     const hostLower = host.toLowerCase();
+    const hostnameOnly = hostLower.split(':')[0];
     let appName = 'eplanner'; // Default
-    if (hostLower.includes('to-lgbtq')) {
+    if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
       appName = 'to-lgbtq';
     } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
       appName = 'eplanner';
@@ -475,8 +476,9 @@ app.get('/api/runs/public-calendar', async (req, res) => {
     // Detect app name from domain (for domain-specific event filtering)
     const host = req.get('host') || '';
     const hostLower = host.toLowerCase();
+    const hostnameOnly = hostLower.split(':')[0];
     let appName = 'eplanner'; // Default
-    if (hostLower.includes('to-lgbtq')) {
+    if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
       appName = 'to-lgbtq';
     } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
       appName = 'eplanner';

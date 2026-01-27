@@ -40,6 +40,10 @@ const EXTERNAL_SIGNUP_DISCLAIMER = 'This event uses an external signup page. You
  */
 function getDomainName() {
   const hostname = window.location.hostname.toLowerCase();
+  // Support alias domain that should behave like to-lgbtq
+  if (hostname === 'to.lgbtq-hub.com' || hostname === 'www.to.lgbtq-hub.com') {
+    return 'to-lgbtq';
+  }
   // Extract part before ".kervinapps.com"
   const match = hostname.match(/^([^.]+)\.kervinapps\.com$/);
   return match ? match[1] : 'eplanner'; // Default to 'eplanner'

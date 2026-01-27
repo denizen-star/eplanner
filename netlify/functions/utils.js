@@ -68,9 +68,10 @@ async function forwardToSheets(payload) {
 function getAppName(event) {
   const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
   const hostLower = host.toLowerCase();
+  const hostnameOnly = hostLower.split(':')[0];
   
   // Check for to-lgbtq domain first (more specific)
-  if (hostLower.includes('to-lgbtq')) {
+  if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
     return 'to-lgbtq';
   }
   
