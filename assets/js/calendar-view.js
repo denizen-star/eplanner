@@ -757,11 +757,17 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCalendar();
   
   // Handle window resize to switch between desktop and mobile views
+  let lastIsDesktop = isDesktop();
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      // Reload calendar to switch views if needed
+      // On mobile, scrolling can trigger resize (address bar show/hide).
+      // Only reload when crossing the desktop breakpoint.
+      const nextIsDesktop = isDesktop();
+      if (nextIsDesktop === lastIsDesktop) return;
+      lastIsDesktop = nextIsDesktop;
+      
       if (currentWeekStart !== null) {
         loadCalendar(currentWeekStart, dateFilterStart, dateFilterEnd, hideCancelled);
       }
