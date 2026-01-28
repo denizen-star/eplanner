@@ -58,6 +58,13 @@
   status = 200
   force = true
 
+# Support nested signups routes (e.g. DELETE /api/runs/:runId/signups/:signupId)
+[[redirects]]
+  from = "/api/runs/:runId/signups/*"
+  to = "/.netlify/functions/runs-signups"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/api/runs/:runId/signups"
   to = "/.netlify/functions/runs-signups"

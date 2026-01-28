@@ -21,6 +21,8 @@ function jsonResponse(statusCode, body) {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Password',
+      'Access-Control-Allow-Methods': 'GET, PUT, PATCH, DELETE, OPTIONS',
     },
     body: JSON.stringify(body),
   };
@@ -39,6 +41,28 @@ exports.handler = async (event, context) => {
   
   console.log('[RUN GET] Handler invoked for runId:', runId, 'path:', event.path, 'method:', event.httpMethod);
   
+  // Support DELETE for soft-deleting runs (matches local Express API behavior)
+  if (event.httpMethod === 'DELETE') {
+    try {
+      if (!runId) {
+        return jsonResponse(400, { error: 'Run ID is required' });
+      }
+
+      // Verify run exists
+      const existingRun = await runs.getById(runId);
+      if (!existingRun) {
+        return jsonResponse(404, { error: 'Run not found' });
+      }
+
+      await runs.delete(runId);
+      return jsonResponse(200, { success: true });
+    } catch (error) {
+      console.error('[RUN GET] Error deleting run:', error);
+      console.error('[RUN GET] Error stack:', error.stack);
+      return jsonResponse(500, { error: 'Failed to delete run', message: error.message });
+    }
+  }
+
   // If method is PUT or PATCH, handle updates directly (no Express needed)
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
     try {
