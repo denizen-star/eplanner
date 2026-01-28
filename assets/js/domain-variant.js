@@ -25,13 +25,26 @@
 
   function applyFavicon(path) {
     if (!path) return;
+    function inferMime(p) {
+      if (!p || typeof p !== 'string') return 'image/png';
+      if (p.startsWith('data:')) {
+        const m = p.match(/^data:([^;]+);/);
+        return (m && m[1]) ? m[1] : 'image/png';
+      }
+      const lower = p.toLowerCase();
+      if (lower.includes('.png')) return 'image/png';
+      if (lower.includes('.jpg') || lower.includes('.jpeg')) return 'image/jpeg';
+      if (lower.includes('.webp')) return 'image/webp';
+      return 'image/svg+xml';
+    }
     const existing = document.querySelectorAll('link[rel*="icon"]');
     existing.forEach(function (l) { l.remove(); });
+    const mime = inferMime(path);
     const sizes = [16, 32, 64];
     sizes.forEach(function (s) {
       const link = document.createElement('link');
       link.rel = 'icon';
-      link.type = path.indexOf('.png') !== -1 ? 'image/png' : 'image/svg+xml';
+      link.type = mime;
       link.href = path;
       link.sizes = s + 'x' + s;
       document.head.appendChild(link);
@@ -43,7 +56,7 @@
     document.head.appendChild(apple);
     const short = document.createElement('link');
     short.rel = 'shortcut icon';
-    short.type = path.indexOf('.png') !== -1 ? 'image/png' : 'image/svg+xml';
+    short.type = mime;
     short.href = path;
     document.head.appendChild(short);
   }
@@ -147,6 +160,57 @@
     }
   }
 
+  function getPageKey() {
+    const p = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    if (!p || p === '/' || p.endsWith('/index.html')) return 'home';
+    if (p.endsWith('/calendar.html')) return 'calendar';
+    if (p.endsWith('/coordinate.html')) return 'coordinate';
+    if (p.endsWith('/whatsapp-community.html')) return 'whatsapp';
+    if (p.endsWith('/signup.html')) return 'signup';
+    return null;
+  }
+
+  function applyHeroSectionOverrides(config) {
+    if (!config || !config.heroSections) return;
+    const pageKey = getPageKey();
+    if (!pageKey) return;
+    const hs = config.heroSections && config.heroSections[pageKey] ? config.heroSections[pageKey] : null;
+    if (!hs) return;
+
+    const heroEl = document.querySelector('.hero-section');
+    if (!heroEl) return;
+
+    function toCssUrl(u) {
+      if (!u) return '';
+      const safe = String(u).replace(/"/g, '\\"');
+      return 'url("' + safe + '")';
+    }
+
+    if (hs.backgroundImage) {
+      heroEl.style.backgroundImage = toCssUrl(hs.backgroundImage);
+    }
+
+    const heroContent = heroEl.querySelector('.hero-content') || heroEl;
+    const headlineEl = heroContent.querySelector('.hero-headline');
+    if (headlineEl && hs.headline) {
+      headlineEl.textContent = hs.headline;
+    }
+
+    if (hs.subheadline) {
+      // Prefer an existing <p> under the hero content; otherwise create one after the headline.
+      let p = heroContent.querySelector('p');
+      if (!p && headlineEl && headlineEl.parentNode) {
+        p = document.createElement('p');
+        p.style.color = 'var(--white)';
+        p.style.fontSize = 'var(--font-lg)';
+        p.style.maxWidth = '600px';
+        p.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        headlineEl.insertAdjacentElement('afterend', p);
+      }
+      if (p) p.textContent = hs.subheadline;
+    }
+  }
+
   function applyBranding(config) {
     if (!config) return;
     if (config.favicon) applyFavicon(config.favicon);
@@ -154,6 +218,7 @@
     applyPageTitle(config.titleBrand || null);
     applyHeroHeadline(config.heroHeadline || null);
     applyHeroButtons(config);
+    applyHeroSectionOverrides(config);
     const signup = document.getElementById('signup-now-btn');
     if (signup) signup.textContent = SIGNUP_BUTTON_NEW_TEXT;
   }
