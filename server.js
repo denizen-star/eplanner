@@ -7,7 +7,7 @@ if (process.env.NETLIFY !== 'true') {
 const express = require('express');
 const cors = require('cors');
 const { runs, signups, waivers, tenants } = require('./lib/databaseClient');
-const { getTenantFromHost, getProductDefaults, mergeConfig } = require('./lib/tenant');
+const { getTenantFromHost, getProductDefaults, mergeConfig, getDefaultSenderEmail } = require('./lib/tenant');
 const EmailService = require('./lib/emailService');
 const { 
   eventCreatedEmail,
@@ -1268,8 +1268,9 @@ async function getTenantSenderEmail(tenantKey) {
   if (!tenantKey) return null;
   try {
     const t = await tenants.getByKey(tenantKey);
-    return (t && t.senderEmail) ? t.senderEmail : null;
-  } catch (e) { return null; }
+    if (t && t.senderEmail) return t.senderEmail;
+  } catch (e) { /* ignore */ }
+  return getDefaultSenderEmail(tenantKey);
 }
 
 app.get('/api/tenant-config', async (req, res) => {

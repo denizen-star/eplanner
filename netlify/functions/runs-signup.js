@@ -1,4 +1,5 @@
 const { runs, signups, waivers, tenants } = require('../../lib/databaseClient');
+const { getDefaultSenderEmail } = require('../../lib/tenant');
 const EmailService = require('../../lib/emailService');
 const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
 
@@ -191,13 +192,13 @@ exports.handler = async (event) => {
         const baseUrl = `${protocol}://${host}`;
         const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
         let fromEmail = null;
+        const tk = run.tenantKey || null;
         try {
-          const tk = run.tenantKey || null;
           if (tk) {
             const tn = await tenants.getByKey(tk);
-            if (tn && tn.senderEmail) fromEmail = tn.senderEmail;
+            fromEmail = (tn && tn.senderEmail) || getDefaultSenderEmail(tk);
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) { fromEmail = tk ? getDefaultSenderEmail(tk) : null; }
         const fromOpt = fromEmail ? { fromEmail } : {};
 
         if (createdSignup.email && createdSignup.email.trim()) {

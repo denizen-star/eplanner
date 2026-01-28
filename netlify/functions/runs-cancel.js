@@ -1,4 +1,5 @@
 const { runs, signups, tenants } = require('../../lib/databaseClient');
+const { getDefaultSenderEmail } = require('../../lib/tenant');
 const EmailService = require('../../lib/emailService');
 const { eventCancelledEmail } = require('../../lib/emailTemplates');
 
@@ -183,13 +184,13 @@ exports.handler = async (event) => {
           console.log(`[RUNS CANCEL] BCC recipients: ${bccRecipients.join(', ')}`);
 
           let cancelFromEmail = null;
+          const tk = cancelledRun.tenantKey || null;
           try {
-            const tk = cancelledRun.tenantKey || null;
             if (tk) {
               const tn = await tenants.getByKey(tk);
-              if (tn && tn.senderEmail) cancelFromEmail = tn.senderEmail;
+              cancelFromEmail = (tn && tn.senderEmail) || getDefaultSenderEmail(tk);
             }
-          } catch (e) { /* ignore */ }
+          } catch (e) { cancelFromEmail = tk ? getDefaultSenderEmail(tk) : null; }
           const cancelFromOpt = cancelFromEmail ? { fromEmail: cancelFromEmail } : {};
 
           console.log('[RUNS CANCEL] Step 4: Sending cancellation emails to participants...');

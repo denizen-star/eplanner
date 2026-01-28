@@ -1,4 +1,5 @@
 const { runs, telemetry, tenants } = require('../../lib/databaseClient');
+const { getDefaultSenderEmail } = require('../../lib/tenant');
 const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
 const EmailService = require('../../lib/emailService');
 const { eventCreatedEmail } = require('../../lib/emailTemplates');
@@ -354,8 +355,8 @@ exports.handler = async (event) => {
         let fromEmail = null;
         try {
           const tn = await tenants.getByKey(tenantKey);
-          if (tn && tn.senderEmail) fromEmail = tn.senderEmail;
-        } catch (e) { /* ignore */ }
+          fromEmail = (tn && tn.senderEmail) || getDefaultSenderEmail(tenantKey);
+        } catch (e) { fromEmail = getDefaultSenderEmail(tenantKey); }
         console.log('[RUNS CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
         const emailResult = await emailService.sendEmail({
           to: trimmedCoordinatorEmail,
