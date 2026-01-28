@@ -991,69 +991,54 @@ loadRuns();
 }
 
 async function deleteRun(runId) {
-  if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-    return;
-  }
+  showConfirmModal(
+    'Delete Event',
+    'Are you sure you want to delete this event? This action cannot be undone.',
+    async () => {
+      try {
+        const response = await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
+        const contentType = response.headers.get('content-type') || '';
 
-  try {
-    const response = await fetch(`/api/runs/${runId}`, {
-      method: 'DELETE'
-    });
+        if (!response.ok) {
+          let errorMessage = 'Failed to delete event';
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Failed to delete event');
+          if (contentType.includes('application/json')) {
+            try {
+              const data = await response.json();
+              errorMessage = data.error || errorMessage;
+            } catch (parseError) {
+              console.error('Failed to parse error response:', parseError);
+              errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            }
+          } else {
+            const text = await response.text();
+            console.error('Non-JSON error response:', text.substring(0, 200));
+            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        // Keep in-memory list consistent and refresh UI
+        currentRuns = (currentRuns || []).filter(r => (r.id !== runId && r.uuid !== runId));
+
+        const runsList = document.getElementById('runsList');
+        if (runsList && currentRuns.length === 0) {
+          runsList.innerHTML = '<p>No events created yet. <a href="coordinate.html">Create your first event</a></p>';
+        } else {
+          renderAdminTable();
+        }
+
+        // Refresh reports (if those sections are used)
+        if (typeof loadReport === 'function') {
+          loadReport();
+        }
+      } catch (error) {
+        console.error('Delete run error:', error);
+        showErrorModal('Error deleting event: ' + (error?.message || 'Unknown error'));
+      }
     }
-
-    
-// Sort admin dashboard runs
-function sortAdminRuns(column) {
-  // Toggle direction if clicking same column
-  if (adminSortColumn === column) {
-    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    adminSortColumn = column;
-    adminSortDirection = 'asc';
-  }
-  
-  // Sort the runs
-  const sorted = [...currentRuns].sort((a, b) => {
-    let aVal, bVal;
-    
-    if (column === 'eventName') {
-      aVal = (a.title || '').toLowerCase();
-      bVal = (b.title || '').toLowerCase();
-    } else if (column === 'createdBy') {
-      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
-      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
-    } else if (column === 'createdAt') {
-      aVal = new Date(a.createdAt || 0).getTime();
-      bVal = new Date(b.createdAt || 0).getTime();
-    } else {
-      return 0;
-    }
-    
-    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
-    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
-  
-  currentRuns = sorted;
-  renderAdminTable();
-  
-  // Update sort icons
-  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
-  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
-  if (activeIcon) {
-    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
-  }
-}
-
-loadRuns();
-    loadReport();
-  } catch (error) {
-    alert('Error deleting event: ' + error.message);
-  }
+  );
 }
 
 // Extract city from location string

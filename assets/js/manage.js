@@ -242,6 +242,8 @@ async function loadRun() {
         const phoneDigits = signup.phone ? signup.phone.replace(/\D/g, '') : '';
         const telLink = phoneDigits ? `tel:${phoneDigits}` : '#';
         const phoneDisplay = signup.phone ? `<a href="${telLink}" class="phone-link">${formattedPhone}</a>` : formattedPhone;
+        const signupId = Number(signup.id);
+        const deleteOnclickArg = Number.isFinite(signupId) ? signupId : 'null';
         
         let contactInfo = '';
         if (signup.email) {
@@ -256,7 +258,7 @@ async function loadRun() {
             <div class="signup-item-main">
               <strong>${signup.name}</strong> - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}
             </div>
-            <button class="button button-secondary button-sm delete-signup-btn" onclick="deleteSignup(${index})" title="Delete Participant" data-track-cta="delete_signup_click">
+            <button class="button button-secondary button-sm delete-signup-btn" onclick="deleteSignup(${deleteOnclickArg})" title="Delete Participant" data-track-cta="delete_signup_click">
               Delete
             </button>
           </div>
@@ -491,53 +493,61 @@ async function cancelEvent() {
   });
 }
 
-async function deleteSignup(signupIndex) {
-  if (!confirm('Are you sure you want to delete this participant? This action cannot be undone.')) {
+async function deleteSignup(signupId) {
+  const numericSignupId = Number(signupId);
+  if (!Number.isFinite(numericSignupId) || numericSignupId < 0) {
+    showErrorModal('Unable to delete participant: missing signup ID. Please refresh the page and try again.');
     return;
   }
 
-  try {
-    const response = await fetch(`/api/runs/${runId}/signups/${signupIndex}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+  showConfirmModal(
+    'Delete Participant',
+    'Are you sure you want to delete this participant? This action cannot be undone.',
+    async () => {
+      try {
+        const response = await fetch(`/api/runs/${runId}/signups/${numericSignupId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-    const contentType = response.headers.get('content-type') || '';
-    
-    if (!response.ok) {
-      let errorMessage = 'Failed to delete participant';
-      
-      if (contentType.includes('application/json')) {
-        try {
-          const data = await response.json();
-          errorMessage = data.error || errorMessage;
-        } catch (parseError) {
-          console.error('Failed to parse error response:', parseError);
-          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        const contentType = response.headers.get('content-type') || '';
+        
+        if (!response.ok) {
+          let errorMessage = 'Failed to delete participant';
+          
+          if (contentType.includes('application/json')) {
+            try {
+              const data = await response.json();
+              errorMessage = data.error || errorMessage;
+            } catch (parseError) {
+              console.error('Failed to parse error response:', parseError);
+              errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            }
+          } else {
+            const text = await response.text();
+            console.error('Non-JSON error response:', text.substring(0, 200));
+            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+          }
+          
+          throw new Error(errorMessage);
         }
-      } else {
-        const text = await response.text();
-        console.error('Non-JSON error response:', text.substring(0, 200));
-        errorMessage = `Server error: ${response.status} ${response.statusText}`;
-      }
-      
-      throw new Error(errorMessage);
-    }
 
-    // Only parse JSON if content type indicates it
-    if (contentType.includes('application/json')) {
-      const data = await response.json();
-      console.log('Signup deleted successfully:', data);
+        // Only parse JSON if content type indicates it
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('Signup deleted successfully:', data);
+        }
+        
+        // Reload the run data to refresh the signups list
+        loadRun();
+      } catch (error) {
+        console.error('Delete signup error:', error);
+        showErrorModal('Error deleting participant: ' + (error?.message || 'Unknown error'));
+      }
     }
-    
-    // Reload the run data to refresh the signups list
-    loadRun();
-  } catch (error) {
-    console.error('Delete signup error:', error);
-    alert('Error deleting participant: ' + error.message);
-  }
+  );
 }
 
 // Store picture data for edit form
