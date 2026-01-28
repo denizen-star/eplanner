@@ -6,7 +6,6 @@
 #   - EMAIL_ENABLED
 #   - SMTP_SERVER
 #   - SMTP_PORT
-#   - SMTP_USERNAME (optional; SMTP auth user if different than From address)
 #   - SENDER_EMAIL
 #   - SENDER_PASSWORD
 #   - EMAIL_DEFAULT_RECIPIENT (optional)
@@ -26,7 +25,6 @@ email:
   enabled: false  # Set to true to enable email delivery for event confirmations
   smtp_server: smtp.zoho.com  # Use smtppro.zoho.com for organization accounts
   smtp_port: 587  # Use 587 for TLS (recommended) or 465 for SSL
-  smtp_username: "your-login@zoho.com"  # Optional: SMTP auth user if different than sender_email (useful for aliases)
   sender_email: "your-email@zoho.com"  # Your email address
   sender_password: "your-app-specific-password"  # App-specific password if 2FA enabled, or regular password if 2FA is not enabled
   recipient_email: "your-email@zoho.com"  # Default fallback recipient (optional)

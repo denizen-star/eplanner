@@ -112,14 +112,6 @@ You should see `coordinator_email` in the column list.
 
 **IMPORTANT**: For production, use Netlify Environment Variables. Never commit email credentials to git!
 
-### Sending from an alias (Zoho “send as”)
-
-If you want emails to appear as **From: `info@to.lgbtq-hub.com`** while still authenticating to Zoho SMTP as **`info@kervinapps.com`**, set:
-
-- `SENDER_EMAIL=info@to.lgbtq-hub.com` (visible From address)
-- `SMTP_USERNAME=info@kervinapps.com` (SMTP login / auth user)
-- Keep using the existing `SENDER_PASSWORD` (the app-specific password for the SMTP login user)
-
 ### Step-by-Step Instructions
 
 1. **Access Netlify Dashboard**
@@ -163,13 +155,6 @@ If you want emails to appear as **From: `info@to.lgbtq-hub.com`** while still au
    #### Variable 4: SENDER_EMAIL
    - **Key**: `SENDER_EMAIL`
    - **Value**: Your email address (e.g., `your-email@zoho.com`)
-   - **Scopes**: Select "All scopes"
-   - Click **"Add variable"**
-
-   #### Variable 4b: SMTP_USERNAME (Optional)
-   - **Key**: `SMTP_USERNAME`
-   - **Value**: Your SMTP login username (often your primary mailbox, e.g., `info@kervinapps.com`)
-   - **When to use**: When `SENDER_EMAIL` is an alias you can “send as”
    - **Scopes**: Select "All scopes"
    - Click **"Add variable"**
 
@@ -230,7 +215,6 @@ If you want emails to appear as **From: `info@to.lgbtq-hub.com`** while still au
 | `SMTP_SERVER` | `smtp.zoho.com` | Yes | Your email provider's SMTP server |
 | `SMTP_PORT` | `587` | Yes | 587 for TLS, 465 for SSL |
 | `SENDER_EMAIL` | `your-email@zoho.com` | Yes | Email address to send from |
-| `SMTP_USERNAME` | `your-login@zoho.com` | No | SMTP auth user (useful if sending From an alias) |
 | `SENDER_PASSWORD` | `abcd efgh ijkl mnop` | Yes | App-specific password (not regular password) |
 | `EMAIL_DEFAULT_RECIPIENT` | `fallback@example.com` | No | Optional fallback recipient |
 
@@ -266,7 +250,6 @@ For local development and testing, you can use a YAML configuration file.
      enabled: true  # Change from false to true
      smtp_server: smtp.zoho.com  # Your SMTP server
      smtp_port: 587  # 587 for TLS, 465 for SSL
-     smtp_username: "your-login@zoho.com"  # Optional: SMTP auth user if different than sender_email (aliases)
      sender_email: "your-email@zoho.com"  # Your email address
      sender_password: "your-app-specific-password"  # App-specific password
      recipient_email: "your-email@zoho.com"  # Optional fallback
