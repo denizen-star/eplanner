@@ -161,12 +161,17 @@
   }
 
   function getPageKey() {
-    const p = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
-    if (!p || p === '/' || p.endsWith('/index.html')) return 'home';
-    if (p.endsWith('/calendar.html')) return 'calendar';
-    if (p.endsWith('/coordinate.html')) return 'coordinate';
-    if (p.endsWith('/whatsapp-community.html')) return 'whatsapp';
-    if (p.endsWith('/signup.html')) return 'signup';
+    if (!window.location || !window.location.pathname) return null;
+    let p = window.location.pathname.toLowerCase();
+    // Strip trailing slashes
+    p = p.replace(/\/+$/, '');
+    if (p === '') p = '/index.html';
+    const last = p.split('/').pop() || '';
+    if (last === 'index' || last === 'index.html') return 'home';
+    if (last === 'calendar' || last === 'calendar.html') return 'calendar';
+    if (last === 'coordinate' || last === 'coordinate.html') return 'coordinate';
+    if (last === 'whatsapp-community' || last === 'whatsapp-community.html') return 'whatsapp';
+    if (last === 'signup' || last === 'signup.html') return 'signup';
     return null;
   }
 
