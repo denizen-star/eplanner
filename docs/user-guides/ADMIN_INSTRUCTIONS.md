@@ -13,7 +13,8 @@ The Admin Dashboard provides you with:
 - Delete events
 - Remove individual signups
 - **Event Report**: View and sort all events with detailed statistics
-- **Attendees Report**: View attendee participation statistics and engagement metrics
+- **Participants Report**: View participant participation statistics and engagement metrics
+- **Tenant Manager**: Manage domain tenants and branding (admin-password protected)
 
 This guide will walk you through each of these features in detail.
 
@@ -27,10 +28,19 @@ This guide will walk you through each of these features in detail.
 **Note**: The Admin Dashboard is organized into collapsible sections that you can expand or collapse as needed:
 - **Admin Dashboard**: Main event management interface
 - **Event Report**: Detailed report of all events with sorting capabilities
-- **Attendees Report**: Statistics about attendee participation
+- **Participants Report**: Statistics about participant participation
+- **Tenant Manager**: Manage domain tenants and branding
 
 [SCREENSHOT: Admin Dashboard showing collapsible sections]
 [SCREENSHOT: Mobile view showing hamburger menu]
+
+## Admin Login (Password)
+
+Admin features are protected by an **admin password** (the same value as `ADMIN_PASSWORD` in your server/Netlify environment).
+
+- When you expand **any** admin section for the first time, a **modal** will prompt you for the admin password.
+- After you log in, the password is remembered for the current browser session.
+- If you enter the wrong password, you’ll be prompted again.
 
 ## Admin Dashboard Section
 
@@ -214,27 +224,27 @@ Click the same header again to reverse the sort order. An arrow indicator (↑ o
 
 [SCREENSHOT: Event Report table with sortable column headers]
 
-## Attendees Report Section
+## Participants Report Section
 
-The Attendees Report provides detailed statistics about attendee participation and engagement.
+The Participants Report provides detailed statistics about participant participation and engagement.
 
-### Accessing the Attendees Report
+### Accessing the Participants Report
 
-1. Click on the **"Attendees Report"** section header to expand it
-2. The report will load and display all attendees with their participation statistics
+1. Click on the **"Participants Report"** section header to expand it
+2. The report will load and display all participants with their participation statistics
 
 [SCREENSHOT: Attendees Report section expanded]
 
-### Attendees Report Features
+### Participants Report Features
 
-The Attendees Report shows:
+The Participants Report shows:
 - **Attendee Name**: The name of the attendee
 - **Email**: The attendee's email address (if provided)
 - **Phone Number**: The attendee's phone number (used as unique identifier)
 - **# of Events**: Total number of events the attendee has signed up for
 - **# of Activity Coordinators**: Number of different activity coordinators the attendee has participated with
 
-### Sorting the Attendees Report
+### Sorting the Participants Report
 
 You can sort the report by clicking on any column header:
 - Click **"Attendee Name"** to sort alphabetically by name
@@ -314,13 +324,22 @@ Events may now include an optional title:
 - **Monitor signups**: Keep an eye on signup patterns to help plan future events
 - **Track capacity**: Use the dashboard to understand which events are popular and adjust accordingly
 
+## Tenant Manager Section
+
+The Tenant Manager is for domain tenants + branding overrides.
+
+1. Expand the **"Tenant Manager"** section
+2. Click **"Log in"** (you’ll be prompted in a modal for the admin password)
+3. Create/edit tenants and branding settings as needed
+4. Click **"Log out"** to clear the stored admin password for this session
+
 ## Troubleshooting
 
 ### I can't see any events in the dashboard
 
 - Click the **"Refresh"** button to reload the data
 - Check your internet connection
-- Verify you're logged in as an administrator
+- Expand an admin section and enter the admin password when prompted
 - Contact technical support if the issue persists
 
 ### The edit form won't save changes

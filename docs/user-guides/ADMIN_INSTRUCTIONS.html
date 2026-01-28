@@ -243,7 +243,8 @@
                 <li>Delete events</li>
                 <li>Remove individual signups</li>
                 <li><strong>Event Report</strong>: View and sort all events with detailed statistics</li>
-                <li><strong>Attendees Report</strong>: View attendee participation statistics and engagement metrics</li>
+                <li><strong>Participants Report</strong>: View participant participation statistics and engagement metrics</li>
+                <li><strong>Tenant Manager</strong>: Manage domain tenants and branding (admin-password protected)</li>
             </ul>
             <p>This guide will walk you through each of these features in detail.</p>
         </div>
@@ -262,7 +263,8 @@
                 <ul style="margin-top: 8px;">
                     <li><strong>Admin Dashboard</strong>: Main event management interface</li>
                     <li><strong>Event Report</strong>: Detailed report of all events with sorting capabilities</li>
-                    <li><strong>Attendees Report</strong>: Statistics about attendee participation</li>
+                    <li><strong>Participants Report</strong>: Statistics about participant participation</li>
+                    <li><strong>Tenant Manager</strong>: Manage domain tenants and branding</li>
                 </ul>
             </div>
             <div class="screenshot-placeholder">
@@ -271,6 +273,16 @@
             <div class="screenshot-placeholder">
                 [SCREENSHOT: Mobile view showing hamburger menu]
             </div>
+        </div>
+
+        <div class="section">
+            <h2>Admin Login (Password)</h2>
+            <p>Admin features are protected by an <strong>admin password</strong> (the same value as <code>ADMIN_PASSWORD</code> in your server/Netlify environment).</p>
+            <ul>
+                <li>When you expand <strong>any</strong> admin section for the first time, a <strong>modal</strong> will prompt you for the admin password.</li>
+                <li>After you log in, the password is remembered for the current browser session.</li>
+                <li>If you enter the wrong password, you’ll be prompted again.</li>
+            </ul>
         </div>
 
         <div class="section">
@@ -507,43 +519,43 @@
                 [SCREENSHOT: Event Report table with sortable column headers]
             </div>
 
-            <h2>Attendees Report Section</h2>
-            <p>The Attendees Report provides detailed statistics about attendee participation and engagement.</p>
+            <h2>Participants Report Section</h2>
+            <p>The Participants Report provides detailed statistics about participant participation and engagement.</p>
 
-            <h3>Accessing the Attendees Report</h3>
+            <h3>Accessing the Participants Report</h3>
             <ol>
-                <li>Click on the <strong>"Attendees Report"</strong> section header to expand it</li>
-                <li>The report will load and display all attendees with their participation statistics</li>
+                <li>Click on the <strong>"Participants Report"</strong> section header to expand it</li>
+                <li>The report will load and display all participants with their participation statistics</li>
             </ol>
             <div class="screenshot-placeholder">
-                [SCREENSHOT: Attendees Report section expanded]
+                [SCREENSHOT: Participants Report section expanded]
             </div>
 
-            <h3>Attendees Report Features</h3>
-            <p>The Attendees Report shows:</p>
+            <h3>Participants Report Features</h3>
+            <p>The Participants Report shows:</p>
             <ul>
-                <li><strong>Attendee Name</strong>: The name of the attendee</li>
-                <li><strong>Email</strong>: The attendee's email address (if provided)</li>
-                <li><strong>Phone Number</strong>: The attendee's phone number (used as unique identifier)</li>
-                <li><strong># of Events</strong>: Total number of events the attendee has signed up for</li>
-                <li><strong># of Activity Coordinators</strong>: Number of different activity coordinators the attendee has participated with</li>
+                <li><strong>Participant Name</strong>: The name of the participant</li>
+                <li><strong>Email</strong>: The participant's email address (if provided)</li>
+                <li><strong>Phone Number</strong>: The participant's phone number (used as unique identifier)</li>
+                <li><strong># of Events</strong>: Total number of events the participant has signed up for</li>
+                <li><strong># of Activity Coordinators</strong>: Number of different activity coordinators the participant has participated with</li>
             </ul>
 
-            <h3>Sorting the Attendees Report</h3>
+            <h3>Sorting the Participants Report</h3>
             <p>You can sort the report by clicking on any column header:</p>
             <ul>
-                <li>Click <strong>"Attendee Name"</strong> to sort alphabetically by name</li>
+                <li>Click <strong>"Participant Name"</strong> to sort alphabetically by name</li>
                 <li>Click <strong>"Email"</strong> to sort by email address</li>
                 <li>Click <strong>"Phone Number"</strong> to sort by phone</li>
-                <li>Click <strong>"# of Events"</strong> to sort by participation (most active attendees first)</li>
+                <li>Click <strong>"# of Events"</strong> to sort by participation (most active participants first)</li>
                 <li>Click <strong>"# of Activity Coordinators"</strong> to sort by diversity of activity coordinators</li>
             </ul>
             <div class="screenshot-placeholder">
-                [SCREENSHOT: Attendees Report table showing attendee statistics]
+                [SCREENSHOT: Participants Report table showing participant statistics]
             </div>
             <div class="highlight-box">
                 <strong>Note</strong>
-                Phone number is used as the unique identifier for tracking attendee participation across multiple events.
+                Phone number is used as the unique identifier for tracking participant participation across multiple events.
             </div>
 
             <h2>Refreshing the Dashboard</h2>
@@ -630,13 +642,24 @@
         </div>
 
         <div class="section">
+            <h2>Tenant Manager Section</h2>
+            <p>The Tenant Manager is for domain tenants + branding overrides.</p>
+            <ol>
+                <li>Expand the <strong>"Tenant Manager"</strong> section</li>
+                <li>Click <strong>"Log in"</strong> (you’ll be prompted in a modal for the admin password)</li>
+                <li>Create/edit tenants and branding settings as needed</li>
+                <li>Click <strong>"Log out"</strong> to clear the stored admin password for this session</li>
+            </ol>
+        </div>
+
+        <div class="section">
             <h2>Troubleshooting</h2>
 
             <h3>I can't see any events in the dashboard</h3>
             <ul>
                 <li>Click the <strong>"Refresh"</strong> button to reload the data</li>
                 <li>Check your internet connection</li>
-                <li>Verify you're logged in as an administrator</li>
+                <li>Expand an admin section and enter the admin password when prompted</li>
                 <li>Contact technical support if the issue persists</li>
             </ul>
 
