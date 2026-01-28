@@ -19,13 +19,20 @@ let adminSortColumn = 'createdAt';
 let adminSortDirection = 'desc'; // Default: newest first
 
 // Toggle collapsible sections
-function toggleSection(sectionId) {
+async function toggleSection(sectionId) {
   const content = document.getElementById(`${sectionId}Content`);
   const icon = document.getElementById(`${sectionId}Icon`);
   
   if (!content || !icon) return;
   
   const isHidden = content.style.display === 'none' || !content.style.display;
+
+  // Require admin login before opening any admin section.
+  if (isHidden && window.AdminAuth && typeof window.AdminAuth.ensureAdmin === 'function') {
+    const pw = await window.AdminAuth.ensureAdmin({ reason: 'access admin features' });
+    if (!pw) return;
+  }
+
   content.style.display = isHidden ? 'block' : 'none';
   
   if (isHidden) {
@@ -410,8 +417,6 @@ function toggleDetails(runId) {
   icon.textContent = isHidden ? '▲' : '▼';
 }
 
-loadRuns();
-
 async function loadRuns() {
   const loading = document.getElementById('loading');
   const runsList = document.getElementById('runsList');
@@ -420,7 +425,9 @@ async function loadRuns() {
   runsList.style.display = 'none';
 
   try {
-    const response = await fetch('/api/runs');
+    const response = (window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+      ? await window.AdminAuth.adminFetch('/api/runs', {}, { reason: 'view events' })
+      : await fetch('/api/runs');
     const data = await response.json();
     currentRuns = data.runs || [];
 
@@ -780,11 +787,14 @@ async function saveRunEdit(event, runId) {
       }
     }
 
-    const response = await fetch(`/api/runs/${runId}`, {
+    const request = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
-    });
+    };
+    const response = (window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+      ? await window.AdminAuth.adminFetch(`/api/runs/${runId}`, request, { reason: 'edit events' })
+      : await fetch(`/api/runs/${runId}`, request);
 
     const data = await response.json();
 
@@ -886,105 +896,11 @@ async function cancelEvent(runId) {
     return;
   }
 
-  // Set up success callback to reload runs list
-  window.onCancellationSuccess = function() {
-    
-// Sort admin dashboard runs
-function sortAdminRuns(column) {
-  // Toggle direction if clicking same column
-  if (adminSortColumn === column) {
-    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    adminSortColumn = column;
-    adminSortDirection = 'asc';
-  }
-  
-  // Sort the runs
-  const sorted = [...currentRuns].sort((a, b) => {
-    let aVal, bVal;
-    
-    if (column === 'eventName') {
-      aVal = (a.title || '').toLowerCase();
-      bVal = (b.title || '').toLowerCase();
-    } else if (column === 'createdBy') {
-      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
-      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
-    } else if (column === 'createdAt') {
-      aVal = new Date(a.createdAt || 0).getTime();
-      bVal = new Date(b.createdAt || 0).getTime();
-    } else {
-      return 0;
-    }
-    
-    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
-    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
-  
-  currentRuns = sorted;
-  renderAdminTable();
-  
-  // Update sort icons
-  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
-  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
-  if (activeIcon) {
-    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
-  }
-}
-
-loadRuns();
-    loadReport();
-  };
-
   // Initialize cancellation flow with modal (admin mode)
   initCancellationFlow(runId, run.coordinatorEmail, {
     isAdmin: true,
     onSuccess: () => {
-      
-// Sort admin dashboard runs
-function sortAdminRuns(column) {
-  // Toggle direction if clicking same column
-  if (adminSortColumn === column) {
-    adminSortDirection = adminSortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    adminSortColumn = column;
-    adminSortDirection = 'asc';
-  }
-  
-  // Sort the runs
-  const sorted = [...currentRuns].sort((a, b) => {
-    let aVal, bVal;
-    
-    if (column === 'eventName') {
-      aVal = (a.title || '').toLowerCase();
-      bVal = (b.title || '').toLowerCase();
-    } else if (column === 'createdBy') {
-      aVal = (a.plannerName || a.pacerName || '').toLowerCase();
-      bVal = (b.plannerName || b.pacerName || '').toLowerCase();
-    } else if (column === 'createdAt') {
-      aVal = new Date(a.createdAt || 0).getTime();
-      bVal = new Date(b.createdAt || 0).getTime();
-    } else {
-      return 0;
-    }
-    
-    if (aVal < bVal) return adminSortDirection === 'asc' ? -1 : 1;
-    if (aVal > bVal) return adminSortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
-  
-  currentRuns = sorted;
-  renderAdminTable();
-  
-  // Update sort icons
-  document.querySelectorAll('.admin-sort-icon').forEach(icon => icon.textContent = '');
-  const activeIcon = document.getElementById(`adminSortIcon-${column}`);
-  if (activeIcon) {
-    activeIcon.textContent = adminSortDirection === 'asc' ? ' ▲' : ' ▼';
-  }
-}
-
-loadRuns();
+      loadRuns();
       loadReport();
     }
   });
@@ -996,7 +912,9 @@ async function deleteRun(runId) {
     'Are you sure you want to delete this event? This action cannot be undone.',
     async () => {
       try {
-        const response = await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
+        const response = (window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+          ? await window.AdminAuth.adminFetch(`/api/runs/${runId}`, { method: 'DELETE' }, { reason: 'delete events' })
+          : await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
         const contentType = response.headers.get('content-type') || '';
 
         if (!response.ok) {
@@ -1124,7 +1042,9 @@ async function loadReport() {
   reportTableContainer.style.display = 'none';
 
   try {
-    const response = await fetch('/api/runs');
+    const response = (window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+      ? await window.AdminAuth.adminFetch('/api/runs', {}, { reason: 'view reports' })
+      : await fetch('/api/runs');
     const data = await response.json();
     reportRuns = data.runs || [];
     
@@ -1255,7 +1175,9 @@ async function loadRunnersReport() {
   runnersReportTableContainer.style.display = 'none';
 
   try {
-    const response = await fetch('/api/runs');
+    const response = (window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+      ? await window.AdminAuth.adminFetch('/api/runs', {}, { reason: 'view participant report' })
+      : await fetch('/api/runs');
     const data = await response.json();
     const allRuns = data.runs || [];
     

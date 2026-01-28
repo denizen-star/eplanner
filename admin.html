@@ -149,8 +149,7 @@
                 </button>
                 <div class="collapsible-content" id="tenantManagerContent" style="display: none;">
                     <div id="tenantManagerLogin" style="padding-top: 20px; display: none;">
-                        <p style="margin-bottom: 12px; color: var(--text-gray);">Enter admin password to manage tenants.</p>
-                        <input type="password" id="tenantAdminPassword" placeholder="Admin password" style="padding: 8px 12px; margin-right: 8px; width: 200px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                        <p style="margin-bottom: 12px; color: var(--text-gray);">Admin login required to manage tenants.</p>
                         <button type="button" class="button button-primary" onclick="tenantAdminLogin()">Log in</button>
                         <p id="tenantLoginError" style="margin-top: 8px; color: #dc2626; display: none;"></p>
                     </div>
@@ -428,6 +427,7 @@
     <script src="assets/js/device-collector.js"></script>
     <script src="assets/js/analytics.js"></script>
     <script src="assets/js/modal-utils.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
     <script src="assets/js/cancellation-utils.js"></script>
     <script src="assets/js/admin.js"></script>
     <script src="assets/js/tenant-admin.js"></script>

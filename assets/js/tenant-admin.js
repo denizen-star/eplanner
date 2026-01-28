@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'tenant_admin_pw';
   const API = '/api';
   const DATA_URL_MAX_BYTES_FAVICON = 300 * 1024; // 300KB
   const DATA_URL_MAX_BYTES_HERO = 2 * 1024 * 1024; // 2MB
@@ -147,23 +146,24 @@
   }
 
   function getPassword() {
-    try {
-      return sessionStorage.getItem(STORAGE_KEY) || '';
-    } catch (e) {
-      return '';
+    if (window.AdminAuth && typeof window.AdminAuth.getPassword === 'function') {
+      return window.AdminAuth.getPassword() || '';
     }
+    try { return sessionStorage.getItem('tenant_admin_pw') || ''; } catch (e) { return ''; }
   }
 
   function setPassword(pw) {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, pw);
-    } catch (e) {}
+    if (window.AdminAuth && typeof window.AdminAuth.setPassword === 'function') {
+      return window.AdminAuth.setPassword(pw);
+    }
+    try { sessionStorage.setItem('tenant_admin_pw', pw); } catch (e) {}
   }
 
   function clearPassword() {
-    try {
-      sessionStorage.removeItem(STORAGE_KEY);
-    } catch (e) {}
+    if (window.AdminAuth && typeof window.AdminAuth.clearPassword === 'function') {
+      return window.AdminAuth.clearPassword();
+    }
+    try { sessionStorage.removeItem('tenant_admin_pw'); } catch (e) {}
   }
 
   function adminHeaders() {
@@ -195,24 +195,20 @@
   }
 
   window.tenantAdminLogin = function () {
-    const input = document.getElementById('tenantAdminPassword');
-    const pw = (input && input.value) ? input.value.trim() : '';
-    if (!pw) {
-      showLoginError('Enter password');
+    showLoginError('');
+    if (window.AdminAuth && typeof window.AdminAuth.openLoginModal === 'function') {
+      window.AdminAuth.openLoginModal({ reason: 'manage tenants' })
+        .then(function (pw) {
+          if (!pw) return;
+          showMain();
+          loadTenantList();
+        })
+        .catch(function () {
+          showLoginError('Login failed');
+        });
       return;
     }
-    showLoginError('');
-    fetch(API + '/admin/tenants', { headers: { 'X-Admin-Password': pw } })
-      .then(function (r) {
-        if (!r.ok) throw new Error('Invalid password');
-        setPassword(pw);
-        if (input) input.value = '';
-        showMain();
-        loadTenantList();
-      })
-      .catch(function () {
-        showLoginError('Invalid password');
-      });
+    showLoginError('Admin login modal unavailable.');
   };
 
   window.tenantAdminLogout = function () {
@@ -476,8 +472,11 @@
     if (getPassword()) {
       showMain();
       loadTenantList();
+    } else if (window.AdminAuth && typeof window.AdminAuth.openLoginModal === 'function') {
+      showLogin();
     } else {
       showLogin();
+      showLoginError('Admin login unavailable.');
     }
     tenantCancelEdit();
     var product = document.getElementById('tenantProduct');

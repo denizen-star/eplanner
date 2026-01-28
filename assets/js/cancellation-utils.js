@@ -146,14 +146,19 @@ window.confirmCancellation = async function(runId, isAdmin, confirmId) {
     : `/api/runs/${runId}/cancel`;
   
   try {
-    const response = await fetch(url, {
+    const request = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         coordinatorEmail: originalEmail,
         cancellationMessage: cancellationMessage
       })
-    });
+    };
+
+    // When cancelling as admin from the admin page, include the admin password header.
+    const response = (isAdmin && window.AdminAuth && typeof window.AdminAuth.adminFetch === 'function')
+      ? await window.AdminAuth.adminFetch(url, request, { reason: 'cancel events' })
+      : await fetch(url, request);
 
     const data = await response.json();
 
