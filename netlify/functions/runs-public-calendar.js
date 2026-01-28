@@ -1,5 +1,5 @@
 const { runs } = require('../../lib/databaseClient');
-const { jsonResponse, getAppName } = require('./utils');
+const { jsonResponse, getTenant } = require('./utils');
 
 // Helper function to get start and end of week for a given date
 function getWeekRange(date = new Date()) {
@@ -58,18 +58,17 @@ exports.handler = async (event) => {
       });
     }
 
-    // Detect app name from domain (for domain-specific event filtering)
-    const appName = getAppName(event);
-    console.log('[RUNS PUBLIC CALENDAR] Detected app name:', appName);
-    
+    const { tenantKey, appName } = getTenant(event);
+    console.log('[RUNS PUBLIC CALENDAR] Detected tenant:', tenantKey, 'appName:', appName);
+
     console.log('[RUNS PUBLIC CALENDAR] Fetching public events:', {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      appName: appName
+      tenantKey,
+      appName
     });
 
-    // Fetch public events for the date range, filtered by app_name
-    const events = await runs.getPublicEvents(startDate.toISOString(), endDate.toISOString(), appName);
+    const events = await runs.getPublicEvents(startDate.toISOString(), endDate.toISOString(), appName, tenantKey);
 
     console.log('[RUNS PUBLIC CALENDAR] Success! Returning', events.length, 'events');
 

@@ -21,6 +21,7 @@ CREATE TABLE ep_events (
   status VARCHAR(20) DEFAULT 'active',
   is_public BOOLEAN DEFAULT TRUE,
   app_name VARCHAR(50) DEFAULT 'eplanner',
+  tenant_key VARCHAR(100) NULL,
   coordinator_email VARCHAR(255) NULL,
   -- Address component fields from Nominatim geocoding
   house_number VARCHAR(50),
@@ -52,6 +53,8 @@ CREATE TABLE ep_events (
   INDEX idx_postcode (postcode),
   INDEX idx_is_public_date_time (is_public, date_time),
   INDEX idx_app_name (app_name),
+  INDEX idx_tenant_key (tenant_key),
+  INDEX idx_tenant_key_date_time (tenant_key, date_time),
   INDEX idx_external_signup_enabled (external_signup_enabled),
   INDEX idx_event_website (event_website(255)),
   INDEX idx_event_instagram (event_instagram(255))
@@ -96,6 +99,21 @@ CREATE TABLE ep_waivers (
   -- FOREIGN KEY (run_id) REFERENCES ep_events(id) ON DELETE CASCADE,
   -- FOREIGN KEY (signup_id) REFERENCES ep_signups(id) ON DELETE CASCADE
   -- Removed: PlanetScale may have restrictions on foreign keys
+);
+
+-- Tenants table: per-subdomain branding and optional sender email override (migration-add-tenant-key.sql)
+CREATE TABLE ep_tenants (
+  tenant_key VARCHAR(100) PRIMARY KEY,
+  product VARCHAR(50) NOT NULL,
+  subdomain VARCHAR(100) NOT NULL,
+  display_name VARCHAR(255) NULL,
+  config_json JSON NULL,
+  sender_email VARCHAR(255) NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_product (product),
+  INDEX idx_is_active (is_active)
 );
 
 

@@ -49,6 +49,8 @@ function toggleSection(sectionId) {
       loadReport();
     } else if (sectionId === 'runnersReport' && runnersReportData.length === 0) {
       loadRunnersReport();
+    } else if (sectionId === 'tenantManager') {
+      if (typeof initTenantManager === 'function') initTenantManager();
     }
   }
 }

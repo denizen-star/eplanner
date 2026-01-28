@@ -83,6 +83,24 @@
   force = true
 
 [[redirects]]
+  from = "/api/tenant-config"
+  to = "/.netlify/functions/tenant-config"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/admin/tenants"
+  to = "/.netlify/functions/admin-tenants"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/admin/tenants/*"
+  to = "/.netlify/functions/admin-tenants-by-key"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/test-sheets-read"
   to = "/.netlify/functions/test-sheets-read"
   status = 200

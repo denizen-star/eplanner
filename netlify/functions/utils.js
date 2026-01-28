@@ -1,12 +1,13 @@
 const { submitToGoogleSheets } = require('../../lib/googleSheetsClient');
+const { getTenantFromHost } = require('../../lib/tenant');
 
 const SKIP_SHEETS = process.env.SKIP_SHEETS === '1';
 
-function allowCors(headers = {}) {
+function allowCors(headers = {}, methods = 'GET, POST, OPTIONS') {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Password',
+    'Access-Control-Allow-Methods': methods,
     ...headers,
   };
 }
@@ -67,21 +68,19 @@ async function forwardToSheets(payload) {
 
 function getAppName(event) {
   const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
-  const hostLower = host.toLowerCase();
-  const hostnameOnly = hostLower.split(':')[0];
-  
-  // Check for to-lgbtq domain first (more specific)
-  if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
-    return 'to-lgbtq';
-  }
-  
-  // Check for eplanner domain
-  if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
-    return 'eplanner';
-  }
-  
-  // Fallback to environment variable or default
-  return process.env.APP_NAME || 'eplanner';
+  return getTenantFromHost(host).appName;
+}
+
+function getTenant(event) {
+  const host = event?.headers?.['host'] || event?.headers?.['Host'] || '';
+  return getTenantFromHost(host);
+}
+
+function requireAdmin(event) {
+  const h = event?.headers || {};
+  const pw = h['x-admin-password'] || h['X-Admin-Password'] || '';
+  const expected = process.env.ADMIN_PASSWORD;
+  return !!(expected && pw === expected);
 }
 
 module.exports = {
@@ -90,5 +89,7 @@ module.exports = {
   extractClientMetadata,
   forwardToSheets,
   getAppName,
+  getTenant,
+  requireAdmin,
 };
 

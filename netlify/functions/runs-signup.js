@@ -1,4 +1,4 @@
-const { runs, signups, waivers } = require('../../lib/databaseClient');
+const { runs, signups, waivers, tenants } = require('../../lib/databaseClient');
 const EmailService = require('../../lib/emailService');
 const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
 
@@ -186,18 +186,20 @@ exports.handler = async (event) => {
       // Only log boolean value, never log sensitive information
       console.log('[RUNS SIGNUP] Email service enabled:', !!emailEnabled);
       if (emailEnabled) {
-        // Generate event view link
         const host = event.headers?.host || event.headers?.Host || 'eplanner.kervinapps.com';
         const protocol = event.headers?.['x-forwarded-proto'] || 'https';
         const baseUrl = `${protocol}://${host}`;
         const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
-        
-        // Send confirmation to attendee if they provided an email
-        console.log('[RUNS SIGNUP] Checking email for attendee:', { 
-          hasEmail: !!createdSignup.email, 
-          emailValue: createdSignup.email,
-          emailType: typeof createdSignup.email 
-        });
+        let fromEmail = null;
+        try {
+          const tk = run.tenantKey || null;
+          if (tk) {
+            const tn = await tenants.getByKey(tk);
+            if (tn && tn.senderEmail) fromEmail = tn.senderEmail;
+          }
+        } catch (e) { /* ignore */ }
+        const fromOpt = fromEmail ? { fromEmail } : {};
+
         if (createdSignup.email && createdSignup.email.trim()) {
           try {
             const attendeeEmail = createdSignup.email.trim();
@@ -209,6 +211,7 @@ exports.handler = async (event) => {
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
               fromName: attendeeEmailContent.fromName,
+              ...fromOpt,
             });
             if (emailResult) {
               console.log('[RUNS SIGNUP] Confirmation email sent successfully to attendee:', attendeeEmail);
@@ -217,13 +220,11 @@ exports.handler = async (event) => {
             }
           } catch (attendeeEmailError) {
             console.error('[RUNS SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
-            console.error('[RUNS SIGNUP] Error stack:', attendeeEmailError.stack);
           }
         } else {
           console.log('[RUNS SIGNUP] No email provided by attendee, skipping confirmation email');
         }
 
-        // Send notification to coordinator if coordinator email exists
         if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
           try {
             const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
@@ -233,6 +234,7 @@ exports.handler = async (event) => {
               html: coordinatorEmailContent.html,
               text: coordinatorEmailContent.text,
               fromName: coordinatorEmailContent.fromName,
+              ...fromOpt,
             });
             console.log('[RUNS SIGNUP] Notification email sent to coordinator');
           } catch (coordinatorEmailError) {

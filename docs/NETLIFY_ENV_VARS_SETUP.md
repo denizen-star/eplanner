@@ -122,6 +122,16 @@ After adding variables, verify they're set correctly:
    - `DATABASE_URL` (if using Option A), OR
    - `PLANETSCALE_HOST`, `PLANETSCALE_USERNAME`, `PLANETSCALE_PASSWORD`, `PLANETSCALE_DATABASE` (if using Option B)
 
+### Optional: ADMIN_PASSWORD (Tenant Manager UI)
+
+To use the Tenant Manager UI (Admin page) for creating and editing subdomain tenants:
+
+1. Add **Key**: `ADMIN_PASSWORD`
+2. **Value**: A shared secret (e.g. a strong password). The UI sends it as `X-Admin-Password` when calling `/api/admin/tenants`.
+3. **Scopes**: Production (and Deploy previews/Branch deploys if you use them).
+
+If unset, admin tenant CRUD endpoints return 401 Unauthorized.
+
 ## Step 5: Trigger a New Deployment
 
 **Important**: Environment variables are only available after a new deployment. You must trigger a deployment for the variables to take effect.

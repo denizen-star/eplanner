@@ -6,7 +6,8 @@ if (process.env.NETLIFY !== 'true') {
 
 const express = require('express');
 const cors = require('cors');
-const { runs, signups, waivers } = require('./lib/databaseClient');
+const { runs, signups, waivers, tenants } = require('./lib/databaseClient');
+const { getTenantFromHost, getProductDefaults, mergeConfig } = require('./lib/tenant');
 const EmailService = require('./lib/emailService');
 const { 
   eventCreatedEmail,
@@ -208,17 +209,9 @@ app.post('/api/runs/create', async (req, res) => {
     const links = generateEventLinks(baseUrl, shortId);
     const { signupLink, manageLink, eventViewLink } = links;
 
-    // Detect app name from domain (for domain-specific event filtering)
     const host = req.get('host') || '';
-    const hostLower = host.toLowerCase();
-    const hostnameOnly = hostLower.split(':')[0];
-    let appName = 'eplanner'; // Default
-    if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
-      appName = 'to-lgbtq';
-    } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
-      appName = 'eplanner';
-    }
-    console.log('[RUN CREATE] Detected app name:', appName);
+    const { tenantKey, appName } = getTenantFromHost(host);
+    console.log('[RUN CREATE] Detected tenant:', tenantKey, 'appName:', appName);
 
     // Save to PlanetScale database
     console.log('[RUN CREATE] Saving to PlanetScale database...');
@@ -237,7 +230,8 @@ app.post('/api/runs/create', async (req, res) => {
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
         isPublic: isPublic !== undefined ? isPublic : true, // Default to true
-        appName: appName, // Store app name for domain filtering
+        appName,
+        tenantKey,
         createdAt: createdAt,
         placeName: placeName ? placeName.trim() : null,
         picture: picture || null,
@@ -342,6 +336,7 @@ app.post('/api/runs/create', async (req, res) => {
           throw templateError;
         }
         
+        const fromEmail = await getTenantSenderEmail(tenantKey);
         console.log('[RUN CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
         const emailResult = await emailService.sendEmail({
           to: trimmedCoordinatorEmail,
@@ -349,6 +344,7 @@ app.post('/api/runs/create', async (req, res) => {
           html: emailContent.html,
           text: emailContent.text,
           fromName: emailContent.fromName,
+          fromEmail: fromEmail || undefined,
         });
         
         emailStatus.sent = emailResult;
@@ -473,26 +469,18 @@ app.get('/api/runs/public-calendar', async (req, res) => {
       });
     }
 
-    // Detect app name from domain (for domain-specific event filtering)
     const host = req.get('host') || '';
-    const hostLower = host.toLowerCase();
-    const hostnameOnly = hostLower.split(':')[0];
-    let appName = 'eplanner'; // Default
-    if (hostLower.includes('to-lgbtq') || hostnameOnly === 'to.lgbtq-hub.com' || hostnameOnly === 'www.to.lgbtq-hub.com') {
-      appName = 'to-lgbtq';
-    } else if (hostLower.includes('eplanner') || hostLower.includes('eventplan')) {
-      appName = 'eplanner';
-    }
-    console.log('[GET PUBLIC CALENDAR] Detected app name:', appName);
-    
+    const { tenantKey, appName } = getTenantFromHost(host);
+    console.log('[GET PUBLIC CALENDAR] Detected tenant:', tenantKey, 'appName:', appName);
+
     console.log('[GET PUBLIC CALENDAR] Fetching public events:', {
       startDate: startDateObj.toISOString(),
       endDate: endDateObj.toISOString(),
-      appName: appName
+      tenantKey,
+      appName
     });
 
-    // Fetch public events for the date range, filtered by app_name
-    const events = await runs.getPublicEvents(startDateObj.toISOString(), endDateObj.toISOString(), appName);
+    const events = await runs.getPublicEvents(startDateObj.toISOString(), endDateObj.toISOString(), appName, tenantKey);
 
     console.log('[GET PUBLIC CALENDAR] Success! Returning', events.length, 'events');
 
@@ -624,11 +612,11 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
     try {
       const emailService = new EmailService();
       if (emailService.isEnabled()) {
-        // Generate event view link
         const baseUrl = req.protocol + '://' + req.get('host');
         const eventViewLink = `${baseUrl}/event.html?id=${runId}`;
-        
-        // Send confirmation to attendee if they provided an email
+        const fromEmail = await getTenantSenderEmail(run.tenantKey || null);
+        const fromOpt = fromEmail ? { fromEmail } : {};
+
         if (createdSignup.email && createdSignup.email.trim()) {
           try {
             const attendeeEmailContent = await signupConfirmationEmail(run, createdSignup, eventViewLink);
@@ -638,6 +626,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
               fromName: attendeeEmailContent.fromName,
+              ...fromOpt,
             });
             console.log('[SIGNUP] Confirmation email sent to attendee');
           } catch (attendeeEmailError) {
@@ -645,7 +634,6 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
           }
         }
 
-        // Send notification to coordinator if coordinator email exists
         if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
           try {
             const coordinatorEmailContent = signupNotificationEmail(run, createdSignup, run.coordinatorEmail);
@@ -655,6 +643,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
               html: coordinatorEmailContent.html,
               text: coordinatorEmailContent.text,
               fromName: coordinatorEmailContent.fromName,
+              ...fromOpt,
             });
             console.log('[SIGNUP] Notification email sent to coordinator');
           } catch (coordinatorEmailError) {
@@ -957,7 +946,9 @@ app.put('/api/runs/:runId', async (req, res) => {
         // Only log boolean value, never log sensitive information
         console.log('[RUN UPDATE] Email service enabled:', !!emailService.isEnabled());
         if (emailService.isEnabled()) {
-          // Send email to coordinator
+          const fromEmail = await getTenantSenderEmail(updatedRun.tenantKey || null);
+          const fromOpt = fromEmail ? { fromEmail } : {};
+
           if (updatedRun.coordinatorEmail && updatedRun.coordinatorEmail.trim()) {
             try {
               const coordinatorEmailContent = eventUpdatedEmail(updatedRun, changes, updatedRun.coordinatorEmail);
@@ -967,6 +958,7 @@ app.put('/api/runs/:runId', async (req, res) => {
                 html: coordinatorEmailContent.html,
                 text: coordinatorEmailContent.text,
                 fromName: coordinatorEmailContent.fromName,
+                ...fromOpt,
               });
               console.log('[RUN UPDATE] Update email sent to coordinator');
             } catch (coordinatorEmailError) {
@@ -974,7 +966,6 @@ app.put('/api/runs/:runId', async (req, res) => {
             }
           }
 
-          // Send email to all signups with email addresses
           try {
             const allSignups = await signups.getByRunId(runId);
             console.log('[RUN UPDATE] Total signups:', allSignups.length);
@@ -992,6 +983,7 @@ app.put('/api/runs/:runId', async (req, res) => {
                     html: signupEmailContent.html,
                     text: signupEmailContent.text,
                     fromName: signupEmailContent.fromName,
+                    ...fromOpt,
                   });
                 } catch (signupEmailError) {
                   console.error(`[RUN UPDATE] Error sending email to signup ${signup.id}:`, signupEmailError.message);
@@ -1168,7 +1160,9 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
           }
           console.log(`[CANCEL] BCC recipients: ${bccRecipients.join(', ')}`);
 
-          // Step 4: Send emails to each signup
+          const cancelFromEmail = await getTenantSenderEmail(cancelledRun.tenantKey || null);
+          const cancelFromOpt = cancelFromEmail ? { fromEmail: cancelFromEmail } : {};
+
           console.log('[CANCEL] Step 4: Sending cancellation emails to participants...');
           let successCount = 0;
           let failureCount = 0;
@@ -1189,6 +1183,7 @@ app.patch('/api/runs/:runId/cancel', async (req, res) => {
                 html: cancellationEmailContent.html,
                 text: cancellationEmailContent.text,
                 fromName: cancellationEmailContent.fromName,
+                ...cancelFromOpt,
               });
               
               successCount++;
@@ -1263,7 +1258,118 @@ app.delete('/api/runs/:runId', async (req, res) => {
   }
 });
 
-// Health check endpoint
+function requireAdmin(req) {
+  const pw = req.get('X-Admin-Password') || req.get('x-admin-password') || '';
+  const expected = process.env.ADMIN_PASSWORD;
+  return !!(expected && pw === expected);
+}
+
+async function getTenantSenderEmail(tenantKey) {
+  if (!tenantKey) return null;
+  try {
+    const t = await tenants.getByKey(tenantKey);
+    return (t && t.senderEmail) ? t.senderEmail : null;
+  } catch (e) { return null; }
+}
+
+app.get('/api/tenant-config', async (req, res) => {
+  try {
+    const host = req.get('host') || '';
+    const { product, subdomain, tenantKey } = getTenantFromHost(host);
+    const defaults = getProductDefaults(product);
+    let overrides = null;
+    let senderEmail = null;
+    try {
+      const row = await tenants.getByKey(tenantKey);
+      if (row) {
+        overrides = row.configJson || null;
+        senderEmail = row.senderEmail || null;
+      }
+    } catch (e) {
+      console.warn('[TENANT-CONFIG] tenants.getByKey failed:', e.message);
+    }
+    const config = mergeConfig(defaults, overrides);
+    res.json({ tenantKey, product, subdomain, ...config, senderEmail: senderEmail || null });
+  } catch (err) {
+    console.error('[TENANT-CONFIG] Error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  }
+});
+
+app.get('/api/admin/tenants', async (req, res) => {
+  if (!requireAdmin(req)) return res.status(401).json({ error: 'Unauthorized', message: 'Admin password required' });
+  try {
+    const list = await tenants.getAll();
+    res.json({ tenants: list });
+  } catch (err) {
+    console.error('[ADMIN-TENANTS] GET error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  }
+});
+
+app.post('/api/admin/tenants', async (req, res) => {
+  if (!requireAdmin(req)) return res.status(401).json({ error: 'Unauthorized', message: 'Admin password required' });
+  try {
+    const { product, subdomain, displayName, configJson, senderEmail } = req.body || {};
+    if (!product || !subdomain || typeof subdomain !== 'string') {
+      return res.status(400).json({ error: 'Bad request', message: 'product and subdomain are required' });
+    }
+    const sk = String(subdomain).trim().toLowerCase();
+    const pk = String(product).trim().toLowerCase();
+    if (!/^[a-z0-9-]+$/.test(pk) || !/^[a-z0-9_-]+$/.test(sk)) {
+      return res.status(400).json({ error: 'Bad request', message: 'product and subdomain must be alphanumeric (with - _)' });
+    }
+    const tenantKey = `${pk}:${sk}`;
+    const created = await tenants.create({
+      tenantKey,
+      product: pk,
+      subdomain: sk,
+      displayName: displayName ? String(displayName).trim() : null,
+      configJson: configJson || null,
+      senderEmail: senderEmail ? String(senderEmail).trim() : null,
+    });
+    res.status(201).json(created);
+  } catch (err) {
+    console.error('[ADMIN-TENANTS] POST error:', err);
+    if (err.message && err.message.includes('Duplicate')) {
+      return res.status(409).json({ error: 'Conflict', message: 'Tenant already exists' });
+    }
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  }
+});
+
+app.put('/api/admin/tenants/:tenantKey', async (req, res) => {
+  if (!requireAdmin(req)) return res.status(401).json({ error: 'Unauthorized', message: 'Admin password required' });
+  try {
+    const tenantKey = decodeURIComponent(req.params.tenantKey);
+    const { product, subdomain, displayName, configJson, senderEmail, isActive } = req.body || {};
+    const updates = {};
+    if (product !== undefined) updates.product = String(product).trim().toLowerCase();
+    if (subdomain !== undefined) updates.subdomain = String(subdomain).trim().toLowerCase();
+    if (displayName !== undefined) updates.displayName = displayName ? String(displayName).trim() : null;
+    if (configJson !== undefined) updates.configJson = configJson;
+    if (senderEmail !== undefined) updates.senderEmail = senderEmail ? String(senderEmail).trim() : null;
+    if (isActive !== undefined) updates.isActive = !!isActive;
+    const updated = await tenants.update(tenantKey, updates);
+    res.json(updated);
+  } catch (err) {
+    console.error('[ADMIN-TENANTS] PUT error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  }
+});
+
+app.delete('/api/admin/tenants/:tenantKey', async (req, res) => {
+  if (!requireAdmin(req)) return res.status(401).json({ error: 'Unauthorized', message: 'Admin password required' });
+  try {
+    const tenantKey = decodeURIComponent(req.params.tenantKey);
+    await tenants.delete(tenantKey);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[ADMIN-TENANTS] DELETE error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   console.log('[HEALTH CHECK] Request received');
   res.json({ 

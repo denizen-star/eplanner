@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a New Domain Tenant - Event Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --bg-hover: #f9fafb;
+            --bg-active: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e7eb;
+            --border-light: #f3f4f6;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-blue-light: #eff6ff;
+            --accent-gray: #6b7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+        .header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            padding: 24px;
+            margin-bottom: 32px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        h1 { font-size: 24px; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
+        .intro { color: var(--text-secondary); font-size: 16px; line-height: 1.8; }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        h2 { font-size: 20px; margin-bottom: 16px; color: var(--text-primary); font-weight: 600; }
+        h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
+        h4 { font-size: 16px; margin-top: 16px; margin-bottom: 8px; color: var(--text-primary); font-weight: 600; }
+        p { color: var(--text-secondary); margin-bottom: 16px; line-height: 1.8; }
+        ul, ol { margin-left: 24px; margin-bottom: 16px; color: var(--text-secondary); }
+        li { margin-bottom: 8px; line-height: 1.8; }
+
+        .highlight-box {
+            background: var(--accent-blue-light);
+            border-left: 4px solid var(--accent-blue);
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .highlight-box strong { color: var(--accent-blue); display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
+        .warning-box {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 4px solid #dc2626;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .warning-box strong { color: #dc2626; display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
+        .tip-box {
+            background: var(--bg-active);
+            border-left: 4px solid var(--accent-gray);
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .tip-box strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 16px 0;
+        }
+        strong { color: var(--text-primary); font-weight: 600; }
+        a { color: var(--accent-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .container { padding: 24px 16px; }
+            h1 { font-size: 28px; }
+            .section { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Create a New Domain Tenant</h1>
+            <p class="intro">This guide explains how to create and manage subdomain tenants (e.g. <code>mia.lgbtq-hub.com</code>, <code>mywedding.eplanner.kervinapps.com</code>) using the Tenant Manager. Each tenant has its own branding (favicon, logo, titles, hero CTAs), optional sender email for updates, and isolated events and signups.</p>
+        </div>
+
+        <div class="section">
+            <h2>Prerequisites</h2>
+            <p>Before using the Tenant Manager:</p>
+            <ul>
+                <li>The <strong>tenant migration</strong> has been run on your PlanetScale database (<code>lib/migration-add-tenant-key.sql</code>).</li>
+                <li><strong>ADMIN_PASSWORD</strong> is set in your Netlify (and local) environment variables. This is the password you will enter to log in to the Tenant Manager.</li>
+            </ul>
+            <p>See <a href="../TENANT_MANAGER_SETUP.md"><strong>TENANT_MANAGER_SETUP.md</strong></a> in the <code>docs/</code> folder for full setup instructions (migration, env vars, DNS, Netlify).</p>
+        </div>
+
+        <div class="section">
+            <h2>Accessing the Tenant Manager</h2>
+            <ol>
+                <li>Go to the <strong>Admin</strong> page (Admin in the main navigation).</li>
+                <li>Expand the <strong>Tenant Manager</strong> collapsible section.</li>
+                <li>If you see a login form, enter the <strong>Admin password</strong> (same as <code>ADMIN_PASSWORD</code>) and click <strong>Log in</strong>.</li>
+                <li>Once logged in, you will see the tenant list and the form to add or edit tenants.</li>
+            </ol>
+            <div class="tip-box">
+                <strong>Note</strong>
+                The Tenant Manager is protected by the admin password. Store it securely and share it only with trusted administrators.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Creating a New Tenant</h2>
+            <p>Use the <strong>Add or edit tenant</strong> form to create a new subdomain tenant.</p>
+
+            <h3>Product and Subdomain</h3>
+            <ul>
+                <li><strong>Product</strong>: Choose <strong>eplanner</strong> or <strong>lgbtq-hub</strong> from the dropdown. This determines the base domain:
+                    <ul>
+                        <li><strong>eplanner</strong> → <code>subdomain.eplanner.kervinapps.com</code></li>
+                        <li><strong>lgbtq-hub</strong> → <code>subdomain.lgbtq-hub.com</code></li>
+                    </ul>
+                </li>
+                <li><strong>Subdomain</strong>: Enter the subdomain (e.g. <code>mia</code>, <code>ny</code>, <code>mywedding</code>). Use only letters, numbers, hyphens, and underscores. The full host will be <code>subdomain.[product-domain]</code>.</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Examples</strong>
+                <code>lgbtq-hub</code> + <code>mia</code> → <code>mia.lgbtq-hub.com</code>; <code>eplanner</code> + <code>mywedding</code> → <code>mywedding.eplanner.kervinapps.com</code>.
+            </div>
+
+            <h3>Optional Fields</h3>
+            <ul>
+                <li><strong>Display name</strong>: A friendly name for the tenant (e.g. &quot;Miami LGBTQ Hub&quot;). Used for reference only.</li>
+                <li><strong>Sender email for updates</strong>: Override the &quot;From&quot; address for all emails (signup confirmations, event created, cancellation, etc.) for this tenant. SMTP server and password stay configured globally (e.g. Zoho). Leave blank to use the default sender.</li>
+            </ul>
+
+            <h3>Branding (Optional)</h3>
+            <p>You can customize how the site looks on this subdomain:</p>
+            <ul>
+                <li><strong>Favicon path</strong>: e.g. <code>assets/images/favicon.svg</code> or <code>assets/images/to-logbtqicon.png</code>.</li>
+                <li><strong>Logo text</strong>: Text shown next to the logo (e.g. &quot;LGBTQ+ Activity Planner&quot;).</li>
+                <li><strong>Title brand</strong>: Replaces &quot;Event Planner&quot; in the browser tab title.</li>
+                <li><strong>Hero Find group URL</strong>: Link for the &quot;Find your group&quot; button (e.g. a WhatsApp invite link).</li>
+                <li><strong>Hero Learn more URL</strong>: Link for the &quot;Learn more&quot; / &quot;Explore Our Community&quot; button (e.g. <code>whatsapp-community.html</code>).</li>
+                <li><strong>Show hero CTAs</strong>: Check to show the Find group and Learn more buttons on the calendar hero. Uncheck to hide them.</li>
+            </ul>
+            <p>Leave branding fields blank to use the product defaults (eplanner vs lgbtq-hub).</p>
+
+            <h3>Save</h3>
+            <ol>
+                <li>Fill in <strong>Product</strong> and <strong>Subdomain</strong> (required).</li>
+                <li>Optionally fill display name, sender email, and branding fields.</li>
+                <li>Click <strong>Create tenant</strong>.</li>
+                <li>The new tenant appears in the <strong>Tenants</strong> table below. The <strong>DNS &amp; Netlify steps</strong> block updates automatically when you enter product and subdomain; use it to configure DNS and Netlify for the new subdomain.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>DNS and Netlify Steps</h2>
+            <p>After creating a tenant, you must configure DNS and Netlify so the subdomain actually loads your site. The Tenant Manager generates a short instruction block when you enter product and subdomain.</p>
+            <ol>
+                <li>Add a <strong>CNAME</strong> record for the subdomain pointing to your Netlify site (e.g. <code>apex-loadbalancer.netlify.app</code>).</li>
+                <li>In <strong>Netlify → Domain settings</strong>, add the custom domain (e.g. <code>mia.lgbtq-hub.com</code>).</li>
+                <li>If you use many subdomains, you can use a wildcard (<code>*.lgbtq-hub.com</code> or <code>*.eplanner.kervinapps.com</code>) in DNS and Netlify instead of adding each subdomain individually.</li>
+            </ol>
+            <div class="warning-box">
+                <strong>Important</strong>
+                Until DNS and Netlify are configured for a subdomain, users cannot reach that tenant via its URL. The Tenant Manager does not configure DNS or Netlify for you; you must do these steps manually.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Editing a Tenant</h2>
+            <ol>
+                <li>In the <strong>Tenants</strong> table, click <strong>Edit</strong> for the tenant you want to change.</li>
+                <li>The form fills with that tenant&apos;s data. Product and subdomain are fixed (you cannot change the tenant key); you can update display name, sender email, and branding.</li>
+                <li>Click <strong>Update tenant</strong> to save.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Deleting a Tenant</h2>
+            <ol>
+                <li>In the <strong>Tenants</strong> table, click <strong>Delete</strong> for the tenant you want to remove.</li>
+                <li>Confirm in the dialog. Deleting a tenant does not delete events or signups; it removes the tenant configuration (branding, sender email) from the Tenant Manager. Events for that tenant key remain in the database.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Data Isolation</h2>
+            <p>Each tenant has isolated data:</p>
+            <ul>
+                <li>Events created on <code>mia.lgbtq-hub.com</code> are stored with <code>tenant_key</code> <code>lgbtq-hub:mia</code> and appear only on the public calendar for that subdomain.</li>
+                <li>Events on <code>ny.lgbtq-hub.com</code> do not appear on <code>mia.lgbtq-hub.com</code>, and vice versa.</li>
+                <li>The same holds for <code>eplanner</code> subdomains (e.g. <code>mywedding.eplanner.kervinapps.com</code> vs <code>eplanner:default</code>).</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Troubleshooting</h2>
+            <h3>Invalid password / 401 Unauthorized</h3>
+            <ul>
+                <li>Confirm <code>ADMIN_PASSWORD</code> is set in Netlify (and locally) and that you are entering it correctly.</li>
+                <li>Redeploy Netlify or restart your local server after changing <code>ADMIN_PASSWORD</code>.</li>
+            </ul>
+            <h3>Tenant already exists / Conflict</h3>
+            <ul>
+                <li>Each <code>product + subdomain</code> pair must be unique. Choose a different subdomain or edit the existing tenant instead.</li>
+            </ul>
+            <h3>Subdomain does not load</h3>
+            <ul>
+                <li>Complete the DNS and Netlify steps for that subdomain. The Tenant Manager only stores configuration; it does not create DNS or Netlify domains.</li>
+            </ul>
+            <h3>Branding or sender email not applied</h3>
+            <ul>
+                <li>Ensure you saved the tenant after editing. Visitors must load the site via the correct subdomain (e.g. <code>mia.lgbtq-hub.com</code>) for that tenant&apos;s config to apply.</li>
+            </ul>
+        </div>
+
+        <div class="tip-box">
+            <h2 style="margin-top: 0;">Quick Reference</h2>
+            <p><strong>Create:</strong> Product + Subdomain (required) → optional display name, sender email, branding → Create tenant. Then follow DNS &amp; Netlify steps.</p>
+            <p><strong>Edit:</strong> Edit in table → change display name, sender email, or branding → Update tenant.</p>
+            <p><strong>Delete:</strong> Delete in table → confirm. Events are not deleted.</p>
+            <p><strong>Products:</strong> <code>eplanner</code> → <code>*.eplanner.kervinapps.com</code>; <code>lgbtq-hub</code> → <code>*.lgbtq-hub.com</code>.</p>
+        </div>
+    </div>
+</body>
+</html>

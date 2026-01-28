@@ -1,8 +1,8 @@
-const { runs, telemetry } = require('../../lib/databaseClient');
+const { runs, telemetry, tenants } = require('../../lib/databaseClient');
 const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
 const EmailService = require('../../lib/emailService');
 const { eventCreatedEmail } = require('../../lib/emailTemplates');
-const { getAppName } = require('./utils');
+const { getTenant } = require('./utils');
 
 function jsonResponse(statusCode, body) {
   return {
@@ -173,16 +173,12 @@ exports.handler = async (event) => {
     const protocol = event.headers?.['x-forwarded-proto'] || 'https';
     const baseUrl = `${protocol}://${host}`;
     
-    // Detect app name from domain (for domain-specific event filtering)
-    const appName = getAppName(event);
-    console.log('[RUNS CREATE] Detected app name:', appName);
-    
-    // Generate all event links using helper function (DRY) - MUST be before database insert
+    const { tenantKey, appName } = getTenant(event);
+    console.log('[RUNS CREATE] Detected tenant:', tenantKey, 'appName:', appName);
+
     const links = generateEventLinks(baseUrl, shortId);
     const { signupLink, manageLink, eventViewLink } = links;
 
-    // Save to PlanetScale database
-    console.log('[RUNS CREATE] Saving to PlanetScale database...');
     try {
       await runs.create({
         id: shortId,
@@ -197,8 +193,9 @@ exports.handler = async (event) => {
         timezone: timezone || null,
         maxParticipants: parseInt(maxParticipants),
         status: 'active',
-        isPublic: isPublic !== undefined ? isPublic : true, // Default to true
-        appName: appName, // Store app name for domain filtering
+        isPublic: isPublic !== undefined ? isPublic : true,
+        appName,
+        tenantKey,
         createdAt: createdAt,
         // Address component fields
         house_number: house_number || null,
@@ -245,6 +242,7 @@ exports.handler = async (event) => {
         if (dbError.message.includes('picture') || dbError.message.includes('description')) {
           missingColumns.push('picture/description');
         }
+        if (dbError.message.includes('tenant_key')) missingColumns.push('tenant_key');
         if (missingColumns.length > 0) {
           throw new Error(`Database migration required: Please add columns: ${missingColumns.join(', ')}. See migration-add-public-endtime-place-links.sql file.`);
         }
@@ -353,6 +351,11 @@ exports.handler = async (event) => {
           throw templateError;
         }
         
+        let fromEmail = null;
+        try {
+          const tn = await tenants.getByKey(tenantKey);
+          if (tn && tn.senderEmail) fromEmail = tn.senderEmail;
+        } catch (e) { /* ignore */ }
         console.log('[RUNS CREATE] Attempting to send email to:', trimmedCoordinatorEmail);
         const emailResult = await emailService.sendEmail({
           to: trimmedCoordinatorEmail,
@@ -360,6 +363,7 @@ exports.handler = async (event) => {
           html: emailContent.html,
           text: emailContent.text,
           fromName: emailContent.fromName,
+          fromEmail: fromEmail || undefined,
         });
         
         emailStatus.sent = emailResult;

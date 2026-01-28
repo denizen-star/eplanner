@@ -26,6 +26,7 @@
                     <button class="nav-dropdown-toggle" type="button">User Guides</button>
                     <ul class="nav-dropdown-menu">
                         <li><a href="docs/user-guides/ADMIN_INSTRUCTIONS.html">Admin Guide</a></li>
+                        <li><a href="docs/user-guides/TENANT_CREATE_GUIDE.html">Create Domain Tenant</a></li>
                         <li><a href="docs/user-guides/RUNNER_INSTRUCTIONS.html">Participant Guide</a></li>
                         <li><a href="docs/user-guides/PACER_INSTRUCTIONS.html">Planner Guide</a></li>
                     </ul>
@@ -139,6 +140,93 @@
                 </div>
             </div>
         </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <div class="collapsible-section">
+                <button class="collapsible-toggle" onclick="toggleSection('tenantManager')" id="tenantManagerToggle">
+                    <span>Tenant Manager</span>
+                    <span class="collapsible-icon collapsed" id="tenantManagerIcon">▶</span>
+                </button>
+                <div class="collapsible-content" id="tenantManagerContent" style="display: none;">
+                    <div id="tenantManagerLogin" style="padding-top: 20px; display: none;">
+                        <p style="margin-bottom: 12px; color: var(--text-gray);">Enter admin password to manage tenants.</p>
+                        <input type="password" id="tenantAdminPassword" placeholder="Admin password" style="padding: 8px 12px; margin-right: 8px; width: 200px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                        <button type="button" class="button button-primary" onclick="tenantAdminLogin()">Log in</button>
+                        <p id="tenantLoginError" style="margin-top: 8px; color: #dc2626; display: none;"></p>
+                    </div>
+                    <div id="tenantManagerMain" style="display: none; padding-top: 20px;">
+                        <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span style="color: var(--text-gray);">Manage subdomain tenants and branding.</span>
+                            <button type="button" class="button button-secondary" onclick="tenantAdminLogout()">Log out</button>
+                        </div>
+                        <div class="card" style="margin-bottom: 24px; padding: 20px;">
+                            <h3 class="section-subheadline" style="margin-bottom: 16px;">Add or edit tenant</h3>
+                            <input type="hidden" id="tenantFormKey" value="">
+                            <div style="display: grid; gap: 12px; max-width: 560px;">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div>
+                                        <label for="tenantProduct" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Product</label>
+                                        <select id="tenantProduct" style="padding: 8px 12px; min-width: 140px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <option value="eplanner">eplanner</option>
+                                            <option value="lgbtq-hub">lgbtq-hub</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="tenantSubdomain" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Subdomain</label>
+                                        <input type="text" id="tenantSubdomain" placeholder="e.g. mia, mywedding" style="padding: 8px 12px; width: 140px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="tenantDisplayName" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Display name (optional)</label>
+                                    <input type="text" id="tenantDisplayName" placeholder="e.g. Miami LGBTQ Hub" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label for="tenantSenderEmail" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Sender email for updates (optional)</label>
+                                    <input type="email" id="tenantSenderEmail" placeholder="e.g. mia@lgbtq-hub.com" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                    <p style="font-size: 12px; color: var(--text-gray); margin-top: 4px;">SMTP/password stay in env; this overrides From address only.</p>
+                                </div>
+                                <div>
+                                    <label for="tenantFavicon" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Favicon path (optional)</label>
+                                    <input type="text" id="tenantFavicon" placeholder="assets/images/favicon.svg" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label for="tenantLogoText" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Logo text (optional)</label>
+                                    <input type="text" id="tenantLogoText" placeholder="e.g. LGBTQ+ Activity Planner" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label for="tenantTitleBrand" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Title brand (optional)</label>
+                                    <input type="text" id="tenantTitleBrand" placeholder="e.g. LGBTQ+ Activity Planner" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label for="tenantHeroFindGroupUrl" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Hero Find group URL (optional)</label>
+                                    <input type="url" id="tenantHeroFindGroupUrl" placeholder="https://chat.whatsapp.com/..." style="padding: 8px 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label for="tenantHeroLearnMoreUrl" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Hero Learn more URL (optional)</label>
+                                    <input type="text" id="tenantHeroLearnMoreUrl" placeholder="e.g. whatsapp-community.html" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="tenantHeroShowCtas" style="width: 18px; height: 18px;">
+                                        <span>Show hero CTAs (Find group, Learn more)</span>
+                                    </label>
+                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button type="button" class="button button-primary" id="tenantSaveBtn" onclick="tenantSave()">Create tenant</button>
+                                    <button type="button" class="button button-secondary" id="tenantCancelEditBtn" style="display: none;" onclick="tenantCancelEdit()">Cancel edit</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tenantDnsBlock" style="display: none; margin-bottom: 24px; padding: 16px; background: var(--light-gray-1); border-radius: 8px; font-family: monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all;"></div>
+                        <div>
+                            <h3 class="section-subheadline" style="margin-bottom: 12px;">Tenants</h3>
+                            <div id="tenantListLoading" style="text-align: center; padding: 24px; color: var(--text-gray);">Loading...</div>
+                            <div id="tenantList" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
 
     </main>
@@ -219,6 +307,7 @@
     <script src="assets/js/modal-utils.js"></script>
     <script src="assets/js/cancellation-utils.js"></script>
     <script src="assets/js/admin.js"></script>
+    <script src="assets/js/tenant-admin.js"></script>
     <script src="assets/js/domain-variant.js"></script>
 </body>
 </html>
