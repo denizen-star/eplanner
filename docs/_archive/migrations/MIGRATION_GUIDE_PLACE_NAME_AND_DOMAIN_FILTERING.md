@@ -1,13 +1,16 @@
 # Migration Guide: Place Name Extraction & Domain Filtering
 
+> **Note**: This guide documents the implementation from v8.0.0. As of v11.0.0, the application also supports `tenant_key` filtering for subdomain-based multi-tenancy. When implementing domain filtering, consider both `app_name` (domain-level) and `tenant_key` (subdomain-level) filtering.
+
 This guide documents the implementation of place name extraction and domain filtering features, making it easy to apply these changes to similar applications (e.g., gayrunclub).
 
 ## Overview
 
 This implementation adds three main features:
 1. **Enhanced Place Name Extraction**: Extracts venue/bar/restaurant names from multiple Nominatim geocoding fields
-2. **Domain Filtering**: Filters events by `app_name` so each domain only shows its own events
-3. **Public Calendar Page**: Weekly calendar view showing public events filtered by domain
+2. **Domain Filtering**: Filters events by `app_name` so each domain only shows its own events (v8.0.0)
+3. **Tenant Filtering**: Filters events by `tenant_key` for subdomain-based isolation (v11.0.0)
+4. **Public Calendar Page**: Weekly calendar view showing public events filtered by domain and tenant
 
 ## Key Learnings & Patterns
 
@@ -166,9 +169,12 @@ function getAppName(event) {
 
 - [ ] **Update `lib/databaseClient.js`**
   - Add `app_name` to `EVENT_SELECT_FIELDS`
+  - Add `tenant_key` to `EVENT_SELECT_FIELDS` (v11.0.0)
   - Add `app_name` to `runs.create()` INSERT statement
-  - Update `runs.getPublicEvents()` to accept optional `appName` parameter
+  - Add `tenant_key` to `runs.create()` INSERT statement (v11.0.0)
+  - Update `runs.getPublicEvents()` to accept optional `appName` and `tenantKey` parameters
   - Add `app_name` filter to query when `appName` is provided
+  - Add `tenant_key` filter to query when `tenantKey` is provided (v11.0.0)
 
 **Key Code Pattern:**
 ```javascript

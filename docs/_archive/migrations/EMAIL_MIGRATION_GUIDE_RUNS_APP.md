@@ -1,5 +1,7 @@
 # Email Functionality Migration Guide - Runs Application (gayrunclub)
 
+> **Note**: This guide is current as of v11.0.0. The email system includes QR codes, calendar links, WhatsApp messages, and supports tenant-based sender email overrides via `tenant_key`.
+
 This guide provides step-by-step instructions for an AI agent to migrate email confirmation functionality from the EventPlan application to the Runs application (gayrunclub). The codebases are very similar but have some key differences in table names and field names.
 
 ## Key Differences Between Applications
@@ -118,13 +120,14 @@ ADD COLUMN coordinator_email VARCHAR(255) NULL;
 1. Replace all instances of `plannerName` with `pacerName` (the Runs app uses `pacerName`)
 2. Replace references to "Event" with "Run" where appropriate in email text
 3. Replace references to "Event Planner" with "Gay Run Club" or appropriate app name
-4. **NEW**: The email templates now include enhanced features that need to be preserved:
+4. **Current Email Features** (as of v11.0.0) that need to be preserved:
    - WhatsApp message generation (with emojis - these should stay)
-   - QR code generation for signup links
-   - Calendar links (Google Calendar and iCal)
+   - QR code generation for signup links using `generateQRCodeUrl()`
+   - Calendar links (Google Calendar and iCal) using `generateGoogleCalendarLink()` and `generateICalLink()`
    - Blue accent color (#6488F4) - ensure this is used consistently
    - Event view links (event.html?id=...) for signup confirmations
    - No emojis in email body content (only in WhatsApp messages)
+   - Tenant-based sender email override support (v11.0.0) - optional per-tenant sender email configuration
 
 **Specific Changes:**
 - **Function: `generateWhatsAppMessage()`**: Keep as-is, but ensure it uses `pacerName` instead of `plannerName`

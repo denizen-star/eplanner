@@ -6,7 +6,7 @@ This guide provides detailed steps to configure your Netlify deployment with Pla
 
 - Netlify account and site created
 - PlanetScale database created and schema deployed
-- Database connection string ready (from `docs/DATABASE_CREDENTIALS.md`)
+- Database connection string ready (from [Database Credentials](DATABASE_CREDENTIALS.md))
 
 ## Step 1: Access Netlify Dashboard
 
@@ -140,7 +140,7 @@ If you prefer to use individual environment variables:
 ### Issue: "Access denied" or Authentication Error
 
 **Solution:**
-- Verify the connection string is correct (copy from `docs/DATABASE_CREDENTIALS.md`)
+- Verify the connection string is correct (copy from [Database Credentials](DATABASE_CREDENTIALS.md))
 - Check that username and password are correct
 - Ensure the password hasn't expired (PlanetScale passwords can expire)
 - Verify the database name is correct (`kervapps`)
@@ -209,7 +209,7 @@ After Netlify is configured:
 
 2. **Monitor function logs** for any errors
 
-3. **Set up DBeaver** (see `docs/DBEAVER_SETUP.md`) for direct database access
+3. **Set up DBeaver** (see [DBeaver Setup](DBEAVER_SETUP.md)) for direct database access
 
 4. **Test the full flow:**
    - Create a run via the web interface
@@ -223,5 +223,5 @@ If you encounter issues:
 2. Verify environment variables are set correctly
 3. Test connection string locally first (in `.env` file)
 4. Check PlanetScale dashboard for database status
-5. Review `docs/DATABASE_CREDENTIALS.md` for current credentials
+5. Review [Database Credentials](DATABASE_CREDENTIALS.md) for current credentials
 

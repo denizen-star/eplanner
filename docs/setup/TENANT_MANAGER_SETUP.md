@@ -52,7 +52,7 @@ Without `ADMIN_PASSWORD`, the Tenant Manager UI login and all **Admin Tenant** A
 
 ## 4. DNS and Netlify Domains (Per Subdomain)
 
-**Saved for later?** A detailed, step-by-step walkthrough is in **`docs/DNS_AND_NETLIFY_SUBDOMAIN_SETUP.md`**. Use that when you’re ready to configure subdomains.
+**Saved for later?** A detailed, step-by-step walkthrough is in [DNS and Netlify Subdomain Setup](DNS_AND_NETLIFY_SUBDOMAIN_SETUP.md). Use that when you’re ready to configure subdomains.
 
 The Tenant Manager UI generates **DNS & Netlify steps** for each tenant you create. You still need to perform these steps yourself (no automated DNS). Until both DNS and Netlify are set up for a subdomain, users cannot open that tenant’s URL (e.g. `mia.lgbtq-hub.com`).
 

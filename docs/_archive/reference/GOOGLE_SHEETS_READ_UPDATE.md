@@ -10,7 +10,7 @@ Implemented Google Sheets read functionality using GET requests to the Google Ap
 - Supports three actions: `getRun`, `getRuns`, `getSignups`
 - Includes comprehensive logging and error handling
 
-### 2. Google Apps Script (`docs/google-apps-script-code.js`)
+### 2. Google Apps Script (`google-apps-script-code.js`)
 - Added `doGet()` function to handle GET requests
 - Added `getRunFromSheet()` - Get a single run by ID or UUID
 - Added `getAllRunsFromSheet()` - Get all runs from the sheet
@@ -31,12 +31,12 @@ Implemented Google Sheets read functionality using GET requests to the Google Ap
 
 ### 1. Update Google Apps Script
 You need to update your Google Apps Script with the new `doGet()` function and helper functions. The updated code is in:
-- `docs/google-apps-script-code.js`
+- `reference/google-apps-script-code.js`
 
 **Instructions:**
 1. Open your Google Sheet
 2. Go to Extensions → Apps Script
-3. Replace the entire script with the updated code from `docs/google-apps-script-code.js`
+3. Replace the entire script with the updated code from `reference/google-apps-script-code.js`
 4. Save the project
 5. The web app should automatically handle both POST (write) and GET (read) requests
 

@@ -25,12 +25,12 @@ If you're getting a 500 Internal Server Error when trying to create a run, follo
    ```
    mysql://[USERNAME]:[PASSWORD]@us-east.connect.psdb.cloud/[DATABASE]?ssl={"rejectUnauthorized":true}
    ```
-   (Get actual values from PlanetScale Dashboard or `docs/DATABASE_CREDENTIALS.md`)
+   (Get actual values from PlanetScale Dashboard or [Database Credentials](../setup/DATABASE_CREDENTIALS.md))
 4. If missing or incorrect, add/update it and **trigger a new deployment**
 
 ### Step 3: Verify Database Tables Exist
 
-1. Connect to your PlanetScale database via DBeaver (see `docs/DBEAVER_SETUP.md`)
+1. Connect to your PlanetScale database via DBeaver (see [DBeaver Setup](../setup/DBEAVER_SETUP.md))
 2. Run this query:
    ```sql
    SHOW TABLES;
@@ -61,7 +61,7 @@ If this fails, check:
 
 #### Issue: "Access denied"
 **Solution:** 
-- Verify credentials in `docs/DATABASE_CREDENTIALS.md`
+- Verify credentials in [Database Credentials](../setup/DATABASE_CREDENTIALS.md)
 - Check if password has expired (generate new one in PlanetScale)
 - Update `DATABASE_URL` in Netlify environment variables
 
@@ -82,19 +82,56 @@ If this fails, check:
 
 ## Getting Detailed Error Information
 
-### From Netlify Function Logs
+### How to Find Netlify Function Logs
 
-1. Go to Functions → `runs-create`
-2. Look for lines starting with `ERROR` or `[DATABASE] Query error`
-3. The error message will tell you exactly what's wrong
+#### Method 1: Netlify Dashboard (Recommended)
 
-### From Browser Console
+1. **Go to your Netlify Dashboard**
+   - Visit https://app.netlify.com
+   - Sign in if needed
 
-1. Open browser Developer Tools (F12)
-2. Go to **Network** tab
-3. Try creating a run again
-4. Click on the failed request (`/api/runs/create`)
-5. Go to **Response** tab to see the error message
+2. **Select Your Site**
+   - Click on your site name (e.g., "eplanner" or "eventplan")
+
+3. **Navigate to Functions**
+   - In the left sidebar, click **"Functions"**
+   - OR look for a tab/menu item called **"Functions"** at the top
+
+4. **View Function Logs**
+   - You should see a list of functions: `runs-create`, `runs-get`, `run-get`, etc.
+   - Click on the function you want to debug (e.g., `runs-create`)
+   - Look for lines starting with `ERROR` or `[DATABASE] Query error`
+   - The error message will tell you exactly what's wrong
+
+5. **Alternative: Real-time Logs**
+   - Look for a **"Real-time logs"** or **"Live logs"** option
+   - This shows logs as they happen
+
+#### Method 2: Site Deploys
+
+1. Go to your site in Netlify
+2. Click **"Deploys"** in the left sidebar
+3. Click on the most recent deploy
+4. Scroll down to see **"Function logs"** section
+5. Click on the function name to see its logs
+
+#### Method 3: Browser Network Tab
+
+1. Open your admin dashboard or the page with the issue
+2. Open Developer Tools (F12)
+3. Go to **Network** tab
+4. Click **Refresh** on the page
+5. Click on the failed request (e.g., `/api/runs/create`)
+6. Check the **Response** tab to see the error message
+
+### What to Look For in Logs
+
+In the logs, look for:
+- `[RUNS CREATE]` - Messages from the runs-create function
+- `[DATABASE]` - Database query messages
+- `[GOOGLE SHEETS READ]` - Messages from the Google Sheets client (if applicable)
+- Error messages or stack traces
+- The actual response from APIs
 
 ### Common Error Messages and Solutions
 

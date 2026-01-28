@@ -1,5 +1,7 @@
 # Cancellation Feature Implementation Guide
 
+> **Note**: This is a historical implementation guide for reference. The cancellation feature was implemented in v8.0.0. The database migration for cancellation fields (`cancellation_message`, `cancelled_at`) is now included in `lib/schema.sql` and does not need to be run separately.
+
 ## Overview
 
 This document provides detailed instructions for implementing a modern cancellation feature for events that includes:
@@ -89,7 +91,11 @@ This document provides detailed instructions for implementing a modern cancellat
 
 ### Phase 1: Database Migration (MUST BE FIRST)
 
-#### Step 1.1: Create Migration File
+> **Note**: The cancellation fields are now included in `lib/schema.sql`. If you're setting up a new database, run `lib/schema.sql` which includes these fields. If you're updating an existing database, you can use the migration below or add the columns manually.
+
+#### Step 1.1: Create Migration File (Historical Reference)
+The migration below is for reference. For new databases, use `lib/schema.sql` instead.
+
 Create `lib/migration-add-cancellation-fields.sql`:
 
 ```sql

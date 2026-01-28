@@ -396,9 +396,9 @@ Run: `node test-email.js`
   - Gmail: https://support.google.com/mail/answer/7126229
   - Outlook: https://support.microsoft.com/en-us/office/pop-imap-and-smtp-settings-8361e398-8af4-4e97-b147-6c6c4ac95353
 
-- **Technical Documentation**: See `docs/EMAIL_IMPLEMENTATION_TECHNICAL.md`
+- **Email Troubleshooting**: See [Email Troubleshooting](EMAIL_TROUBLESHOOTING.md)
 
-- **Netlify Environment Variables**: See `docs/NETLIFY_ENV_VARS_SETUP.md`
+- **Netlify Environment Variables**: See [Netlify Environment Variables Setup](../setup/NETLIFY_ENV_VARS_SETUP.md)
 
 ---
 

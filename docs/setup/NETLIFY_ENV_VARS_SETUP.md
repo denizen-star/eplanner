@@ -286,7 +286,7 @@ If you encounter issues:
 2. Verify environment variables are set correctly
 3. Test connection string locally first (in `.env` file)
 4. Check PlanetScale dashboard for database status
-5. Review `docs/TROUBLESHOOTING.md` for common issues
+5. Review [Troubleshooting Guide](../troubleshooting/TROUBLESHOOTING.md) for common issues
 
 
 
