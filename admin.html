@@ -206,10 +206,10 @@
                                     <label for="tenantTitleBrand" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Title brand (optional)</label>
                                     <input type="text" id="tenantTitleBrand" placeholder="e.g. LGBTQ+ Activity Planner" style="padding: 8px 12px; width: 100%; max-width: 320px; border: 1px solid var(--border-gray); border-radius: 6px;">
                                 </div>
-                                <div style="margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
-                                    <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Hero images (optional)</h4>
-                                    <p style="margin: 0 0 12px 0; font-size: 12px; color: var(--text-gray);">Paste a URL/path, or use Browse to store an image in the database (data URL).</p>
-                                    <div style="display: grid; gap: 12px;">
+                                <!-- Home section -->
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Home section</h4>
+                                    <div style="display: grid; gap: 8px;">
                                         <div>
                                             <label for="tenantHeroHomeBg" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Home hero image</label>
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -222,7 +222,17 @@
                                                 <img id="tenantHeroHomeBgPreview" src="" alt="Home hero preview" style="width: 100%; height: auto; max-height: 140px; object-fit: cover; display: block; border-radius: 6px;">
                                             </div>
                                         </div>
+                                        <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                            <input type="text" id="tenantHeroHomeHeadline" placeholder="The weekly gatherings turning strangers into friends" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <input type="text" id="tenantHeroHomeSubheadline" placeholder="" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- Calendar section -->
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Calendar section</h4>
+                                    <div style="display: grid; gap: 8px;">
                                         <div>
                                             <label for="tenantHeroCalendarBg" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Calendar hero image</label>
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -235,7 +245,17 @@
                                                 <img id="tenantHeroCalendarBgPreview" src="" alt="Calendar hero preview" style="width: 100%; height: auto; max-height: 140px; object-fit: cover; display: block; border-radius: 6px;">
                                             </div>
                                         </div>
+                                        <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                            <input type="text" id="tenantHeroCalendarHeadline" placeholder="Start your own revolution. Meet new friends &amp; adventure accomplices" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <input type="text" id="tenantHeroCalendarSubheadline" placeholder="Discover upcoming community events and join the gatherings" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- Coordinate section -->
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Coordinate section</h4>
+                                    <div style="display: grid; gap: 8px;">
                                         <div>
                                             <label for="tenantHeroCoordinateBg" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Coordinate hero image</label>
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -248,7 +268,17 @@
                                                 <img id="tenantHeroCoordinateBgPreview" src="" alt="Coordinate hero preview" style="width: 100%; height: auto; max-height: 140px; object-fit: cover; display: block; border-radius: 6px;">
                                             </div>
                                         </div>
+                                        <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                            <input type="text" id="tenantHeroCoordinateHeadline" placeholder="Coordinate an Event" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <input type="text" id="tenantHeroCoordinateSubheadline" placeholder="Create and manage community events that bring people together" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- WhatsApp community section -->
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">WhatsApp Community section</h4>
+                                    <div style="display: grid; gap: 8px;">
                                         <div>
                                             <label for="tenantHeroWhatsappBg" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">WhatsApp community hero image</label>
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -261,7 +291,17 @@
                                                 <img id="tenantHeroWhatsappBgPreview" src="" alt="WhatsApp hero preview" style="width: 100%; height: auto; max-height: 140px; object-fit: cover; display: block; border-radius: 6px;">
                                             </div>
                                         </div>
+                                        <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                            <input type="text" id="tenantHeroWhatsappHeadline" placeholder="🏳️‍🌈 Toronto - LGBTQ+ 🏳️‍🌈" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <input type="text" id="tenantHeroWhatsappSubheadline" placeholder="Your community hub for connecting, playing, and thriving together" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- Signup section -->
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Signup section</h4>
+                                    <div style="display: grid; gap: 8px;">
                                         <div>
                                             <label for="tenantHeroSignupBg" style="display: block; margin-bottom: 4px; font-size: var(--font-sm); font-weight: var(--font-medium);">Signup hero image</label>
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -274,47 +314,9 @@
                                                 <img id="tenantHeroSignupBgPreview" src="" alt="Signup hero preview" style="width: 100%; height: auto; max-height: 140px; object-fit: cover; display: block; border-radius: 6px;">
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div style="margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--border-gray);">
-                                    <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Hero text (optional)</h4>
-                                    <p style="margin: 0 0 12px 0; font-size: 12px; color: var(--text-gray);">Overrides the hero headline/subheadline per page. Leave blank to use defaults.</p>
-                                    <div style="display: grid; gap: 12px;">
-                                        <div>
-                                            <label style="display: block; margin-bottom: 6px; font-size: var(--font-sm); font-weight: var(--font-medium);">Home hero text</label>
-                                            <div style="display: grid; gap: 8px;">
-                                                <input type="text" id="tenantHeroHomeHeadline" placeholder="Home headline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                                <input type="text" id="tenantHeroHomeSubheadline" placeholder="Home subheadline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 6px; font-size: var(--font-sm); font-weight: var(--font-medium);">Calendar hero text</label>
-                                            <div style="display: grid; gap: 8px;">
-                                                <input type="text" id="tenantHeroCalendarHeadline" placeholder="Calendar headline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                                <input type="text" id="tenantHeroCalendarSubheadline" placeholder="Calendar subheadline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 6px; font-size: var(--font-sm); font-weight: var(--font-medium);">Coordinate hero text</label>
-                                            <div style="display: grid; gap: 8px;">
-                                                <input type="text" id="tenantHeroCoordinateHeadline" placeholder="Coordinate headline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                                <input type="text" id="tenantHeroCoordinateSubheadline" placeholder="Coordinate subheadline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 6px; font-size: var(--font-sm); font-weight: var(--font-medium);">WhatsApp community hero text</label>
-                                            <div style="display: grid; gap: 8px;">
-                                                <input type="text" id="tenantHeroWhatsappHeadline" placeholder="WhatsApp headline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                                <input type="text" id="tenantHeroWhatsappSubheadline" placeholder="WhatsApp subheadline (optional)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 6px; font-size: var(--font-sm); font-weight: var(--font-medium);">Signup hero text (optional)</label>
-                                            <div style="display: grid; gap: 8px;">
-                                                <input type="text" id="tenantHeroSignupHeadline" placeholder="Signup headline (best-effort; event may override)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                                <input type="text" id="tenantHeroSignupSubheadline" placeholder="Signup subheadline (best-effort; event may override)" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                            </div>
+                                        <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                            <input type="text" id="tenantHeroSignupHeadline" placeholder="Join Us" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
+                                            <input type="text" id="tenantHeroSignupSubheadline" placeholder="Be part of something special" style="padding: 8px 12px; width: 100%; max-width: 520px; border: 1px solid var(--border-gray); border-radius: 6px;">
                                         </div>
                                     </div>
                                 </div>
