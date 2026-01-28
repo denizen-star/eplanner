@@ -81,12 +81,16 @@ Debugging and troubleshooting resources:
 
 ## Marketing Materials
 
-Press releases and marketing content:
+Canonical copy (current):
 
-- [Press Release](marketing/PRESS_RELEASE.md) - Full press release
-- [Press Release (Short)](marketing/PRESS_RELEASE_SHORT.md) - Shortened press release
-- [Press Release (WhatsApp)](marketing/PRESS_RELEASE_WHATSAPP.txt) - WhatsApp-formatted press release
-- [WhatsApp Pacer Invite](marketing/WHATSAPP_PACER_INVITE.txt) - WhatsApp invitation template
+- [Marketing Copy (Canonical)](marketing/MARKETING_COPY.md)
+
+Archived (historical / outdated terminology):
+
+- [Press Release](./_archive/marketing/PRESS_RELEASE.md)
+- [Press Release (Short)](./_archive/marketing/PRESS_RELEASE_SHORT.md)
+- [Press Release (WhatsApp)](./_archive/marketing/PRESS_RELEASE_WHATSAPP.txt)
+- [WhatsApp Invite (Legacy)](./_archive/marketing/WHATSAPP_PACER_INVITE.txt)
 
 ---
 
