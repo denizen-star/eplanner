@@ -1119,19 +1119,39 @@ body:has(.calendar-week) .main-container {
     gap: 0;
   }
 
+  /* All hero sections - ensure mobile styles override desktop */
   .hero-section {
-    min-height: 60vh;
-    padding: 100px 0 60px;
+    min-height: 60vh !important;
+    padding: 100px 0 60px !important;
+    background-size: cover !important;
+    background-position: center !important;
   }
 
+  /* Calendar page hero - explicit override */
+  .calendar-page-hero.hero-section {
+    min-height: 60vh !important;
+    padding: 100px 0 60px !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+
+  /* All hero headlines */
   .hero-headline {
-    font-size: var(--font-3xl);
-    margin-bottom: var(--space-lg);
+    font-size: var(--font-3xl) !important;
+    margin-bottom: var(--space-lg) !important;
   }
 
   /* Optional hook for extra-long hero headlines (kept same sizing for consistency) */
   .hero-headline--tagline {
-    font-size: var(--font-3xl);
+    font-size: var(--font-3xl) !important;
+    margin-bottom: var(--space-lg) !important;
+  }
+
+  /* Calendar page hero headlines - explicit override */
+  .calendar-page-hero .hero-headline,
+  .calendar-page-hero .hero-headline--tagline {
+    font-size: var(--font-3xl) !important;
+    margin-bottom: var(--space-lg) !important;
   }
 
   .hero-cta-group {
