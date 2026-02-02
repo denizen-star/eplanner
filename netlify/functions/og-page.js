@@ -1,9 +1,27 @@
 /**
  * Serves event.html and signup.html with injected Open Graph meta so crawlers
  * (WhatsApp, Facebook, Twitter, etc.) see the correct link preview image and title.
- * Only runs when ?id= is present; otherwise redirects are not used and static HTML is served.
+ * All requests to these pages hit this function; when ?id= is present we inject meta.
  */
+const path = require('path');
+const fs = require('fs');
 const { runs } = require('../../lib/databaseClient');
+
+function readStaticHtml(page) {
+  const name = page === 'event' ? 'event.html' : 'signup.html';
+  const candidates = [
+    path.join(process.cwd(), name),
+    path.join(__dirname, name),
+    path.join(__dirname, '..', '..', name),
+    path.resolve(__dirname, '..', '..', name),
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+    } catch (_) {}
+  }
+  return null;
+}
 
 function htmlResponse(statusCode, html) {
   return {
@@ -103,25 +121,24 @@ exports.handler = async (event) => {
   }
 
   const runId = event.queryStringParameters?.id || event.multiValueQueryStringParameters?.id?.[0];
+
+  let html = readStaticHtml(isEvent ? 'event' : 'signup');
+  if (!html) {
+    return { statusCode: 502, body: 'Failed to load page' };
+  }
+
   if (!runId) {
-    return { statusCode: 404, body: 'Not Found' };
+    return htmlResponse(200, html);
   }
 
   const origin = getOrigin(event);
   const pageUrl = `${origin}${path}?id=${encodeURIComponent(runId)}`;
-  const staticPath = isEvent ? '/event.html' : '/signup.html';
 
   try {
     const run = await runs.getById(runId);
     if (!run) {
-      return { statusCode: 404, body: 'Event not found' };
+      return htmlResponse(200, html);
     }
-
-    const res = await fetch(`${origin}${staticPath}`);
-    if (!res.ok) {
-      return { statusCode: 502, body: 'Failed to load page' };
-    }
-    let html = await res.text();
 
     const meta = isEvent
       ? buildEventMeta(run, runId, origin)
@@ -131,6 +148,6 @@ exports.handler = async (event) => {
     return htmlResponse(200, html);
   } catch (err) {
     console.error('[OG-PAGE] Error:', err);
-    return { statusCode: 500, body: 'Server error' };
+    return htmlResponse(200, html);
   }
 };

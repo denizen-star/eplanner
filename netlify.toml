@@ -10,7 +10,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  included_files = ["server.js", "lib/**", "package.json"]
+  included_files = ["server.js", "lib/**", "package.json", "./event.html", "./signup.html"]
 
 # Canonical host redirect (must come before other redirects)
 [[redirects]]
@@ -119,20 +119,18 @@
   status = 200
   force = true
 
-# Event/signup pages with ?id=: server-side OG meta for crawlers (link preview)
+# Event/signup pages: always serve via function so crawlers get correct OG meta (query-based redirect is unreliable)
 [[redirects]]
   from = "/event.html"
   to = "/.netlify/functions/og-page"
   status = 200
   force = true
-  query = {id = ":id"}
 
 [[redirects]]
   from = "/signup.html"
   to = "/.netlify/functions/og-page"
   status = 200
   force = true
-  query = {id = ":id"}
 
 # HTML file redirects
 [[redirects]]
