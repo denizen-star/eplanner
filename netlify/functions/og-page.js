@@ -46,9 +46,9 @@ function buildEventMeta(run, runId, origin) {
 function buildSignupMeta(run, runId, origin) {
   const runTitleDisplay = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
   const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
-  let title = 'Sign Up for Run - Gay Run Club';
-  if (runTitleDisplay) title = `${runTitleDisplay} - Gay Run Club`;
-  else if (pacerName) title = `Run with ${pacerName} - Gay Run Club`;
+  let title = 'Sign Up for Run';
+  if (runTitleDisplay) title = runTitleDisplay;
+  else if (pacerName) title = `Run with ${pacerName}`;
 
   const date = new Date(run.dateTime);
   const formattedDate = date.toLocaleString('en-US', {
@@ -60,10 +60,15 @@ function buildSignupMeta(run, runId, origin) {
     minute: '2-digit',
     hour12: true,
   });
-  let description = 'Join us for a run!';
-  if (run.location) description += ` Location: ${run.location}`;
-  if (formattedDate) description += ` | Date: ${formattedDate}`;
-  if (pacerName) description += ` | Pacer: ${pacerName}`;
+  const parts = ['Join us!.'];
+  if (formattedDate) parts.push(`Date: ${formattedDate}.`);
+  if (run.location) parts.push(`Location: ${run.location}.`);
+  if (pacerName) parts.push(`Organized by: ${pacerName}.`);
+  const statusLabel = run.status && typeof run.status === 'string'
+    ? run.status.charAt(0).toUpperCase() + run.status.slice(1).toLowerCase()
+    : 'Active';
+  parts.push(`Event Status: ${statusLabel}.`);
+  const description = parts.join(' ');
 
   const ogImageUrl = run.picture && typeof run.picture === 'string' && run.picture.trim()
     ? `${origin}/api/event-image/${runId}`

@@ -151,19 +151,20 @@ function updateOpenGraphTags(run, runTitle) {
   const baseUrl = window.location.origin;
   const currentUrl = window.location.href;
   
-  // Build title
+  // Build title (event name, no " - Gay Run Club")
   const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
-  let title = 'Sign Up for Run - Gay Run Club';
+  let title = 'Sign Up for Run';
   if (runTitle) {
-    title = `${runTitle} - Gay Run Club`;
+    title = runTitle;
   } else if (pacerName) {
-    title = `Run with ${pacerName} - Gay Run Club`;
+    title = `Run with ${pacerName}`;
   }
   
-  // Build description
+  // Build description: Join us!. Date: <date>. Location: <location>. Organized by: <organizer>
   const date = new Date(run.dateTime);
+  const timezone = run.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const formattedDate = date.toLocaleString('en-US', {
-    timeZone: 'America/New_York',
+    timeZone: timezone,
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -171,17 +172,15 @@ function updateOpenGraphTags(run, runTitle) {
     minute: '2-digit',
     hour12: true
   });
-  
-  let description = `Join us for a run!`;
-  if (run.location) {
-    description += ` Location: ${run.location}`;
-  }
-  if (formattedDate) {
-    description += ` | Date: ${formattedDate} EST`;
-  }
-  if (pacerName) {
-    description += ` | Pacer: ${pacerName}`;
-  }
+  const parts = ['Join us!.'];
+  if (formattedDate) parts.push(`Date: ${formattedDate}.`);
+  if (run.location) parts.push(`Location: ${run.location}.`);
+  if (pacerName) parts.push(`Organized by: ${pacerName}.`);
+  const statusLabel = run.status && typeof run.status === 'string'
+    ? run.status.charAt(0).toUpperCase() + run.status.slice(1).toLowerCase()
+    : 'Active';
+  parts.push(`Event Status: ${statusLabel}.`);
+  const description = parts.join(' ');
   
   // Set image URL: event image if present, otherwise standard default thumbnail
   const imageUrl = run.picture && typeof run.picture === 'string' && run.picture.trim()
@@ -217,19 +216,19 @@ async function loadRun() {
       const pacerName = run.pacerName.trim();
       if (runTitleDisplay) {
         runTitleElement.textContent = `${runTitleDisplay} - ${pacerName}`;
-        document.title = `${runTitleDisplay} - ${pacerName} - Gay Run Club`;
+        document.title = `${runTitleDisplay} - ${pacerName}`;
       } else {
         runTitleElement.textContent = `Run with ${pacerName}`;
-        document.title = `Run with ${pacerName} - Gay Run Club`;
+        document.title = `Run with ${pacerName}`;
       }
       if (pacerNameElement) pacerNameElement.textContent = pacerName;
     } else {
       if (runTitleDisplay) {
         runTitleElement.textContent = runTitleDisplay;
-        document.title = `${runTitleDisplay} - Gay Run Club`;
+        document.title = runTitleDisplay;
       } else {
         runTitleElement.textContent = 'Sign Up for Run';
-        document.title = 'Sign Up for Run - Gay Run Club';
+        document.title = 'Sign Up for Run';
       }
       if (pacerNameElement) pacerNameElement.textContent = '-';
     }
