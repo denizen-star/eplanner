@@ -119,6 +119,21 @@
   status = 200
   force = true
 
+# Event/signup pages with ?id=: server-side OG meta for crawlers (link preview)
+[[redirects]]
+  from = "/event.html"
+  to = "/.netlify/functions/og-page"
+  status = 200
+  force = true
+  query = {id = ":id"}
+
+[[redirects]]
+  from = "/signup.html"
+  to = "/.netlify/functions/og-page"
+  status = 200
+  force = true
+  query = {id = ":id"}
+
 # HTML file redirects
 [[redirects]]
   from = "/*.html"
