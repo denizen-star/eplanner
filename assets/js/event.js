@@ -113,6 +113,16 @@ async function loadEvent() {
       }
     }
     
+    // Link preview thumbnail: event image if present, otherwise default
+    const origin = window.location.origin;
+    const ogImageUrl = event.picture && typeof event.picture === 'string' && event.picture.trim()
+      ? origin + '/api/event-image/' + eventId
+      : origin + '/assets/images/og-default.jpeg';
+    const ogImageEl = document.getElementById('og-image');
+    const twitterImageEl = document.getElementById('twitter-image');
+    if (ogImageEl) ogImageEl.setAttribute('content', ogImageUrl);
+    if (twitterImageEl) twitterImageEl.setAttribute('content', ogImageUrl);
+    
     // Display event description if available
     const descriptionContainer = document.getElementById('eventDescriptionContainer');
     const descriptionElement = document.getElementById('eventDescription');

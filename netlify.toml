@@ -113,6 +113,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/event-image/:runId"
+  to = "/.netlify/functions/event-image"
+  status = 200
+  force = true
+
 # HTML file redirects
 [[redirects]]
   from = "/*.html"

@@ -183,8 +183,10 @@ function updateOpenGraphTags(run, runTitle) {
     description += ` | Pacer: ${pacerName}`;
   }
   
-  // Set image URL (absolute URL required for Open Graph)
-  const imageUrl = `${baseUrl}/assets/images/og-signup-image.jpg`;
+  // Set image URL: event image if present, otherwise standard default thumbnail
+  const imageUrl = run.picture && typeof run.picture === 'string' && run.picture.trim()
+    ? `${baseUrl}/api/event-image/${runId}`
+    : `${baseUrl}/assets/images/og-default.jpeg`;
   
   // Update meta tags
   document.getElementById('og-url').setAttribute('content', currentUrl);
