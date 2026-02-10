@@ -18,14 +18,6 @@ const {
   eventCancelledEmail
 } = require('./lib/emailTemplates');
 
-const fs = require('fs');
-const path = require('path');
-const DEBUG_LOG_PATH = path.join(__dirname, '.cursor', 'debug.log');
-function debugLog(payload) {
-  const line = JSON.stringify({ ...payload, timestamp: Date.now() }) + '\n';
-  try { fs.appendFileSync(DEBUG_LOG_PATH, line); } catch (_) {}
-}
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
@@ -516,13 +508,6 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
   try {
     const { name, phone, email, instagram, waiverAccepted, newsletterWeekly, session_id: sessionId, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = req.body;
 
-    // #region agent log
-    (function(d){
-      fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,timestamp:Date.now()})}).catch(()=>{});
-      debugLog({...d,data:d.data,hypothesisId:d.hypothesisId,timestamp:Date.now()});
-    })({location:'server.js:signup',message:'Signup body and contact',data:{bodyEmail:email!=null?String(email).trim():'',bodyPhone:phone!=null?String(phone).trim():'',hasContactInfo:!!(phone||email)},hypothesisId:'H1-H5'});
-    // #endregion
-
     console.log('[SIGNUP] Validating signup data...');
     // At least one of phone or email must be provided
     const hasContactInfo = phone || email;
@@ -653,12 +638,6 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         const fromOpt = fromEmail ? { fromEmail } : {};
 
         const attendeeAddress = (createdSignup.email || email) ? String(createdSignup.email || email).trim() : '';
-        // #region agent log
-        (function(d){
-          fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).catch(()=>{});
-          debugLog({...d,data:d.data,hypothesisId:d.hypothesisId,timestamp:Date.now()});
-        })({location:'server.js:attendeeAddress',message:'Attendee email decision',data:{createdSignupEmail:createdSignup.email!=null?String(createdSignup.email).trim():'',attendeeAddress:attendeeAddress||'(empty)',willSendAttendee:!!attendeeAddress},hypothesisId:'H1'});
-        // #endregion
         if (attendeeAddress) {
           try {
             console.log('[SIGNUP] Attempting confirmation email to attendee:', attendeeAddress);
@@ -671,24 +650,12 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
               fromName: attendeeEmailContent.fromName,
               ...fromOpt,
             });
-            // #region agent log
-            (function(d){
-              fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).catch(()=>{});
-              debugLog({...d,timestamp:Date.now()});
-            })({location:'server.js:sendEmailResult',message:'Attendee sendEmail result',data:{emailResult:!!emailResult,to:attendeeAddress},hypothesisId:'H2-H3'});
-            // #endregion
             if (emailResult) {
               console.log('[SIGNUP] Confirmation email sent to attendee:', attendeeAddress);
             } else {
               console.error('[SIGNUP] Email service returned false for attendee:', attendeeAddress);
             }
           } catch (attendeeEmailError) {
-            // #region agent log
-            (function(d){
-              fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).catch(()=>{});
-              debugLog({...d,timestamp:Date.now()});
-            })({location:'server.js:attendeeEmailCatch',message:'Attendee email error',data:{errMsg:attendeeEmailError.message},hypothesisId:'H2'});
-            // #endregion
             console.error('[SIGNUP] Error sending confirmation to attendee:', attendeeEmailError.message, attendeeEmailError.stack || '');
           }
         } else {
