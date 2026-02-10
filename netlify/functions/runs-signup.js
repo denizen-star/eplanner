@@ -143,6 +143,7 @@ exports.handler = async (event) => {
         externalSignup: !!externalSignup,
         signedAt: signedAt,
         metadata: metadata,
+        sessionId: sessionId || null,
       });
       console.log('[RUNS SIGNUP] Signup created with ID:', createdSignup.id);
     } catch (dbError) {
@@ -172,16 +173,19 @@ exports.handler = async (event) => {
       // Don't fail the signup if waiver creation fails, but log it
     }
 
-    // Weekly newsletter opt-in: upsert app_members type=Weekly, status=active. Do not modify existing NA/passive row.
+    // Weekly newsletter opt-in: upsert app_members type=Weekly, status=active; link signup to member.
     if (newsletterWeekly && email && String(email).trim()) {
       try {
         const { appName, tenantKey } = getTenant(event);
-        await appMembers.upsertWeeklyMember(appName, tenantKey, {
+        const member = await appMembers.upsertWeeklyMember(appName, tenantKey, {
           email: String(email).trim(),
           name: name ? String(name).trim() : null,
           phone: phone ? String(phone).trim() : null,
           session_id: sessionId || null,
         });
+        if (member && member.id) {
+          await signups.update(createdSignup.id, { appMemberId: member.id });
+        }
         console.log('[RUNS SIGNUP] Weekly newsletter opt-in recorded for:', email.trim());
       } catch (memberError) {
         console.warn('[RUNS SIGNUP] app_members upsert failed (non-fatal):', memberError.message);
@@ -218,13 +222,13 @@ exports.handler = async (event) => {
         } catch (e) { fromEmail = tk ? getDefaultSenderEmail(tk) : null; }
         const fromOpt = fromEmail ? { fromEmail } : {};
 
-        if (createdSignup.email && createdSignup.email.trim()) {
+        const attendeeAddress = (createdSignup.email || email) ? String(createdSignup.email || email).trim() : '';
+        if (attendeeAddress) {
           try {
-            const attendeeEmail = createdSignup.email.trim();
-            console.log('[RUNS SIGNUP] Sending confirmation email to:', attendeeEmail);
+            console.log('[RUNS SIGNUP] Attempting confirmation email to attendee:', attendeeAddress);
             const attendeeEmailContent = await signupConfirmationEmail(run, createdSignup, eventViewLink, !!externalSignup);
             const emailResult = await emailService.sendEmail({
-              to: attendeeEmail,
+              to: attendeeAddress,
               subject: attendeeEmailContent.subject,
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
@@ -232,15 +236,15 @@ exports.handler = async (event) => {
               ...fromOpt,
             });
             if (emailResult) {
-              console.log('[RUNS SIGNUP] Confirmation email sent successfully to attendee:', attendeeEmail);
+              console.log('[RUNS SIGNUP] Confirmation email sent successfully to attendee:', attendeeAddress);
             } else {
-              console.error('[RUNS SIGNUP] Email service returned false for attendee email');
+              console.error('[RUNS SIGNUP] Email service returned false for attendee:', attendeeAddress);
             }
           } catch (attendeeEmailError) {
-            console.error('[RUNS SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+            console.error('[RUNS SIGNUP] Error sending confirmation to attendee:', attendeeEmailError.message, attendeeEmailError.stack || '');
           }
         } else {
-          console.log('[RUNS SIGNUP] No email provided by attendee, skipping confirmation email');
+          console.log('[RUNS SIGNUP] No attendee email (createdSignup.email or body.email), skipping confirmation email');
         }
 
         if (run.coordinatorEmail && run.coordinatorEmail.trim()) {

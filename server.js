@@ -577,6 +577,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         waiverAccepted: true,
         signedAt: signedAt,
         metadata: metadata,
+        sessionId: sessionId || null,
       });
       console.log('[SIGNUP] Signup created with ID:', createdSignup.id);
     } catch (dbError) {
@@ -609,12 +610,15 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
       try {
         const host = req.get('host') || '';
         const { appName, tenantKey } = getTenantFromHost(host);
-        await appMembers.upsertWeeklyMember(appName, tenantKey, {
+        const member = await appMembers.upsertWeeklyMember(appName, tenantKey, {
           email: String(email).trim(),
           name: name ? String(name).trim() : null,
           phone: phone ? String(phone).trim() : null,
           session_id: sessionId || null,
         });
+        if (member && member.id) {
+          await signups.update(createdSignup.id, { appMemberId: member.id });
+        }
         console.log('[SIGNUP] Weekly newsletter opt-in recorded for:', email.trim());
       } catch (memberError) {
         console.warn('[SIGNUP] app_members upsert failed (non-fatal):', memberError.message);
@@ -633,21 +637,29 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         const fromEmail = await getTenantSenderEmail(run.tenantKey || null);
         const fromOpt = fromEmail ? { fromEmail } : {};
 
-        if (createdSignup.email && createdSignup.email.trim()) {
+        const attendeeAddress = (createdSignup.email || email) ? String(createdSignup.email || email).trim() : '';
+        if (attendeeAddress) {
           try {
+            console.log('[SIGNUP] Attempting confirmation email to attendee:', attendeeAddress);
             const attendeeEmailContent = await signupConfirmationEmail(run, createdSignup, eventViewLink);
-            await emailService.sendEmail({
-              to: createdSignup.email.trim(),
+            const emailResult = await emailService.sendEmail({
+              to: attendeeAddress,
               subject: attendeeEmailContent.subject,
               html: attendeeEmailContent.html,
               text: attendeeEmailContent.text,
               fromName: attendeeEmailContent.fromName,
               ...fromOpt,
             });
-            console.log('[SIGNUP] Confirmation email sent to attendee');
+            if (emailResult) {
+              console.log('[SIGNUP] Confirmation email sent to attendee:', attendeeAddress);
+            } else {
+              console.error('[SIGNUP] Email service returned false for attendee:', attendeeAddress);
+            }
           } catch (attendeeEmailError) {
-            console.error('[SIGNUP] Error sending email to attendee:', attendeeEmailError.message);
+            console.error('[SIGNUP] Error sending confirmation to attendee:', attendeeEmailError.message, attendeeEmailError.stack || '');
           }
+        } else {
+          console.log('[SIGNUP] No attendee email (createdSignup.email or body.email), skipping confirmation email');
         }
 
         if (run.coordinatorEmail && run.coordinatorEmail.trim()) {
