@@ -28,7 +28,10 @@ const waiverText = `
 <h4>8. COMMUNICATION AND DISTRIBUTION CONSENT</h4>
 <p>I agree to receive operational and promotional communication via text message (SMS) and/or WhatsApp from the Club at the phone number provided during registration. I acknowledge that I am responsible for any costs or fees associated with receiving these messages (e.g., carrier data or SMS rates). I also consent to be added to the official Miami Beach Gay Runners distribution list for email and/or messaging updates.</p>
 
-<h4>9. ELECTRONIC CONSENT</h4>
+<h4>9. DATA COLLECTION AND USE</h4>
+<p>I understand and consent that the Club and its technology providers collect certain technical and usage data in connection with my registration and use of the signup system. This may include: device type, browser and operating system information, screen and connection details, a session identifier, the page URL and referrer, and similar technical data. This data is used for security, fraud prevention, improving the service, and analytics, and may be stored with my registration and waiver records. By accepting this waiver, I consent to this collection and use as described.</p>
+
+<h4>10. ELECTRONIC CONSENT</h4>
 <p>I acknowledge that I have carefully read, fully understand, and agree to all terms of this Electronic Waiver. I am at least 18 years of age (or a parent/guardian signing on behalf of a minor). My electronic acceptance has the same legal force and effect as if I had signed a physical document.</p>
 `;
 
