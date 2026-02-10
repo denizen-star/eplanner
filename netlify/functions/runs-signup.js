@@ -1,8 +1,16 @@
+const path = require('path');
+const fs = require('fs');
 const { runs, signups, waivers, tenants, appMembers } = require('../../lib/databaseClient');
 const { getDefaultSenderEmail } = require('../../lib/tenant');
 const { getTenant } = require('./utils');
 const EmailService = require('../../lib/emailService');
 const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
+
+const DEBUG_LOG_PATH = path.resolve(__dirname, '../../.cursor/debug.log');
+function debugLog(payload) {
+  const line = JSON.stringify({ ...payload, timestamp: Date.now() }) + '\n';
+  try { fs.appendFileSync(DEBUG_LOG_PATH, line); } catch (_) {}
+}
 
 function jsonResponse(statusCode, body) {
   return {
@@ -66,6 +74,13 @@ exports.handler = async (event) => {
     
     const body = parseBody(event);
     const { name, phone, email, instagram, waiverAccepted, externalSignup, newsletterWeekly, session_id: sessionId, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = body;
+
+    // #region agent log
+    (function(d){
+      fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,timestamp:Date.now()})}).catch(()=>{});
+      debugLog({...d,data:d.data,hypothesisId:d.hypothesisId,timestamp:Date.now()});
+    })({location:'runs-signup.js:body',message:'Signup body (Netlify)',data:{bodyEmail:email!=null?String(email).trim():'',bodyPhone:phone!=null?String(phone).trim():'',hasContactInfo:!!(phone||email)},hypothesisId:'H1-H5-H4'});
+    // #endregion
 
     console.log('[RUNS SIGNUP] Request received for runId:', runId);
 
@@ -223,6 +238,12 @@ exports.handler = async (event) => {
         const fromOpt = fromEmail ? { fromEmail } : {};
 
         const attendeeAddress = (createdSignup.email || email) ? String(createdSignup.email || email).trim() : '';
+        // #region agent log
+        (function(d){
+          fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,timestamp:Date.now()})}).catch(()=>{});
+          debugLog({...d,data:d.data,hypothesisId:d.hypothesisId,timestamp:Date.now()});
+        })({location:'runs-signup.js:attendeeAddress',message:'Attendee email decision (Netlify)',data:{createdSignupEmail:createdSignup.email!=null?String(createdSignup.email).trim():'',attendeeAddress:attendeeAddress||'(empty)',willSendAttendee:!!attendeeAddress},hypothesisId:'H1'});
+        // #endregion
         if (attendeeAddress) {
           try {
             console.log('[RUNS SIGNUP] Attempting confirmation email to attendee:', attendeeAddress);
@@ -235,12 +256,24 @@ exports.handler = async (event) => {
               fromName: attendeeEmailContent.fromName,
               ...fromOpt,
             });
+            // #region agent log
+            (function(d){
+              fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,timestamp:Date.now()})}).catch(()=>{});
+              debugLog({...d,timestamp:Date.now()});
+            })({location:'runs-signup.js:sendEmailResult',message:'Attendee sendEmail result (Netlify)',data:{emailResult:!!emailResult,to:attendeeAddress},hypothesisId:'H2-H3'});
+            // #endregion
             if (emailResult) {
               console.log('[RUNS SIGNUP] Confirmation email sent successfully to attendee:', attendeeAddress);
             } else {
               console.error('[RUNS SIGNUP] Email service returned false for attendee:', attendeeAddress);
             }
           } catch (attendeeEmailError) {
+            // #region agent log
+            (function(d){
+              fetch('http://127.0.0.1:7243/ingest/9e1f6512-a975-462a-9e39-bc277d1d3769',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,timestamp:Date.now()})}).catch(()=>{});
+              debugLog({...d,timestamp:Date.now()});
+            })({location:'runs-signup.js:attendeeEmailCatch',message:'Attendee email error (Netlify)',data:{errMsg:attendeeEmailError.message},hypothesisId:'H2'});
+            // #endregion
             console.error('[RUNS SIGNUP] Error sending confirmation to attendee:', attendeeEmailError.message, attendeeEmailError.stack || '');
           }
         } else {
