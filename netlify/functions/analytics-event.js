@@ -1,6 +1,14 @@
-const { jsonResponse, parseBody, extractClientMetadata, getAppName } = require('./utils');
-const { appEvents } = require('../../lib/databaseClient');
+const { jsonResponse, parseBody, extractClientMetadata, getAppName, getTenant } = require('./utils');
+const { appEvents, appMembers } = require('../../lib/databaseClient');
 const { getGeolocationFromIP } = require('../../lib/ipGeolocation');
+
+const SIGNUP_INTENT_CTAS = [
+  'signup_submit_click',
+  'event_signup_click',
+  'calendar_event_click',
+  'desktop_calendar_signup_click',
+  'home_signup_button_click',
+];
 
 /**
  * Validate required event data
@@ -67,6 +75,27 @@ async function writeTelemetryToDatabase(payload) {
   }
 }
 
+/**
+ * If this is a signup-intent CTA, upsert a passive NA app_member (same request, no new endpoint).
+ * Non-blocking: failures are logged but do not fail the analytics response.
+ */
+async function upsertPassiveMemberIfSignupCta(body, event) {
+  if (body.eventType !== 'cta_click' || !body.ctaType || !SIGNUP_INTENT_CTAS.includes(body.ctaType)) {
+    return;
+  }
+  try {
+    const { appName, tenantKey } = getTenant(event);
+    const sessionId = body.sessionId || null;
+    const email = body.memberEmail != null ? String(body.memberEmail).trim() : null;
+    const name = body.memberName != null ? String(body.memberName).trim() : null;
+    const phone = body.memberPhone != null ? String(body.memberPhone).trim() : null;
+    if (!sessionId && !email) return;
+    await appMembers.upsertPassiveNaMember(appName, tenantKey, { sessionId, email, name, phone });
+  } catch (err) {
+    console.warn('[ANALYTICS] Passive member upsert failed (non-fatal):', err.message);
+  }
+}
+
 exports.handler = async (event) => {
   console.log('[ANALYTICS EVENT] Handler invoked');
   
@@ -101,6 +130,9 @@ exports.handler = async (event) => {
     
     // Write to database
     await writeTelemetryToDatabase(payload);
+
+    // Reuse same call for passive app_member (signup-intent CTAs only)
+    await upsertPassiveMemberIfSignupCta(body, event);
     
     // Return success response
     return jsonResponse(200, {

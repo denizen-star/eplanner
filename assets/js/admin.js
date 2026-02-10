@@ -453,6 +453,42 @@ async function loadRuns() {
   }
 }
 
+async function sendWeeklyDigest() {
+  const btn = document.getElementById('sendWeeklyDigestBtn');
+  const msgEl = document.getElementById('weeklyDigestMessage');
+  if (!btn || !msgEl) return;
+  if (!window.AdminAuth || typeof window.AdminAuth.adminFetch !== 'function') {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#fef2f2';
+    msgEl.style.color = '#991b1b';
+    msgEl.textContent = 'Admin auth is required.';
+    return;
+  }
+  btn.disabled = true;
+  msgEl.style.display = 'none';
+  try {
+    const response = await window.AdminAuth.adminFetch('/api/admin/send-weekly-digest', { method: 'POST' }, { reason: 'send weekly digest' });
+    const data = await response.json();
+    msgEl.style.display = 'block';
+    if (data.success) {
+      msgEl.style.background = '#f0fdf4';
+      msgEl.style.color = '#166534';
+      msgEl.textContent = 'Sent: ' + (data.sentCount || 0) + ', skipped: ' + (data.skippedCount || 0) + ', events: ' + (data.eventsCount || 0);
+    } else {
+      msgEl.style.background = '#fef2f2';
+      msgEl.style.color = '#991b1b';
+      msgEl.textContent = data.error || data.message || 'Failed to send.';
+    }
+  } catch (err) {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#fef2f2';
+    msgEl.style.color = '#991b1b';
+    msgEl.textContent = err.message || 'Request failed.';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function editRun(runId) {
   const run = currentRuns.find(r => r.id === runId || r.uuid === runId);
   if (!run) return;

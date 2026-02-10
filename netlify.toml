@@ -108,6 +108,18 @@
   force = true
 
 [[redirects]]
+  from = "/api/admin/send-weekly-digest"
+  to = "/.netlify/functions/admin-send-weekly-digest"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/newsletter/unsubscribe"
+  to = "/.netlify/functions/newsletter-unsubscribe"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/test-sheets-read"
   to = "/.netlify/functions/test-sheets-read"
   status = 200

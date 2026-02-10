@@ -463,16 +463,18 @@ function validateEmail(email) {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Track signup submission CTA click
-  if (window.Analytics?.safeTrack) {
-    window.Analytics.safeTrack('trackCTAClick', 'signup_submit_click', {
-      pageCategory: 'event_signup',
-      articleId: runId,
-    });
-  }
-
   const phone = document.getElementById('phone').value.trim();
   const email = document.getElementById('email').value.trim();
+  const name = document.getElementById('name').value.trim();
+
+  // Track signup submission CTA click; optional enrichment for passive member (memberEmail, memberName, memberPhone)
+  if (window.Analytics?.safeTrack) {
+    const ctaContext = { pageCategory: 'event_signup', articleId: runId };
+    if (email) ctaContext.memberEmail = email;
+    if (name) ctaContext.memberName = name;
+    if (phone) ctaContext.memberPhone = phone;
+    window.Analytics.safeTrack('trackCTAClick', 'signup_submit_click', ctaContext);
+  }
   const instagram = formatInstagramHandle(document.getElementById('instagram').value);
 
   // Validate that at least one of phone or email is provided
@@ -504,6 +506,9 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   // Use domain-aware waiver text if available, otherwise fall back to default
   const waiverTextToSubmit = window.currentWaiverText || getWaiverText(getDomainName());
   
+  const sessionId = (sessionManager && sessionManager.sessionId) || (typeof localStorage !== 'undefined' && localStorage.getItem('eplanner_session_id')) || null;
+  const newsletterWeeklyOptIn = document.getElementById('newsletterWeeklyOptIn') && document.getElementById('newsletterWeeklyOptIn').checked;
+
   const formData = {
     name: document.getElementById('name').value.trim(),
     phone: document.getElementById('phone').value.trim(),
@@ -512,6 +517,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     waiverAccepted: document.getElementById('waiverAccepted').checked,
     waiverText: waiverTextToSubmit,
     externalSignup: isExternal,
+    newsletterWeekly: !!newsletterWeeklyOptIn,
+    session_id: sessionId,
     deviceInfo: deviceInfo,
     sessionInfo: sessionInfo,
     pageUrl: window.location.href,

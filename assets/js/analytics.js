@@ -84,6 +84,10 @@ async function sendEvent(eventData) {
       ctaType: eventData.ctaType || null,
       // Scroll depth
       depthPercent: eventData.depthPercent || null,
+      // Optional member fields (e.g. for signup_submit_click passive member enrichment)
+      memberEmail: eventData.memberEmail || null,
+      memberName: eventData.memberName || null,
+      memberPhone: eventData.memberPhone || null,
     };
 
     const url = getApiBaseUrl() + API_ENDPOINT;

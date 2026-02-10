@@ -1,5 +1,6 @@
-const { runs, signups, waivers, tenants } = require('../../lib/databaseClient');
+const { runs, signups, waivers, tenants, appMembers } = require('../../lib/databaseClient');
 const { getDefaultSenderEmail } = require('../../lib/tenant');
+const { getTenant } = require('./utils');
 const EmailService = require('../../lib/emailService');
 const { signupConfirmationEmail, signupNotificationEmail } = require('../../lib/emailTemplates');
 
@@ -64,7 +65,7 @@ exports.handler = async (event) => {
     const runId = runIdIndex >= 0 && pathParts[runIdIndex + 1] ? pathParts[runIdIndex + 1] : null;
     
     const body = parseBody(event);
-    const { name, phone, email, instagram, waiverAccepted, externalSignup, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = body;
+    const { name, phone, email, instagram, waiverAccepted, externalSignup, newsletterWeekly, session_id: sessionId, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = body;
 
     console.log('[RUNS SIGNUP] Request received for runId:', runId);
 
@@ -169,6 +170,22 @@ exports.handler = async (event) => {
     } catch (waiverError) {
       console.error('[RUNS SIGNUP] Database error creating waiver:', waiverError.message);
       // Don't fail the signup if waiver creation fails, but log it
+    }
+
+    // Weekly newsletter opt-in: upsert app_members type=Weekly, status=active. Do not modify existing NA/passive row.
+    if (newsletterWeekly && email && String(email).trim()) {
+      try {
+        const { appName, tenantKey } = getTenant(event);
+        await appMembers.upsertWeeklyMember(appName, tenantKey, {
+          email: String(email).trim(),
+          name: name ? String(name).trim() : null,
+          phone: phone ? String(phone).trim() : null,
+          session_id: sessionId || null,
+        });
+        console.log('[RUNS SIGNUP] Weekly newsletter opt-in recorded for:', email.trim());
+      } catch (memberError) {
+        console.warn('[RUNS SIGNUP] app_members upsert failed (non-fatal):', memberError.message);
+      }
     }
 
     console.log('[RUNS SIGNUP] Success! Signup completed for:', name);

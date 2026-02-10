@@ -47,7 +47,9 @@
                     <div style="margin-bottom: 24px; padding-top: 20px;">
                         <a href="coordinate.html" class="button button-primary">Create New Event</a>
                         <button class="button button-secondary" onclick="loadRuns()" style="margin-left: 12px;">Refresh</button>
+                        <button class="button button-secondary" id="sendWeeklyDigestBtn" onclick="sendWeeklyDigest()" style="margin-left: 12px;">Send Weekly Events Email</button>
                     </div>
+                    <div id="weeklyDigestMessage" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 8px;"></div>
 
                     <div id="loading" style="text-align: center; padding: 40px;">
                         <p>Loading events...</p>

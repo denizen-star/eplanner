@@ -6,7 +6,7 @@ if (process.env.NETLIFY !== 'true') {
 
 const express = require('express');
 const cors = require('cors');
-const { runs, signups, waivers, tenants } = require('./lib/databaseClient');
+const { runs, signups, waivers, tenants, appMembers } = require('./lib/databaseClient');
 const { getTenantFromHost, getProductDefaults, mergeConfig, getDefaultSenderEmail } = require('./lib/tenant');
 const EmailService = require('./lib/emailService');
 const { 
@@ -506,7 +506,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
   console.log('[SIGNUP] Request received for runId:', runId);
 
   try {
-    const { name, phone, email, instagram, waiverAccepted, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = req.body;
+    const { name, phone, email, instagram, waiverAccepted, newsletterWeekly, session_id: sessionId, deviceInfo, sessionInfo, pageUrl, referrer, waiverText } = req.body;
 
     console.log('[SIGNUP] Validating signup data...');
     // At least one of phone or email must be provided
@@ -603,6 +603,22 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
     } catch (waiverError) {
       console.error('[SIGNUP] Database error creating waiver:', waiverError.message);
       // Don't fail the signup if waiver creation fails, but log it
+    }
+
+    if (newsletterWeekly && email && String(email).trim()) {
+      try {
+        const host = req.get('host') || '';
+        const { appName, tenantKey } = getTenantFromHost(host);
+        await appMembers.upsertWeeklyMember(appName, tenantKey, {
+          email: String(email).trim(),
+          name: name ? String(name).trim() : null,
+          phone: phone ? String(phone).trim() : null,
+          session_id: sessionId || null,
+        });
+        console.log('[SIGNUP] Weekly newsletter opt-in recorded for:', email.trim());
+      } catch (memberError) {
+        console.warn('[SIGNUP] app_members upsert failed (non-fatal):', memberError.message);
+      }
     }
 
     console.log('[SIGNUP] Success! Signup completed for:', name);
