@@ -150,6 +150,14 @@
   to = "/:splat.html"
   status = 200
 
+# Geo-block: serve blocked page for visitors from these countries (all Asia, all Africa, plus recommended)
+[[redirects]]
+  from = "/*"
+  to = "/blocked.html"
+  status = 404
+  force = true
+  conditions = { Country = ["ae", "af", "am", "ao", "az", "bd", "bf", "bh", "bj", "bn", "br", "bt", "bw", "by", "bz", "cd", "cf", "cg", "cm", "cn", "co", "cr", "cu", "cv", "dj", "dz", "ec", "eg", "er", "et", "ga", "ge", "gh", "gm", "gn", "gq", "gt", "gw", "hn", "id", "il", "in", "iq", "ir", "jp", "jo", "ke", "kg", "kh", "km", "kr", "kp", "kw", "kz", "la", "lb", "ls", "lr", "ly", "ma", "mg", "ml", "mm", "mr", "mu", "mv", "mw", "my", "mz", "na", "ne", "ng", "ni", "np", "om", "pa", "pe", "ph", "pk", "ps", "qa", "ru", "rw", "sa", "sc", "sd", "sg", "sl", "sn", "so", "ss", "st", "sz", "sy", "sv", "td", "tg", "th", "tj", "tl", "tm", "tn", "tr", "tw", "tz", "ug", "uz", "ve", "vn", "ye", "za", "zm", "zw"] }
+
 # Catch-all redirect - must be last
 [[redirects]]
   from = "/*"
