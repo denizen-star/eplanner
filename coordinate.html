@@ -90,10 +90,18 @@
 
               <div class="form-section">
                 <div class="form-section-head">Basics</div>
-                <div class="form-group"><label for="pacerName">Planner Name *</label><input type="text" id="pacerName" name="pacerName" required placeholder="e.g., John Smith"></div>
-                <div class="form-group"><label for="coordinatorEmail">Coordinator Email *</label><input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="e.g., coordinator@example.com"><small>Email address for event confirmations and notifications</small></div>
-                <div class="form-group"><label for="runTitle">Event Title (Optional)</label><input type="text" id="runTitle" name="runTitle" placeholder="e.g., Morning Beach Event"></div>
-                <div class="form-group"><label for="eventDescription">Event Description (Optional)</label><textarea id="eventDescription" name="eventDescription" rows="2" placeholder="Add details about your event..."></textarea></div>
+                <div class="inline-row">
+                  <input type="text" id="pacerName" name="pacerName" required placeholder="Planner Name *" aria-label="Planner Name">
+                </div>
+                <div class="inline-row">
+                  <input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="Coordinator Email *" aria-label="Coordinator Email">
+                </div>
+                <div class="inline-row">
+                  <input type="text" id="runTitle" name="runTitle" placeholder="Event Title (optional)" aria-label="Event Title">
+                </div>
+                <div class="block-row">
+                  <textarea id="eventDescription" name="eventDescription" rows="2" placeholder="Description (optional)" aria-label="Event Description"></textarea>
+                </div>
               </div>
 
               <div class="form-section">
@@ -118,38 +126,28 @@
                 <div class="form-section-head">Social</div>
                 <div class="inline-row">
                   <div class="event-website-wrap">
-                    <div class="form-group">
-                      <label for="eventWebsite">Event Website (Optional)</label>
-                      <input type="url" id="eventWebsite" name="eventWebsite" placeholder="e.g., https://example.com">
-                      <div class="checkbox-inline">
-                        <input type="checkbox" id="externalSignupEnabled" name="externalSignupEnabled">
-                        <label for="externalSignupEnabled">Use website for external signups</label>
-                      </div>
-                      <small>If checked, attendees complete waiver here then open this link. URL is required.</small>
+                    <input type="url" id="eventWebsite" name="eventWebsite" placeholder="Event Website (optional)" aria-label="Event Website">
+                    <div class="checkbox-inline">
+                      <input type="checkbox" id="externalSignupEnabled" name="externalSignupEnabled">
+                      <label for="externalSignupEnabled">Use website for external signups</label>
                     </div>
                   </div>
-                  <div class="form-group" style="flex:1;">
-                    <label for="eventInstagram">Event Instagram (Optional)</label>
-                    <input type="text" id="eventInstagram" name="eventInstagram" placeholder="e.g., @handle or URL">
-                  </div>
+                  <input type="text" id="eventInstagram" name="eventInstagram" placeholder="Event Instagram (optional)" style="flex:1;" aria-label="Event Instagram">
                 </div>
-                <div class="form-group">
-                  <label for="eventPicture">Event Picture (Optional)</label>
-                  <input type="file" id="eventPicture" name="eventPicture" accept="image/*">
-                  <div id="picturePreview" style="display: none;">
-                    <img id="previewImage" src="" alt="Preview">
-                    <button type="button" id="removePicture" class="button button-secondary">Remove Picture</button>
-                  </div>
+                <div class="inline-row">
+                  <input type="file" id="eventPicture" name="eventPicture" accept="image/*" aria-label="Event Picture">
+                </div>
+                <div id="picturePreview" class="pic-preview" style="display: none;">
+                  <img id="previewImage" src="" alt="Preview">
+                  <button type="button" id="removePicture" class="btn btn-secondary">Remove Picture</button>
                 </div>
               </div>
 
               <div class="form-section">
                 <div class="form-section-head">Location</div>
-                <div class="form-group">
-                  <label for="location">Location *</label>
-                  <input type="text" id="location" name="location" required placeholder="e.g., 1664 Lincoln Rd, Miami Beach, FL 33139">
-                  <small>Map appears when location is found</small>
-                  <div id="locationValidation" style="display: none;"><strong>Validated address:</strong> <span id="validatedAddress"></span></div>
+                <div class="block-row">
+                  <input type="text" id="location" name="location" required placeholder="Address * (map appears when found)" aria-label="Location">
+                  <div id="locationValidation" class="validated-addr" style="display: none;"><strong>Validated:</strong> <span id="validatedAddress"></span></div>
                   <div id="locationMap" class="location-map"></div>
                 </div>
               </div>
@@ -172,21 +170,20 @@
                     </div>
                   </div>
                   <div id="paymentDetailsCard" style="display: none;">
-                    <div id="fixedAmountWrap" class="payment-inline-field" style="display: none;">
-                      <label><span>Amount</span> <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0" class="form-input payment-input"></label>
+                    <div id="fixedAmountWrap" class="payment-cost-row" style="display: none;">
+                      <label><span style="font-weight:500;">Amount</span> <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0"></label>
                     </div>
                     <div id="splitCostWrap" class="payment-cost-inline" style="display: none;">
-                      <label><span>Total</span> <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0" class="form-input payment-input"></label>
-                      <label><span>Collection</span> <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input"></label>
+                      <label><span style="font-weight:500;">Total</span> <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0"></label>
+                      <label><span style="font-weight:500;">Collection</span> <input type="date" id="paymentDueDate" name="paymentDueDate"></label>
                     </div>
                   </div>
-                  <div class="payment-inline-helper">The app will display the estimated cost per person based on the current number of sign-ups.</div>
-                  <div class="payment-disclaimer payment-disclaimer-inline">Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.</div>
+                  <div class="payment-disclaimer payment-disclaimer-inline">Kervinapps does not process payments. You collect funds from participants directly.</div>
                 </div>
               </div>
 
               <div class="form-section">
-                <div class="form-section-head">Event Visibility</div>
+                <div class="form-section-head">Visibility</div>
                 <div class="vis-row">
                   <div class="vis-pills">
                     <label class="vis-pill radio-card">
@@ -202,7 +199,7 @@
                 </div>
               </div>
 
-              <button type="submit" class="button button-primary" id="submitButton" data-track-cta="create_event_button_click">Create Event</button>
+              <button type="submit" class="btn" id="submitButton" data-track-cta="create_event_button_click">Create Event</button>
             </form>
 
             <div id="result" style="display: none; margin-top: 32px;">
