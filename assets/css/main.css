@@ -2553,3 +2553,47 @@ td, th {
   font-weight: 500;
 }
 
+/* Payment inputs - compact modern style */
+.payment-input {
+  font-size: 13px;
+  padding: 6px 10px;
+  max-width: 160px;
+  width: 100%;
+  border: 1px solid var(--border-gray);
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.payment-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+}
+
+.payment-helper {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-gray);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.collection-date-inline {
+  padding-top: 8px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.collection-date-inline label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1976D2;
+  margin-bottom: 6px;
+}
+
+.collection-date-inline .payment-input {
+  max-width: 160px;
+}
+

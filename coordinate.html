@@ -181,30 +181,32 @@
                             <input type="hidden" name="paymentType" id="paymentTypeHidden" value="free">
                             <div id="paymentDetailsCard" class="payment-details-card" style="display: none;">
                                 <div class="cost-type-box" style="background: #E3F2FD; border: 1px solid #2196F3; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);">
-                                    <label class="cost-type-label" style="display: block; font-weight: var(--font-semibold); margin-bottom: 12px; color: #1976D2;">Cost Type</label>
-                                    <div class="cost-type-options" style="display: flex; gap: 12px; align-items: center;">
-                                        <label class="cost-type-option">
-                                            <input type="radio" name="paymentMode" value="fixed_amount">
-                                            <span>Fixed Cost</span>
-                                        </label>
-                                        <label class="cost-type-option">
-                                            <input type="radio" name="paymentMode" value="split_cost">
-                                            <span>Split Cost</span>
-                                        </label>
+                                    <div class="cost-type-header" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                                        <label class="cost-type-label" style="font-weight: var(--font-semibold); color: #1976D2; margin-bottom: 0;">Cost Type</label>
+                                        <div class="cost-type-options" style="display: flex; gap: 12px; align-items: center;">
+                                            <label class="cost-type-option">
+                                                <span>Fixed Cost</span>
+                                                <input type="radio" name="paymentMode" value="fixed_amount">
+                                            </label>
+                                            <label class="cost-type-option">
+                                                <span>Split Cost</span>
+                                                <input type="radio" name="paymentMode" value="split_cost">
+                                            </label>
+                                        </div>
                                     </div>
                                     <div id="fixedAmountWrap" style="display: none; margin-top: 12px;">
-                                        <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Amount per person" step="0.01" min="0" class="form-input" style="width: 100%; max-width: 180px; padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                        <small style="display: block; margin-top: 6px; color: var(--text-gray); font-size: 13px;">The app will display the estimated cost per person based on the current number of sign-ups.</small>
+                                        <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Amount per person" step="0.01" min="0" class="form-input payment-input">
+                                        <small class="payment-helper">The app will display the estimated cost per person based on the current number of sign-ups.</small>
                                     </div>
                                     <div id="splitCostWrap" style="display: none; margin-top: 12px;">
-                                        <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost of event" step="0.01" min="0" class="form-input" style="width: 100%; max-width: 180px; padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                        <small style="display: block; margin-top: 6px; color: var(--text-gray); font-size: 13px;">The app will display the estimated cost per person based on the current number of sign-ups.</small>
+                                        <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost of event" step="0.01" min="0" class="form-input payment-input">
+                                        <small class="payment-helper">The app will display the estimated cost per person based on the current number of sign-ups.</small>
                                     </div>
-                                </div>
-                                <div id="collectionDateWrap" class="form-group" style="display: none;">
-                                    <label for="paymentDueDate">Collection Date (Optional)</label>
-                                    <input type="date" id="paymentDueDate" name="paymentDueDate" style="width: 100%; max-width: 200px; padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 6px;">
-                                    <small style="display: block; margin-top: 4px; color: var(--text-gray);">Date participants should expect to pay the coordinator</small>
+                                    <div id="collectionDateWrap" class="form-group collection-date-inline" style="display: none; margin-top: 12px;">
+                                        <label for="paymentDueDate">Collection Date (Optional)</label>
+                                        <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input">
+                                        <small class="payment-helper">Date participants should expect to pay the coordinator</small>
+                                    </div>
                                 </div>
                                 <div class="payment-disclaimer" style="margin-top: 12px; padding: 12px; background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; font-size: 14px; font-weight: 600;">
                                     Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.
