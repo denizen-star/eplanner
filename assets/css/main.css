@@ -2543,10 +2543,6 @@ td, th {
   background-color: rgba(33, 150, 243, 0.15);
 }
 
-.cost-type-option input {
-  margin: 0;
-}
-
 .cost-type-option:has(input:checked) {
   background-color: rgba(33, 150, 243, 0.2);
   color: #1976D2;
@@ -2595,5 +2591,107 @@ td, th {
 
 .collection-date-inline .payment-input {
   max-width: 160px;
+}
+
+/* Option B: Inline compact with blue colors */
+.payment-inline-box {
+  background: #E3F2FD;
+  border: 1px solid #2196F3;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.payment-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.payment-inline-row-1 {
+  margin-bottom: 12px;
+}
+
+.payment-inline-row-2 {
+  margin-bottom: 10px;
+  gap: 20px;
+}
+
+.payment-inline-row .payment-toggle-label {
+  font-size: 13px;
+  color: #1976D2;
+  font-weight: 500;
+}
+
+.payment-inline-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(33, 150, 243, 0.4);
+  margin: 0 4px;
+}
+
+.payment-inline-cost-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1976D2;
+}
+
+.payment-inline-box .cost-type-options {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.payment-inline-box .cost-type-option,
+.payment-section label.cost-type-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.cost-type-option input[type="radio"] {
+  width: auto;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.payment-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-inline-field-label {
+  font-size: 13px;
+  color: #1976D2;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.payment-inline-field .payment-input {
+  max-width: 140px;
+  min-width: 100px;
+}
+
+.payment-inline-helper {
+  font-size: 12px;
+  color: #1976D2;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.payment-disclaimer-inline {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #991b1b;
 }
 

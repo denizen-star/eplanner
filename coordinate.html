@@ -170,45 +170,48 @@
 
                         <div class="form-group payment-section" style="margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-light);">
                             <label>Payment Information</label>
-                            <div class="payment-toggle-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                                <span class="payment-toggle-label" style="font-size: var(--font-sm); color: var(--text-secondary);">Free Event</span>
-                                <label class="payment-toggle">
-                                    <input type="checkbox" id="paymentTypeToggle" name="paymentTypeToggle" value="paid">
-                                    <span class="payment-toggle-slider"></span>
-                                </label>
-                                <span class="payment-toggle-label" style="font-size: var(--font-sm); color: var(--text-secondary);">Paid Event</span>
-                            </div>
                             <input type="hidden" name="paymentType" id="paymentTypeHidden" value="free">
-                            <div id="paymentDetailsCard" class="payment-details-card" style="display: none;">
-                                <div class="cost-type-box" style="background: #E3F2FD; border: 1px solid #2196F3; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);">
-                                    <div class="cost-type-header" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
-                                        <label class="cost-type-label" style="font-weight: var(--font-semibold); color: #1976D2; margin-bottom: 0;">Cost Type</label>
-                                        <div class="cost-type-options" style="display: flex; gap: 12px; align-items: center;">
-                                            <label class="cost-type-option">
-                                                <span>Fixed Cost</span>
-                                                <input type="radio" name="paymentMode" value="fixed_amount">
-                                            </label>
-                                            <label class="cost-type-option">
-                                                <span>Split Cost</span>
-                                                <input type="radio" name="paymentMode" value="split_cost">
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div id="fixedAmountWrap" style="display: none; margin-top: 12px;">
-                                        <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Amount per person" step="0.01" min="0" class="form-input payment-input">
-                                        <small class="payment-helper">The app will display the estimated cost per person based on the current number of sign-ups.</small>
-                                    </div>
-                                    <div id="splitCostWrap" style="display: none; margin-top: 12px;">
-                                        <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost of event" step="0.01" min="0" class="form-input payment-input">
-                                        <small class="payment-helper">The app will display the estimated cost per person based on the current number of sign-ups.</small>
-                                    </div>
-                                    <div id="collectionDateWrap" class="form-group collection-date-inline" style="display: none; margin-top: 12px;">
-                                        <label for="paymentDueDate">Collection Date (Optional)</label>
-                                        <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input">
-                                        <small class="payment-helper">Date participants should expect to pay the coordinator</small>
+                            <div class="payment-inline-box">
+                                <div class="payment-inline-row payment-inline-row-1">
+                                    <span class="payment-toggle-label">Free</span>
+                                    <label class="payment-toggle">
+                                        <input type="checkbox" id="paymentTypeToggle" name="paymentTypeToggle" value="paid">
+                                        <span class="payment-toggle-slider"></span>
+                                    </label>
+                                    <span class="payment-toggle-label">Paid</span>
+                                    <span id="paymentCostTypeDivider" class="payment-inline-divider" style="display: none;"></span>
+                                    <span id="paymentCostTypeLabel" class="payment-inline-cost-label" style="display: none;">Cost:</span>
+                                    <div id="paymentCostTypeOptions" class="cost-type-options" style="display: none;">
+                                        <label class="cost-type-option">
+                                            <span>Fixed</span>
+                                            <input type="radio" name="paymentMode" value="fixed_amount">
+                                        </label>
+                                        <label class="cost-type-option">
+                                            <span>Split</span>
+                                            <input type="radio" name="paymentMode" value="split_cost">
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="payment-disclaimer" style="margin-top: 12px; padding: 12px; background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; font-size: 14px; font-weight: 600;">
+                                <div id="paymentDetailsCard" class="payment-details-card payment-inline-b" style="display: none;">
+                                    <div class="payment-inline-row payment-inline-row-2">
+                                        <div id="fixedAmountWrap" class="payment-inline-field" style="display: none;">
+                                            <span class="payment-inline-field-label">Amount:</span>
+                                            <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0" class="form-input payment-input">
+                                        </div>
+                                        <div id="splitCostWrap" class="payment-inline-field payment-inline-split" style="display: none;">
+                                            <span class="payment-inline-field-label">Total:</span>
+                                            <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0" class="form-input payment-input">
+                                        </div>
+                                        <div id="collectionDateWrap" class="payment-inline-field" style="display: none;">
+                                            <span class="payment-inline-field-label">Collection:</span>
+                                            <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input">
+                                        </div>
+                                    </div>
+                                    <div class="payment-inline-helper">
+                                        The app will display the estimated cost per person based on the current number of sign-ups.
+                                    </div>
+                                </div>
+                                <div class="payment-disclaimer payment-disclaimer-inline">
                                     Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.
                                 </div>
                             </div>

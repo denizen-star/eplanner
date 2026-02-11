@@ -88,6 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const paymentTypeToggle = document.getElementById('paymentTypeToggle');
   const paymentDetailsCard = document.getElementById('paymentDetailsCard');
   const paymentTypeHidden = document.getElementById('paymentTypeHidden');
+  const paymentCostTypeDivider = document.getElementById('paymentCostTypeDivider');
+  const paymentCostTypeLabel = document.getElementById('paymentCostTypeLabel');
+  const paymentCostTypeOptions = document.getElementById('paymentCostTypeOptions');
   const paymentModeInputs = document.querySelectorAll('input[name="paymentMode"]');
   const fixedAmountWrap = document.getElementById('fixedAmountWrap');
   const splitCostWrap = document.getElementById('splitCostWrap');
@@ -97,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPaid = paymentTypeToggle && paymentTypeToggle.checked;
     paymentDetailsCard.style.display = isPaid ? 'block' : 'none';
     if (paymentTypeHidden) paymentTypeHidden.value = isPaid ? 'paid' : 'free';
+    if (paymentCostTypeDivider) paymentCostTypeDivider.style.display = isPaid ? 'inline-block' : 'none';
+    if (paymentCostTypeLabel) paymentCostTypeLabel.style.display = isPaid ? 'inline' : 'none';
+    if (paymentCostTypeOptions) paymentCostTypeOptions.style.display = isPaid ? 'flex' : 'none';
     if (!isPaid) {
       fixedAmountWrap.style.display = 'none';
       splitCostWrap.style.display = 'none';
@@ -104,9 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const checked = document.querySelector('input[name="paymentMode"]:checked');
       if (checked) {
-        fixedAmountWrap.style.display = checked.value === 'fixed_amount' ? 'block' : 'none';
-        splitCostWrap.style.display = checked.value === 'split_cost' ? 'block' : 'none';
-        if (collectionDateWrap) collectionDateWrap.style.display = checked.value === 'split_cost' ? 'block' : 'none';
+        fixedAmountWrap.style.display = checked.value === 'fixed_amount' ? 'flex' : 'none';
+        splitCostWrap.style.display = checked.value === 'split_cost' ? 'flex' : 'none';
+        if (collectionDateWrap) collectionDateWrap.style.display = checked.value === 'split_cost' ? 'flex' : 'none';
       }
     }
   }
