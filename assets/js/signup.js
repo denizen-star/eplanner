@@ -311,6 +311,15 @@ async function loadRun() {
     if (run.location) {
       updateMapForLocation('locationMap', run.location, true);
     }
+
+    const paymentContainer = document.getElementById('paymentSummaryContainer');
+    if (paymentContainer && typeof renderPaymentSummaryBox === 'function' && run.paymentInfoEnabled) {
+      paymentContainer.innerHTML = renderPaymentSummaryBox(run, { showCoordinatorDisclaimer: false });
+      paymentContainer.style.display = 'block';
+    } else if (paymentContainer) {
+      paymentContainer.innerHTML = '';
+      paymentContainer.style.display = 'none';
+    }
     
     // Update Open Graph meta tags for social sharing
     updateOpenGraphTags(run, runTitleDisplay);

@@ -67,10 +67,13 @@
                         <p><strong>Current Signups:</strong> <span id="runCurrent"></span></p>
                         <p><strong>Created:</strong> <span id="runCreated">-</span></p>
                     </div>
-                    <div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <button id="editEventButton" class="button button-primary" onclick="editEvent()" style="display: none;" data-track-cta="edit_event_click">Edit Event</button>
+                        <button id="lockCollectionButton" class="button button-secondary" onclick="lockCollection()" style="display: none;" data-track-cta="lock_collection_click">Lock Collection</button>
                     </div>
                 </div>
+
+                <div id="paymentSummaryContainer"></div>
 
                 <div id="editFormSection" style="display: none; margin-top: 24px; margin-bottom: 24px; padding: 20px; background: var(--light-gray-1); border-radius: 8px; border: 1px solid var(--border-gray);">
                     <h2 style="margin-bottom: 16px; background: var(--primary-rainbow); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Edit Event</h2>
@@ -118,6 +121,39 @@
                             <label for="editInstagram">Event Instagram (Optional)</label>
                             <input type="text" id="editInstagram" placeholder="e.g., @pickleball6ix or https://instagram.com/pickleball6ix">
                             <small>Instagram handle or full URL</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Information</label>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="editPaymentType" value="free">
+                                    <span>Free Event</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="editPaymentType" value="paid">
+                                    <span>Paid Event</span>
+                                </label>
+                            </div>
+                            <div id="editPaymentDetailsCard" style="display: none; margin-left: 24px; margin-bottom: 12px;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="editPaymentMode" value="fixed_amount">
+                                    <span>Fixed Cost</span>
+                                </label>
+                                <div id="editFixedAmountWrap" style="display: none; margin-left: 24px; margin-bottom: 8px;">
+                                    <input type="number" id="editAmountPerPerson" placeholder="Amount per person" step="0.01" min="0" style="width: 100%; max-width: 200px;">
+                                </div>
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="editPaymentMode" value="split_cost">
+                                    <span>Split Cost</span>
+                                </label>
+                                <div id="editSplitCostWrap" style="display: none; margin-left: 24px;">
+                                    <input type="number" id="editTotalEventCost" placeholder="Total cost of event" step="0.01" min="0" style="width: 100%; max-width: 200px;">
+                                </div>
+                                <div class="form-group" style="margin-top: 12px;">
+                                    <label for="editPaymentDueDate">Collection Date (Optional)</label>
+                                    <input type="date" id="editPaymentDueDate" style="width: 100%; max-width: 200px;">
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="editPicture">Event Picture (Optional)</label>
@@ -249,6 +285,7 @@
     <script src="assets/js/calendar-utils.js"></script>
     <script src="assets/js/dropdown.js"></script>
     <script src="assets/js/device-collector.js"></script>
+    <script src="assets/js/payment-terms.js"></script>
     <script src="assets/js/analytics.js"></script>
     <script src="assets/js/modal-utils.js"></script>
     <script src="assets/js/cancellation-utils.js"></script>

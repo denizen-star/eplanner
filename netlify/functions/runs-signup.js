@@ -129,6 +129,11 @@ exports.handler = async (event) => {
       referrer: referrer || null,
     };
 
+    let amountDue = null;
+    if (run.paymentInfoEnabled && run.totalEventCost && run.paymentMode === 'fixed_amount') {
+      amountDue = Math.round(parseFloat(run.totalEventCost) * 100) / 100;
+    }
+
     // Create signup in database
     console.log('[RUNS SIGNUP] Creating signup in database...');
     let createdSignup;
@@ -144,6 +149,7 @@ exports.handler = async (event) => {
         signedAt: signedAt,
         metadata: metadata,
         sessionId: sessionId || null,
+        amountDue: amountDue,
       });
       console.log('[RUNS SIGNUP] Signup created with ID:', createdSignup.id);
     } catch (dbError) {

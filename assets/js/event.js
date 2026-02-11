@@ -123,6 +123,15 @@ async function loadEvent() {
     if (ogImageEl) ogImageEl.setAttribute('content', ogImageUrl);
     if (twitterImageEl) twitterImageEl.setAttribute('content', ogImageUrl);
     
+    const paymentContainer = document.getElementById('paymentSummaryContainer');
+    if (paymentContainer && typeof renderPaymentSummaryBox === 'function' && event.paymentInfoEnabled) {
+      paymentContainer.innerHTML = renderPaymentSummaryBox(event, { showCoordinatorDisclaimer: false });
+      paymentContainer.style.display = 'block';
+    } else if (paymentContainer) {
+      paymentContainer.innerHTML = '';
+      paymentContainer.style.display = 'none';
+    }
+
     // Display event description if available
     const descriptionContainer = document.getElementById('eventDescriptionContainer');
     const descriptionElement = document.getElementById('eventDescription');

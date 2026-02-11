@@ -67,7 +67,8 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
     try {
       const body = parseBody(event);
-      const { location, pacerName, plannerName, title, dateTime, endTime, maxParticipants, coordinates, picture, description, eventWebsite, eventInstagram, externalSignupEnabled } = body;
+      const { location, pacerName, plannerName, title, dateTime, endTime, maxParticipants, coordinates, picture, description, eventWebsite, eventInstagram, externalSignupEnabled,
+        paymentInfoEnabled, paymentMode, totalEventCost, paymentDueDate, collectionLocked } = body;
 
       console.log('[RUN GET] PUT request received:', {
         runId,
@@ -132,6 +133,20 @@ exports.handler = async (event, context) => {
           return jsonResponse(400, { error: 'Cannot set max participants below current signup count' });
         }
         updates.maxParticipants = parseInt(maxParticipants);
+      }
+
+      if (paymentInfoEnabled !== undefined) updates.paymentInfoEnabled = !!paymentInfoEnabled;
+      if (paymentMode !== undefined) updates.paymentMode = paymentMode || null;
+      if (totalEventCost !== undefined) updates.totalEventCost = totalEventCost != null ? parseFloat(totalEventCost) : null;
+      if (paymentDueDate !== undefined) updates.paymentDueDate = paymentDueDate ? String(paymentDueDate).split('T')[0] : null;
+
+      if (collectionLocked === true) {
+        try {
+          const lockedRun = await runs.lockCollection(runId);
+          return jsonResponse(200, { success: true, run: lockedRun });
+        } catch (lockError) {
+          return jsonResponse(400, { error: lockError.message || 'Failed to lock collection' });
+        }
       }
 
       // Track changes for email notifications

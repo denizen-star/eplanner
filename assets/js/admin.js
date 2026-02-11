@@ -249,6 +249,7 @@ function renderAdminTable() {
       <tr class="admin-table-details-row" id="rowDetails-${run.id}" style="display: none; background: var(--bg-secondary);">
         <td colspan="7" style="padding: 20px;">
           <div style="max-width: 800px;">
+            ${(typeof renderPaymentSummaryBox === 'function' && run.paymentInfoEnabled) ? renderPaymentSummaryBox({ ...run, signupCount: signupsArray.length }, { showCoordinatorDisclaimer: true }) : ''}
             <div style="margin-bottom: 16px;">
               <strong style="display: block; margin-bottom: 8px; color: var(--text-dark);">Signups (${signupsArray.length} / ${run.maxParticipants}):</strong>
               <ul class="signup-list" id="signupList-${run.id}" style="max-height: 200px; overflow-y: auto; list-style: none; padding: 0;"></ul>
@@ -878,7 +879,8 @@ function loadSignupsForRun(runId, signups) {
         contactInfo += ` - <a href="https://instagram.com/${signup.instagram}" target="_blank" class="contact-link">@${signup.instagram}</a>`;
       }
       
-      return `<li class="signup-item">${signup.name} - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}</li>`;
+      const amountStr = signup.amountDue != null ? ` - Amount: $${Number(signup.amountDue).toFixed(2)}` : '';
+      return `<li class="signup-item">${signup.name} - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}${amountStr}</li>`;
     }).join('');
   }
 }

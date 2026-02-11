@@ -208,6 +208,22 @@ async function loadRun() {
     displayAddressDetails(run);
     console.log('[MANAGE] Address details displayed');
 
+    const paymentContainer = document.getElementById('paymentSummaryContainer');
+    if (paymentContainer && typeof renderPaymentSummaryBox === 'function' && run.paymentInfoEnabled) {
+      paymentContainer.innerHTML = renderPaymentSummaryBox(run, { showCoordinatorDisclaimer: true });
+      paymentContainer.style.display = 'block';
+    } else if (paymentContainer) {
+      paymentContainer.innerHTML = '';
+      paymentContainer.style.display = 'none';
+    }
+
+    const lockBtn = document.getElementById('lockCollectionButton');
+    if (lockBtn) {
+      const showLock = run.paymentInfoEnabled && run.paymentMode === 'split_cost' && !run.collectionLocked && run.signups && run.signups.length > 0;
+      lockBtn.style.display = showLock ? 'inline-block' : 'none';
+      lockBtn.disabled = !showLock;
+    }
+
     // Add calendar links section (after map is loaded)
     setTimeout(() => {
       addCalendarLinksSection(run);
@@ -253,10 +269,11 @@ async function loadRun() {
           contactInfo += ` - <a href="https://instagram.com/${signup.instagram}" target="_blank" class="contact-link">@${signup.instagram}</a>`;
         }
         
+        const amountDueStr = run.paymentInfoEnabled && signup.amountDue != null ? ` - Amount: $${Number(signup.amountDue).toFixed(2)}` : '';
         return `<li class="signup-item">
           <div class="signup-item-content">
             <div class="signup-item-main">
-              <strong>${signup.name}</strong> - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}
+              <strong>${signup.name}</strong> - ${phoneDisplay}${contactInfo} - ${formattedDate} - Waiver: ${signup.waiverAccepted ? 'Yes' : 'No'}${amountDueStr}
             </div>
             <button class="button button-secondary button-sm delete-signup-btn" onclick="deleteSignup(${deleteOnclickArg})" title="Delete Participant" data-track-cta="delete_signup_click">
               Delete
@@ -724,8 +741,74 @@ function editEvent() {
     mapContainer.style.display = 'none';
   }
   
+  // Populate payment fields
+  const editPaymentTypeFree = document.querySelector('input[name="editPaymentType"][value="free"]');
+  const editPaymentTypePaid = document.querySelector('input[name="editPaymentType"][value="paid"]');
+  const editPaymentDetailsCard = document.getElementById('editPaymentDetailsCard');
+  const editAmountPerPerson = document.getElementById('editAmountPerPerson');
+  const editTotalEventCost = document.getElementById('editTotalEventCost');
+  const editPaymentDueDate = document.getElementById('editPaymentDueDate');
+  if (editPaymentTypeFree) editPaymentTypeFree.checked = !currentRun.paymentInfoEnabled;
+  if (editPaymentTypePaid) editPaymentTypePaid.checked = !!currentRun.paymentInfoEnabled;
+  editPaymentDetailsCard.style.display = currentRun.paymentInfoEnabled ? 'block' : 'none';
+  const editFixedWrap = document.getElementById('editFixedAmountWrap');
+  const editSplitWrap = document.getElementById('editSplitCostWrap');
+  if (currentRun.paymentMode === 'fixed_amount') {
+    const fixedRadio = document.querySelector('input[name="editPaymentMode"][value="fixed_amount"]');
+    if (fixedRadio) fixedRadio.checked = true;
+    editFixedWrap.style.display = 'block';
+    editSplitWrap.style.display = 'none';
+    if (editAmountPerPerson) editAmountPerPerson.value = currentRun.totalEventCost || '';
+  } else if (currentRun.paymentMode === 'split_cost') {
+    const splitRadio = document.querySelector('input[name="editPaymentMode"][value="split_cost"]');
+    if (splitRadio) splitRadio.checked = true;
+    editFixedWrap.style.display = 'none';
+    editSplitWrap.style.display = 'block';
+    if (editTotalEventCost) editTotalEventCost.value = currentRun.totalEventCost || '';
+  }
+  if (editPaymentDueDate && currentRun.paymentDueDate) editPaymentDueDate.value = String(currentRun.paymentDueDate).split('T')[0];
+
+  document.querySelectorAll('input[name="editPaymentType"]').forEach(el => {
+    el.removeEventListener('change', window._editPaymentTypeHandler);
+  });
+  window._editPaymentTypeHandler = () => {
+    const paid = document.querySelector('input[name="editPaymentType"]:checked')?.value === 'paid';
+    editPaymentDetailsCard.style.display = paid ? 'block' : 'none';
+    if (!paid) editFixedWrap.style.display = editSplitWrap.style.display = 'none';
+  };
+  document.querySelectorAll('input[name="editPaymentType"]').forEach(el => {
+    el.addEventListener('change', window._editPaymentTypeHandler);
+  });
+  document.querySelectorAll('input[name="editPaymentMode"]').forEach(el => {
+    el.removeEventListener('change', window._editPaymentModeHandler);
+  });
+  window._editPaymentModeHandler = () => {
+    const mode = document.querySelector('input[name="editPaymentMode"]:checked')?.value;
+    editFixedWrap.style.display = mode === 'fixed_amount' ? 'block' : 'none';
+    editSplitWrap.style.display = mode === 'split_cost' ? 'block' : 'none';
+  };
+  document.querySelectorAll('input[name="editPaymentMode"]').forEach(el => {
+    el.addEventListener('change', window._editPaymentModeHandler);
+  });
+
   // Scroll to form
   document.getElementById('editFormSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function lockCollection() {
+  if (!currentRun || !runId) return;
+  try {
+    const response = await fetch(`/api/runs/${runId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ collectionLocked: true })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || data.message || 'Failed to lock collection');
+    loadRun();
+  } catch (err) {
+    alert(err.message || 'Failed to lock collection');
+  }
 }
 
 /**
@@ -949,6 +1032,33 @@ async function saveEventEdit(event) {
     return;
   }
 
+  const paymentTypeChecked = document.querySelector('input[name="editPaymentType"]:checked');
+  const isPaid = paymentTypeChecked && paymentTypeChecked.value === 'paid';
+  let paymentInfoEnabled = false;
+  let paymentMode = null;
+  let totalEventCost = null;
+  let paymentDueDate = null;
+  if (isPaid) {
+    const modeChecked = document.querySelector('input[name="editPaymentMode"]:checked');
+    paymentMode = modeChecked ? modeChecked.value : null;
+    const amountPerPersonInput = document.getElementById('editAmountPerPerson');
+    const totalEventCostInput = document.getElementById('editTotalEventCost');
+    const paymentDueDateInput = document.getElementById('editPaymentDueDate');
+    if (paymentMode === 'fixed_amount' && amountPerPersonInput?.value) {
+      totalEventCost = parseFloat(amountPerPersonInput.value);
+    } else if (paymentMode === 'split_cost' && totalEventCostInput?.value) {
+      totalEventCost = parseFloat(totalEventCostInput.value);
+    }
+    paymentDueDate = paymentDueDateInput?.value || null;
+    if (!paymentMode || !totalEventCost || totalEventCost <= 0) {
+      const err = document.getElementById('editError');
+      err.textContent = 'Paid events require selecting a cost type and entering a valid amount.';
+      err.style.display = 'block';
+      return;
+    }
+    paymentInfoEnabled = true;
+  }
+
   const formData = {
     title: document.getElementById('editTitle').value.trim(),
     location: document.getElementById('editLocation').value.trim(),
@@ -959,7 +1069,11 @@ async function saveEventEdit(event) {
     description: description,
     eventWebsite: eventWebsite,
     eventInstagram: eventInstagram,
-    externalSignupEnabled: externalSignupEnabled
+    externalSignupEnabled: externalSignupEnabled,
+    paymentInfoEnabled: paymentInfoEnabled,
+    paymentMode: paymentMode,
+    totalEventCost: totalEventCost,
+    paymentDueDate: paymentDueDate
   };
   
   // Only include picture if it was changed

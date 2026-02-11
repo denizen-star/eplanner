@@ -116,7 +116,8 @@ app.post('/api/runs/create', async (req, res) => {
   console.log('[RUN CREATE] Full request body:', JSON.stringify(req.body, null, 2));
 
   try {
-    const { location, coordinates, pacerName, plannerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail, isPublic, placeName } = req.body;
+    const { location, coordinates, pacerName, plannerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo, picture, description, coordinatorEmail, isPublic, placeName,
+      paymentInfoEnabled, paymentMode, totalEventCost, paymentDueDate } = req.body;
 
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -162,6 +163,10 @@ app.post('/api/runs/create', async (req, res) => {
     if (maxParticipants <= 0 || !Number.isInteger(maxParticipants)) {
       console.error('[RUN CREATE] Validation failed: Invalid maxParticipants');
       return res.status(400).json({ error: 'Max participants must be a positive integer' });
+    }
+
+    if (paymentInfoEnabled && (!paymentMode || !totalEventCost || parseFloat(totalEventCost) <= 0)) {
+      return res.status(400).json({ error: 'Paid events require payment mode and a valid amount.' });
     }
 
     // Validate email format
@@ -238,7 +243,11 @@ app.post('/api/runs/create', async (req, res) => {
         description: description || null,
         signupLink: signupLink,
         manageLink: manageLink,
-        eventViewLink: eventViewLink
+        eventViewLink: eventViewLink,
+        paymentInfoEnabled: !!paymentInfoEnabled,
+        paymentMode: paymentMode || null,
+        totalEventCost: paymentInfoEnabled && totalEventCost != null ? parseFloat(totalEventCost) : null,
+        paymentDueDate: paymentInfoEnabled && paymentDueDate ? String(paymentDueDate).split('T')[0] : null
       };
       
       console.log('[RUN CREATE] Create data prepared:', {
@@ -564,6 +573,11 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
       referrer: referrer || null,
     };
 
+    let amountDue = null;
+    if (run.paymentInfoEnabled && run.totalEventCost && run.paymentMode === 'fixed_amount') {
+      amountDue = Math.round(parseFloat(run.totalEventCost) * 100) / 100;
+    }
+
     // Create signup in database
     console.log('[SIGNUP] Creating signup in database...');
     let createdSignup;
@@ -578,6 +592,7 @@ app.post('/api/runs/:runId/signup', async (req, res) => {
         signedAt: signedAt,
         metadata: metadata,
         sessionId: sessionId || null,
+        amountDue: amountDue,
       });
       console.log('[SIGNUP] Signup created with ID:', createdSignup.id);
     } catch (dbError) {
@@ -901,6 +916,20 @@ app.put('/api/runs/:runId', async (req, res) => {
         return res.status(400).json({ error: 'Cannot set max participants below current signup count' });
       }
       updates.maxParticipants = parseInt(maxParticipants);
+    }
+
+    if (req.body.paymentInfoEnabled !== undefined) updates.paymentInfoEnabled = !!req.body.paymentInfoEnabled;
+    if (req.body.paymentMode !== undefined) updates.paymentMode = req.body.paymentMode || null;
+    if (req.body.totalEventCost !== undefined) updates.totalEventCost = req.body.totalEventCost != null ? parseFloat(req.body.totalEventCost) : null;
+    if (req.body.paymentDueDate !== undefined) updates.paymentDueDate = req.body.paymentDueDate ? String(req.body.paymentDueDate).split('T')[0] : null;
+
+    if (req.body.collectionLocked === true) {
+      try {
+        const lockedRun = await runs.lockCollection(runId);
+        return res.json({ success: true, run: lockedRun });
+      } catch (lockError) {
+        return res.status(400).json({ error: lockError.message || 'Failed to lock collection' });
+      }
     }
 
     // Track changes for email notifications

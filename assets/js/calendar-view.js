@@ -529,6 +529,10 @@ function renderDesktopEventDetails(event) {
       
       ${descriptionHtml}
       
+      ${(typeof renderPaymentSummaryBox === 'function' && event.paymentInfoEnabled)
+        ? renderPaymentSummaryBox(event, { showCoordinatorDisclaimer: false })
+        : ''}
+      
       ${linksHtml}
       
       <div class="event-map-container">

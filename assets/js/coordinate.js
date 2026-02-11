@@ -84,6 +84,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize map (with retry logic for script loading)
   initializeMapWhenReady();
 
+  // Payment Information toggle
+  const paymentTypeInputs = document.querySelectorAll('input[name="paymentType"]');
+  const paymentDetailsCard = document.getElementById('paymentDetailsCard');
+  const paymentModeInputs = document.querySelectorAll('input[name="paymentMode"]');
+  const fixedAmountWrap = document.getElementById('fixedAmountWrap');
+  const splitCostWrap = document.getElementById('splitCostWrap');
+
+  paymentTypeInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      paymentDetailsCard.style.display = input.value === 'paid' ? 'block' : 'none';
+      if (input.value !== 'paid') {
+        fixedAmountWrap.style.display = 'none';
+        splitCostWrap.style.display = 'none';
+      } else {
+        const checked = document.querySelector('input[name="paymentMode"]:checked');
+        if (checked) {
+          fixedAmountWrap.style.display = checked.value === 'fixed_amount' ? 'block' : 'none';
+          splitCostWrap.style.display = checked.value === 'split_cost' ? 'block' : 'none';
+        }
+      }
+    });
+  });
+
+  paymentModeInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      fixedAmountWrap.style.display = input.value === 'fixed_amount' ? 'block' : 'none';
+      splitCostWrap.style.display = input.value === 'split_cost' ? 'block' : 'none';
+    });
+  });
+
   // Set default datetime to tomorrow at 6:30 PM
   const dateTimeInput = document.getElementById('dateTime');
   const endTimeInput = document.getElementById('endTime');
@@ -438,6 +468,30 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Event website URL is required when "Use this URL for external signups" is enabled.');
     }
 
+    const paymentTypeChecked = document.querySelector('input[name="paymentType"]:checked');
+    const isPaid = paymentTypeChecked && paymentTypeChecked.value === 'paid';
+    let paymentInfoEnabled = false;
+    let paymentMode = null;
+    let totalEventCost = null;
+    let paymentDueDate = null;
+    if (isPaid) {
+      const modeChecked = document.querySelector('input[name="paymentMode"]:checked');
+      paymentMode = modeChecked ? modeChecked.value : null;
+      const amountPerPersonInput = document.getElementById('amountPerPerson');
+      const totalEventCostInput = document.getElementById('totalEventCostInput');
+      const paymentDueDateInput = document.getElementById('paymentDueDate');
+      if (paymentMode === 'fixed_amount' && amountPerPersonInput) {
+        totalEventCost = amountPerPersonInput.value ? parseFloat(amountPerPersonInput.value) : null;
+      } else if (paymentMode === 'split_cost' && totalEventCostInput) {
+        totalEventCost = totalEventCostInput.value ? parseFloat(totalEventCostInput.value) : null;
+      }
+      paymentDueDate = paymentDueDateInput && paymentDueDateInput.value ? paymentDueDateInput.value : null;
+      if (!paymentMode || !totalEventCost || totalEventCost <= 0) {
+        throw new Error('Paid events require selecting a cost type and entering a valid amount.');
+      }
+      paymentInfoEnabled = true;
+    }
+
     const maxParticipantsInput = document.getElementById('maxParticipants');
     const maxParticipantsValue = maxParticipantsInput ? parseInt(maxParticipantsInput.value) : null;
     
@@ -509,7 +563,11 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       description: eventDescription,
       eventWebsite: eventWebsite,
       eventInstagram: eventInstagram,
-      externalSignupEnabled: externalSignupEnabled
+      externalSignupEnabled: externalSignupEnabled,
+      paymentInfoEnabled: paymentInfoEnabled,
+      paymentMode: paymentMode,
+      totalEventCost: totalEventCost,
+      paymentDueDate: paymentDueDate
     };
     
     console.log('[COORDINATE] Form Data being sent:', {

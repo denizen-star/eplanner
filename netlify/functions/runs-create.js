@@ -91,7 +91,8 @@ exports.handler = async (event) => {
       location, coordinates, plannerName, pacerName, title, dateTime, endTime, timezone, maxParticipants, deviceInfo, sessionInfo,
       house_number, road, suburb, city, county, state, postcode, country, country_code,
       neighbourhood, city_district, village, town, municipality, pageUrl, referrer, picture, description,
-      coordinatorEmail, isPublic, placeName, eventWebsite, eventInstagram, externalSignupEnabled
+      coordinatorEmail, isPublic, placeName, eventWebsite, eventInstagram, externalSignupEnabled,
+      paymentInfoEnabled, paymentMode, totalEventCost, paymentDueDate
     } = body;
     // Support both plannerName (new) and pacerName (legacy) for backward compatibility
     const nameToUse = plannerName || pacerName;
@@ -130,6 +131,10 @@ exports.handler = async (event) => {
     if (externalSignupEnabled && !trimmedEventWebsite) {
       console.error('[RUNS CREATE] Validation failed: External signup enabled but no event website URL');
       return jsonResponse(400, { success: false, error: 'Event website URL is required when "Use this URL for external signups" is enabled.' });
+    }
+
+    if (paymentInfoEnabled && (!paymentMode || !totalEventCost || parseFloat(totalEventCost) <= 0)) {
+      return jsonResponse(400, { success: false, error: 'Paid events require payment mode and a valid amount.' });
     }
 
     console.log('[RUNS CREATE] Generating IDs...');
@@ -222,7 +227,11 @@ exports.handler = async (event) => {
         eventViewLink: eventViewLink,
         eventWebsite: trimmedEventWebsite || null,
         eventInstagram: eventInstagram ? eventInstagram.trim() : null,
-        externalSignupEnabled: !!externalSignupEnabled
+        externalSignupEnabled: !!externalSignupEnabled,
+        paymentInfoEnabled: !!paymentInfoEnabled,
+        paymentMode: paymentMode || null,
+        totalEventCost: paymentInfoEnabled && totalEventCost != null ? parseFloat(totalEventCost) : null,
+        paymentDueDate: paymentInfoEnabled && paymentDueDate ? String(paymentDueDate).split('T')[0] : null
       });
       console.log('[RUNS CREATE] Run saved to database successfully');
     } catch (dbError) {
