@@ -20,6 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/coordinate-form.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
@@ -79,171 +80,129 @@
         </section>
 
         <div class="main-container">
-        <div class="card form-card">
+        <div class="card form-card coordinate-form-card">
             <div class="form-intro">
                 <p style="font-size: var(--font-lg); color: var(--text-secondary); margin-bottom: var(--space-xl); line-height: 1.7;">Fill out the form below to create a new event. You'll receive signup and management links upon submission.</p>
             </div>
 
             <form id="coordinateForm">
-                <div class="form-columns">
-                    <div class="form-column-left">
-                        <div class="form-group">
-                            <label for="pacerName">Planner Name *</label>
-                            <input type="text" id="pacerName" name="pacerName" required placeholder="e.g., John Smith">
-                        </div>
+              <input type="hidden" name="paymentType" id="paymentTypeHidden" value="free">
 
-                        <div class="form-group">
-                            <label for="coordinatorEmail">Coordinator Email *</label>
-                            <input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="e.g., coordinator@example.com">
-                            <small>Email address for event confirmations and notifications</small>
-                        </div>
+              <div class="form-section">
+                <div class="form-section-head">Basics</div>
+                <div class="form-group"><label for="pacerName">Planner Name *</label><input type="text" id="pacerName" name="pacerName" required placeholder="e.g., John Smith"></div>
+                <div class="form-group"><label for="coordinatorEmail">Coordinator Email *</label><input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="e.g., coordinator@example.com"><small>Email address for event confirmations and notifications</small></div>
+                <div class="form-group"><label for="runTitle">Event Title (Optional)</label><input type="text" id="runTitle" name="runTitle" placeholder="e.g., Morning Beach Event"></div>
+                <div class="form-group"><label for="eventDescription">Event Description (Optional)</label><textarea id="eventDescription" name="eventDescription" rows="2" placeholder="Add details about your event..."></textarea></div>
+              </div>
 
-                        <div class="form-group">
-                            <label for="runTitle">Event Title (Optional)</label>
-                            <input type="text" id="runTitle" name="runTitle" placeholder="e.g., Morning Beach Event">
-                            <small>Give your event a name if you'd like</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dateTime">Date and Start Time *</label>
-                            <input type="datetime-local" id="dateTime" name="dateTime" step="1800" required>
-                            <small>Select the date and start time for the event (30-minute increments)</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="endTime">End Time (Optional)</label>
-                            <input type="datetime-local" id="endTime" name="endTime" step="1800">
-                            <small>Select the end time for the event (optional, defaults to start time)</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="maxParticipants">Max Number of Participants *</label>
-                            <input type="number" id="maxParticipants" name="maxParticipants" required min="1" placeholder="e.g., 10" value="10">
-                            <small>Maximum number of participants allowed to sign up</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="eventDescription">Event Description (Optional)</label>
-                            <textarea id="eventDescription" name="eventDescription" rows="4" placeholder="Add details about your event..."></textarea>
-                            <small>Provide additional information about the event</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="eventWebsite">Event Website (Optional)</label>
-                            <input type="url" id="eventWebsite" name="eventWebsite" placeholder="e.g., https://example.com">
-                            <small>Link to the event's website or registration page</small>
-                            <div class="checkbox-group" style="margin-top: 12px;">
-                                <input type="checkbox" id="externalSignupEnabled" name="externalSignupEnabled">
-                                <label for="externalSignupEnabled">Use this URL for external signups</label>
-                            </div>
-                            <small style="display: block; margin-top: 4px; color: var(--text-gray);">If checked, attendees will complete waiver here then open this link (e.g. Ticketmaster, Eventbrite) to register. URL is required.</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="eventInstagram">Event Instagram (Optional)</label>
-                            <input type="text" id="eventInstagram" name="eventInstagram" placeholder="e.g., @pickleball6ix or https://instagram.com/pickleball6ix">
-                            <small>Instagram handle or full URL</small>
-                        </div>
-                    </div>
-
-                    <div class="form-column-right">
-                        <div class="form-group">
-                            <label for="eventPicture">Event Picture (Optional)</label>
-                            <input type="file" id="eventPicture" name="eventPicture" accept="image/*">
-                            <small>Upload an image from your phone gallery or computer</small>
-                            <div id="picturePreview" style="display: none; margin-top: 12px;">
-                                <img id="previewImage" src="" alt="Preview" style="width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-gray);">
-                                <button type="button" id="removePicture" class="button button-secondary" style="margin-top: 8px;">Remove Picture</button>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="location">Location *</label>
-                            <input type="text" id="location" name="location" required placeholder="e.g., 1664 Lincoln Rd, Miami Beach, FL 33139">
-                            <small>Enter an address or location. A map will appear below when the location is found.</small>
-                        </div>
-
-                        <div id="locationMap" class="location-map" style="margin-bottom: 20px;"></div>
-                        <div id="locationValidation" style="display: none; margin-bottom: 16px; padding: 12px; background: rgba(117, 7, 135, 0.1); border: 1px solid #750787; border-radius: 8px; color: #750787; font-size: 14px;">
-                            <strong>Validated address:</strong> <span id="validatedAddress"></span>
-                        </div>
-
-                        <div class="form-group payment-section" style="margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-light);">
-                            <label>Payment Information</label>
-                            <input type="hidden" name="paymentType" id="paymentTypeHidden" value="free">
-                            <div class="payment-inline-box">
-                                <div class="payment-inline-row payment-inline-row-1">
-                                    <span class="payment-toggle-label">Free</span>
-                                    <label class="payment-toggle">
-                                        <input type="checkbox" id="paymentTypeToggle" name="paymentTypeToggle" value="paid">
-                                        <span class="payment-toggle-slider"></span>
-                                    </label>
-                                    <span class="payment-toggle-label">Paid</span>
-                                    <span id="paymentCostTypeDivider" class="payment-inline-divider" style="display: none;"></span>
-                                    <span id="paymentCostTypeLabel" class="payment-inline-cost-label" style="display: none;">Cost:</span>
-                                    <div id="paymentCostTypeOptions" class="cost-type-options" style="display: none;">
-                                        <label class="cost-type-option">
-                                            <span>Fixed</span>
-                                            <input type="radio" name="paymentMode" value="fixed_amount">
-                                        </label>
-                                        <label class="cost-type-option">
-                                            <span>Split</span>
-                                            <input type="radio" name="paymentMode" value="split_cost">
-                                        </label>
-                                    </div>
-                                </div>
-                                <div id="paymentDetailsCard" class="payment-details-card payment-inline-b" style="display: none;">
-                                    <div class="payment-inline-row payment-inline-row-2">
-                                        <div id="fixedAmountWrap" class="payment-inline-field" style="display: none;">
-                                            <span class="payment-inline-field-label">Amount:</span>
-                                            <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0" class="form-input payment-input">
-                                        </div>
-                                        <div id="splitCostWrap" class="payment-inline-field payment-inline-split" style="display: none;">
-                                            <span class="payment-inline-field-label">Total:</span>
-                                            <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0" class="form-input payment-input">
-                                        </div>
-                                        <div id="collectionDateWrap" class="payment-inline-field" style="display: none;">
-                                            <span class="payment-inline-field-label">Collection:</span>
-                                            <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input">
-                                        </div>
-                                    </div>
-                                    <div class="payment-inline-helper">
-                                        The app will display the estimated cost per person based on the current number of sign-ups.
-                                    </div>
-                                </div>
-                                <div class="payment-disclaimer payment-disclaimer-inline">
-                                    Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              <div class="form-section">
+                <div class="form-section-head">When</div>
+                <div class="inline-row">
+                  <div class="when-field form-group">
+                    <div class="time-label">From</div>
+                    <input type="datetime-local" id="dateTime" name="dateTime" step="1800" required>
+                  </div>
+                  <div class="when-field form-group">
+                    <div class="time-label">To</div>
+                    <input type="datetime-local" id="endTime" name="endTime" step="1800">
+                  </div>
+                  <div class="when-field when-field-max form-group">
+                    <div class="time-label">Max Participants</div>
+                    <input type="number" id="maxParticipants" name="maxParticipants" required min="1" value="10">
+                  </div>
                 </div>
+              </div>
 
-                <div style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-light);">
+              <div class="form-section">
+                <div class="form-section-head">Social</div>
+                <div class="inline-row">
+                  <div class="event-website-wrap">
                     <div class="form-group">
-                        <label for="eventVisibility">Event Visibility <span style="color: #dc2626;">*</span></label>
-                        <div class="radio-card-group">
-                            <label class="radio-card selected">
-                                <input type="radio" name="eventVisibility" value="public" checked required>
-                                <div class="radio-card-content">
-                                    <div class="radio-card-label">PUBLIC EVENT</div>
-                                    <div class="radio-card-description">VISIBLE IN PUBLIC CALENDAR AND SEARCHABLE BY ALL USERS</div>
-                                </div>
-                            </label>
-                            <label class="radio-card">
-                                <input type="radio" name="eventVisibility" value="private" required>
-                                <div class="radio-card-content">
-                                    <div class="radio-card-label">PRIVATE EVENT</div>
-                                    <div class="radio-card-description">ONLY ACCESSIBLE VIA DIRECT SIGNUP LINK, NOT SHOWN IN PUBLIC CALENDAR</div>
-                                </div>
-                            </label>
-                        </div>
+                      <label for="eventWebsite">Event Website (Optional)</label>
+                      <input type="url" id="eventWebsite" name="eventWebsite" placeholder="e.g., https://example.com">
+                      <div class="checkbox-inline">
+                        <input type="checkbox" id="externalSignupEnabled" name="externalSignupEnabled">
+                        <label for="externalSignupEnabled">Use website for external signups</label>
+                      </div>
+                      <small>If checked, attendees complete waiver here then open this link. URL is required.</small>
                     </div>
+                  </div>
+                  <div class="form-group" style="flex:1;">
+                    <label for="eventInstagram">Event Instagram (Optional)</label>
+                    <input type="text" id="eventInstagram" name="eventInstagram" placeholder="e.g., @handle or URL">
+                  </div>
                 </div>
+                <div class="form-group">
+                  <label for="eventPicture">Event Picture (Optional)</label>
+                  <input type="file" id="eventPicture" name="eventPicture" accept="image/*">
+                  <div id="picturePreview" style="display: none;">
+                    <img id="previewImage" src="" alt="Preview">
+                    <button type="button" id="removePicture" class="button button-secondary">Remove Picture</button>
+                  </div>
+                </div>
+              </div>
 
-                <div style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-light);">
-                    <button type="submit" class="button button-primary" id="submitButton" style="font-size: var(--font-base); padding: 14px 40px;" data-track-cta="create_event_button_click">Create Event</button>
+              <div class="form-section">
+                <div class="form-section-head">Location</div>
+                <div class="form-group">
+                  <label for="location">Location *</label>
+                  <input type="text" id="location" name="location" required placeholder="e.g., 1664 Lincoln Rd, Miami Beach, FL 33139">
+                  <small>Map appears when location is found</small>
+                  <div id="locationValidation" style="display: none;"><strong>Validated address:</strong> <span id="validatedAddress"></span></div>
+                  <div id="locationMap" class="location-map"></div>
                 </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-head">Payment</div>
+                <div class="payment-section-compact">
+                  <div class="payment-row-1">
+                    <div class="payment-type">
+                      <span>Free</span>
+                      <label class="payment-toggle">
+                        <input type="checkbox" id="paymentTypeToggle" name="paymentTypeToggle" value="paid">
+                        <span class="payment-toggle-slider"></span>
+                      </label>
+                      <span>Paid</span>
+                    </div>
+                    <div id="paymentCostTypeOptions" style="display: none;">
+                      <label class="cost-type-option"><input type="radio" name="paymentMode" value="fixed_amount">Fixed</label>
+                      <label class="cost-type-option"><input type="radio" name="paymentMode" value="split_cost">Split</label>
+                    </div>
+                  </div>
+                  <div id="paymentDetailsCard" style="display: none;">
+                    <div id="fixedAmountWrap" class="payment-inline-field" style="display: none;">
+                      <label><span>Amount</span> <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0" class="form-input payment-input"></label>
+                    </div>
+                    <div id="splitCostWrap" class="payment-cost-inline" style="display: none;">
+                      <label><span>Total</span> <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0" class="form-input payment-input"></label>
+                      <label><span>Collection</span> <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-input"></label>
+                    </div>
+                  </div>
+                  <div class="payment-inline-helper">The app will display the estimated cost per person based on the current number of sign-ups.</div>
+                  <div class="payment-disclaimer payment-disclaimer-inline">Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.</div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-head">Event Visibility</div>
+                <div class="vis-row">
+                  <div class="vis-pills">
+                    <label class="vis-pill radio-card">
+                      <input type="radio" name="eventVisibility" value="public" checked required>
+                      Public
+                    </label>
+                    <label class="vis-pill radio-card">
+                      <input type="radio" name="eventVisibility" value="private" required>
+                      Private
+                    </label>
+                  </div>
+                  <div id="visDesc" class="vis-desc">Shown in calendar, searchable, newsletter emails</div>
+                </div>
+              </div>
+
+              <button type="submit" class="button button-primary" id="submitButton" data-track-cta="create_event_button_click">Create Event</button>
             </form>
 
             <div id="result" style="display: none; margin-top: 32px;">

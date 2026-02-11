@@ -1,0 +1,217 @@
+/* Coordinate Form - CoordForm3 Layout (modular, scoped to .coordinate-form-card) */
+.coordinate-form-card .form-section {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: rgba(247, 243, 237, 0.5);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+}
+
+.coordinate-form-card .form-section-head {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.coordinate-form-card .form-section .form-group {
+  margin-bottom: 10px;
+}
+
+.coordinate-form-card .form-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.coordinate-form-card .inline-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.coordinate-form-card .inline-row .form-group {
+  flex: 1;
+  min-width: 100px;
+  margin-bottom: 0;
+}
+
+.coordinate-form-card .block-row {
+  margin-bottom: 10px;
+}
+
+.coordinate-form-card .block-row .form-group {
+  margin-bottom: 0;
+}
+
+.coordinate-form-card .when-field {
+  flex: 1;
+  min-width: 100px;
+}
+
+.coordinate-form-card .when-field-max {
+  flex: 0 0 140px;
+}
+
+.coordinate-form-card .time-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.coordinate-form-card .event-website-wrap {
+  flex: 1.5;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.coordinate-form-card .event-website-wrap .form-group {
+  width: 100%;
+}
+
+.coordinate-form-card .checkbox-inline {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.coordinate-form-card .checkbox-inline input {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.coordinate-form-card .vis-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.coordinate-form-card .vis-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.coordinate-form-card .vis-desc {
+  flex: 1;
+  min-width: 180px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.coordinate-form-card .vis-pill {
+  padding: 6px 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.coordinate-form-card .vis-pill:hover {
+  border-color: var(--accent-pink);
+}
+
+.coordinate-form-card .vis-pill.selected,
+.coordinate-form-card .vis-pill:has(input:checked) {
+  background: #E3F2FD;
+  border-color: #2196F3;
+  color: #1976D2;
+}
+
+.coordinate-form-card .vis-pill input {
+  display: none;
+}
+
+/* Payment - simplified layout */
+.coordinate-form-card .payment-section-compact {
+  padding: 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-primary);
+}
+
+.coordinate-form-card .payment-row-1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.coordinate-form-card .payment-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coordinate-form-card .payment-cost-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.coordinate-form-card .payment-cost-inline label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.coordinate-form-card #picturePreview {
+  margin-top: 12px;
+}
+
+.coordinate-form-card #picturePreview img {
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+}
+
+.coordinate-form-card #picturePreview .button {
+  margin-top: 8px;
+}
+
+.coordinate-form-card .payment-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.coordinate-form-card .payment-inline-field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.coordinate-form-card #locationValidation {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(117, 7, 135, 0.1);
+  border: 1px solid #750787;
+  border-radius: 8px;
+  color: #750787;
+  font-size: 14px;
+}
+
+.coordinate-form-card .location-map {
+  margin-top: 8px;
+  min-height: 180px;
+}

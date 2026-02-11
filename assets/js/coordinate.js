@@ -183,6 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set initial state
     updateRadioCardVisualState();
   }
+
+  // Update visibility description when Public/Private changes
+  const visDesc = document.getElementById('visDesc');
+  const visRadios = document.querySelectorAll('input[name="eventVisibility"]');
+  if (visDesc && visRadios.length) {
+    function updateVisDesc() {
+      const c = document.querySelector('input[name="eventVisibility"]:checked');
+      visDesc.textContent = c?.value === 'public' ? 'Shown in calendar, searchable, newsletter emails' : 'Via signup link only';
+    }
+    visRadios.forEach(r => r.addEventListener('change', updateVisDesc));
+    updateVisDesc();
+  }
   
   // Set up location input handler
   const locationInput = document.getElementById('location');
