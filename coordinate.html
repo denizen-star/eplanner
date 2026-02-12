@@ -91,22 +91,22 @@
               <div class="form-section">
                 <div class="form-section-head">Basics</div>
                 <div class="inline-row">
-                  <input type="text" id="pacerName" name="pacerName" required placeholder="Planner Name *" aria-label="Planner Name">
-                </div>
-                <div class="inline-row">
-                  <input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="Coordinator Email *" aria-label="Coordinator Email">
-                </div>
-                <div class="inline-row">
                   <input type="text" id="runTitle" name="runTitle" placeholder="Event Title (optional)" aria-label="Event Title">
                 </div>
                 <div class="block-row">
                   <textarea id="eventDescription" name="eventDescription" rows="2" placeholder="Description (optional)" aria-label="Event Description"></textarea>
                 </div>
+                <div class="inline-row">
+                  <input type="text" id="pacerName" name="pacerName" required placeholder="Planner Name *" aria-label="Planner Name">
+                </div>
+                <div class="inline-row">
+                  <input type="email" id="coordinatorEmail" name="coordinatorEmail" required placeholder="Coordinator Email *" aria-label="Coordinator Email">
+                </div>
               </div>
 
               <div class="form-section">
                 <div class="form-section-head">When</div>
-                <div class="inline-row">
+                <div class="inline-row when-row">
                   <div class="when-field form-group">
                     <div class="time-label">From</div>
                     <input type="datetime-local" id="dateTime" name="dateTime" step="1800" required>

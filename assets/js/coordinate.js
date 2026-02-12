@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Set default datetime to tomorrow at 6:30 PM
+  // Set default datetime to tomorrow at 6:30 PM, end time 1 hour later
   const dateTimeInput = document.getElementById('dateTime');
   const endTimeInput = document.getElementById('endTime');
   if (dateTimeInput) {
@@ -138,29 +138,37 @@ document.addEventListener('DOMContentLoaded', () => {
     tomorrow.setHours(18, 30, 0, 0);
     const defaultDateTime = tomorrow.toISOString().slice(0, 16);
     dateTimeInput.value = defaultDateTime;
-    
-    // Set end time to match start time initially
+
     if (endTimeInput) {
-      endTimeInput.value = defaultDateTime;
+      const endDefault = new Date(tomorrow);
+      endDefault.setHours(endDefault.getHours() + 1);
+      endTimeInput.value = endDefault.toISOString().slice(0, 16);
     }
   }
-  
-  // Sync end time with start time when start time changes (only if end time hasn't been manually changed)
+
   let endTimeManuallyChanged = false;
   if (dateTimeInput && endTimeInput) {
     dateTimeInput.addEventListener('change', () => {
       if (!endTimeManuallyChanged) {
-        endTimeInput.value = dateTimeInput.value;
+        const from = new Date(dateTimeInput.value);
+        from.setHours(from.getHours() + 1);
+        endTimeInput.value = from.toISOString().slice(0, 16);
       }
     });
-    
+
     endTimeInput.addEventListener('change', () => {
       endTimeManuallyChanged = true;
     });
   }
 
-  // Handle radio card selection visual state
-  // The label wrapper should handle clicks naturally, we just need to update visual state
+  // Handle radio card selection visual state and visibility description
+  const visDesc = document.getElementById('visDesc');
+  function updateVisDesc() {
+    if (!visDesc) return;
+    const c = document.querySelector('input[name="eventVisibility"]:checked');
+    visDesc.textContent = c?.value === 'public' ? 'Shown in calendar, searchable, newsletter emails' : 'Via signup link only';
+  }
+
   function updateRadioCardVisualState() {
     document.querySelectorAll('.radio-card').forEach(card => {
       const radio = card.querySelector('input[type="radio"]');
@@ -170,29 +178,19 @@ document.addEventListener('DOMContentLoaded', () => {
         card.classList.remove('selected');
       }
     });
+    updateVisDesc();
   }
-  
-  // Update visual state when any radio changes
+
   const visibilityRadios = document.querySelectorAll('input[name="eventVisibility"]');
   if (visibilityRadios.length > 0) {
     visibilityRadios.forEach(radio => {
       radio.addEventListener('change', updateRadioCardVisualState);
       radio.addEventListener('click', updateRadioCardVisualState);
     });
-    
-    // Set initial state
+    document.querySelectorAll('.vis-pill').forEach(pill => {
+      pill.addEventListener('click', () => setTimeout(updateRadioCardVisualState, 0));
+    });
     updateRadioCardVisualState();
-  }
-
-  // Update visibility description when Public/Private changes
-  const visDesc = document.getElementById('visDesc');
-  const visRadios = document.querySelectorAll('input[name="eventVisibility"]');
-  if (visDesc && visRadios.length) {
-    function updateVisDesc() {
-      const c = document.querySelector('input[name="eventVisibility"]:checked');
-      visDesc.textContent = c?.value === 'public' ? 'Shown in calendar, searchable, newsletter emails' : 'Via signup link only';
-    }
-    visRadios.forEach(r => r.addEventListener('change', updateVisDesc));
     updateVisDesc();
   }
   
@@ -784,12 +782,13 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     tomorrow.setHours(18, 30, 0, 0);
     const defaultDateTime = tomorrow.toISOString().slice(0, 16);
     document.getElementById('dateTime').value = defaultDateTime;
-    
-    // Reset end time to match start time
+
     const endTimeInputReset = document.getElementById('endTime');
     if (endTimeInputReset) {
-      endTimeInputReset.value = defaultDateTime;
-      endTimeManuallyChanged = false; // Reset the flag
+      const endDefault = new Date(tomorrow);
+      endDefault.setHours(endDefault.getHours() + 1);
+      endTimeInputReset.value = endDefault.toISOString().slice(0, 16);
+      endTimeManuallyChanged = false;
     }
     
     // Reset event visibility to public (default) - use setTimeout to ensure form reset completes first

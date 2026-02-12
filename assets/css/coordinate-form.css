@@ -16,7 +16,7 @@
 
 .coordinate-form-card .inline-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
@@ -87,6 +87,10 @@
   flex: 0 0 140px;
 }
 
+.coordinate-form-card .when-row {
+  align-items: flex-end;
+}
+
 .coordinate-form-card .time-label {
   font-size: 8px;
   font-weight: 500;
@@ -120,7 +124,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 4px;
   margin-top: 6px;
   margin-bottom: 0;
 }
@@ -136,9 +140,11 @@
   display: inline;
 }
 
-/* Picture preview - CoordForm3 compact style */
+/* Picture preview - responsive, fit screen */
 .coordinate-form-card .pic-preview {
-  max-height: 100px;
+  max-height: min(400px, 50vh);
+  width: 100%;
+  max-width: 100%;
   margin-top: 8px;
   border-radius: 8px;
   overflow: hidden;
@@ -148,7 +154,9 @@
 .coordinate-form-card .pic-preview img {
   width: 100%;
   height: auto;
+  max-height: min(400px, 50vh);
   object-fit: contain;
+  display: block;
 }
 
 .coordinate-form-card .btn.btn-secondary {
@@ -277,8 +285,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-top: 8px;
+}
+
+.coordinate-form-card #splitCostWrap.payment-cost-inline {
+  flex-wrap: nowrap;
 }
 
 .coordinate-form-card .payment-cost-inline label,
@@ -325,17 +337,17 @@
   border-top: 1px solid var(--border-primary);
 }
 
-/* Submit button - CoordForm3 .btn style */
+/* Submit button - prominent, twice as big */
 .coordinate-form-card #submitButton.btn {
   background: var(--accent-pink);
   color: var(--white);
   border: none;
-  padding: 7px 18px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 20px;
+  padding: 14px 36px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 24px;
   cursor: pointer;
-  margin-top: 14px;
+  margin-top: 20px;
 }
 
 .coordinate-form-card #submitButton.btn:hover {
