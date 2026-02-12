@@ -107,15 +107,15 @@
               <div class="form-section">
                 <div class="form-section-head">When</div>
                 <div class="inline-row when-row">
-                  <div class="when-field form-group">
+                  <div class="when-field">
                     <div class="time-label">From</div>
                     <input type="datetime-local" id="dateTime" name="dateTime" step="1800" required>
                   </div>
-                  <div class="when-field form-group">
+                  <div class="when-field">
                     <div class="time-label">To</div>
                     <input type="datetime-local" id="endTime" name="endTime" step="1800">
                   </div>
-                  <div class="when-field when-field-max form-group">
+                  <div class="when-field when-field-max">
                     <div class="time-label">Max Participants</div>
                     <input type="number" id="maxParticipants" name="maxParticipants" required min="1" value="10">
                   </div>
@@ -173,9 +173,11 @@
                     <div id="fixedAmountWrap" class="payment-cost-row" style="display: none;">
                       <label><span style="font-weight:500;">Amount</span> <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0"></label>
                     </div>
-                    <div id="splitCostWrap" class="payment-cost-inline" style="display: none;">
-                      <label><span style="font-weight:500;">Total</span> <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0"></label>
-                      <label><span style="font-weight:500;">Collection</span> <input type="date" id="paymentDueDate" name="paymentDueDate"></label>
+                    <div id="splitCostWrap" class="payment-split-grid" style="display: none;">
+                      <label class="payment-split-label"><span>Total</span></label>
+                      <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0" class="payment-split-input">
+                      <label class="payment-split-label"><span>Collection</span></label>
+                      <input type="date" id="paymentDueDate" name="paymentDueDate" class="payment-split-input">
                     </div>
                   </div>
                   <div class="payment-disclaimer payment-disclaimer-inline">Kervinapps does not process payments. You collect funds from participants directly.</div>

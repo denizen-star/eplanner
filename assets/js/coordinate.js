@@ -23,6 +23,16 @@ function normalizeWebsiteUrl(url) {
   return `https://${trimmed}`;
 }
 
+// Format date for datetime-local input (local time, not UTC)
+function toLocalDatetimeLocalValue(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day}T${h}:${min}`;
+}
+
 // Normalize Instagram URL - convert handle to URL or ensure full URL
 function normalizeInstagramUrl(input) {
   if (!input || !input.trim()) return null;
@@ -111,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const checked = document.querySelector('input[name="paymentMode"]:checked');
       if (checked) {
         fixedAmountWrap.style.display = checked.value === 'fixed_amount' ? 'flex' : 'none';
-        splitCostWrap.style.display = checked.value === 'split_cost' ? 'flex' : 'none';
+        splitCostWrap.style.display = checked.value === 'split_cost' ? 'grid' : 'none';
         if (collectionDateWrap) collectionDateWrap.style.display = checked.value === 'split_cost' ? 'flex' : 'none';
       }
     }
@@ -124,25 +134,23 @@ document.addEventListener('DOMContentLoaded', () => {
   paymentModeInputs.forEach(input => {
     input.addEventListener('change', () => {
       fixedAmountWrap.style.display = input.value === 'fixed_amount' ? 'block' : 'none';
-      splitCostWrap.style.display = input.value === 'split_cost' ? 'block' : 'none';
+      splitCostWrap.style.display = input.value === 'split_cost' ? 'grid' : 'none';
       if (collectionDateWrap) collectionDateWrap.style.display = input.value === 'split_cost' ? 'block' : 'none';
     });
   });
 
-  // Set default datetime to tomorrow at 6:30 PM, end time 1 hour later
   const dateTimeInput = document.getElementById('dateTime');
   const endTimeInput = document.getElementById('endTime');
   if (dateTimeInput) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(18, 30, 0, 0);
-    const defaultDateTime = tomorrow.toISOString().slice(0, 16);
-    dateTimeInput.value = defaultDateTime;
+    tomorrow.setHours(17, 0, 0, 0); // 5:00 PM default
+    dateTimeInput.value = toLocalDatetimeLocalValue(tomorrow);
 
     if (endTimeInput) {
       const endDefault = new Date(tomorrow);
       endDefault.setHours(endDefault.getHours() + 1);
-      endTimeInput.value = endDefault.toISOString().slice(0, 16);
+      endTimeInput.value = toLocalDatetimeLocalValue(endDefault);
     }
   }
 
@@ -152,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!endTimeManuallyChanged) {
         const from = new Date(dateTimeInput.value);
         from.setHours(from.getHours() + 1);
-        endTimeInput.value = from.toISOString().slice(0, 16);
+        endTimeInput.value = toLocalDatetimeLocalValue(from);
       }
     });
 
@@ -776,18 +784,17 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     // Reset map to Miami
     initMap('locationMap', null, null, false, MIAMI_COORDINATES);
     
-    // Reset datetime to tomorrow at 6:30 PM
+    // Reset datetime to tomorrow at 5:00 PM, end 1 hour later
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(18, 30, 0, 0);
-    const defaultDateTime = tomorrow.toISOString().slice(0, 16);
-    document.getElementById('dateTime').value = defaultDateTime;
+    tomorrow.setHours(17, 0, 0, 0);
+    document.getElementById('dateTime').value = toLocalDatetimeLocalValue(tomorrow);
 
     const endTimeInputReset = document.getElementById('endTime');
     if (endTimeInputReset) {
       const endDefault = new Date(tomorrow);
       endDefault.setHours(endDefault.getHours() + 1);
-      endTimeInputReset.value = endDefault.toISOString().slice(0, 16);
+      endTimeInputReset.value = toLocalDatetimeLocalValue(endDefault);
       endTimeManuallyChanged = false;
     }
     

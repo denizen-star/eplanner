@@ -89,6 +89,17 @@
 
 .coordinate-form-card .when-row {
   align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.coordinate-form-card .when-row .when-field {
+  flex: 0 1 auto;
+  min-width: 120px;
+}
+
+.coordinate-form-card .when-row .when-field-max {
+  flex: 0 0 140px;
+  min-width: 100px;
 }
 
 .coordinate-form-card .time-label {
@@ -289,8 +300,28 @@
   margin-top: 8px;
 }
 
-.coordinate-form-card #splitCostWrap.payment-cost-inline {
-  flex-wrap: nowrap;
+/* Payment split: Total and Collection each on own line, inputs aligned vertically */
+.coordinate-form-card .payment-split-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 8px;
+  max-width: 280px;
+}
+
+.coordinate-form-card .payment-split-grid .payment-split-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.coordinate-form-card .payment-split-grid .payment-split-input {
+  padding: 4px 6px;
+  font-size: 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  width: 120px;
 }
 
 .coordinate-form-card .payment-cost-inline label,
