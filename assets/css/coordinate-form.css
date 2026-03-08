@@ -368,6 +368,38 @@
   border-top: 1px solid var(--border-primary);
 }
 
+/* Optional collapsible section (details/summary) */
+.coordinate-form-card details.form-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.coordinate-form-card details.form-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.coordinate-form-card details.form-section summary::after {
+  content: '▶';
+  font-size: 7px;
+  color: var(--text-tertiary);
+  transition: transform 0.2s;
+  margin-left: 2px;
+}
+
+.coordinate-form-card details.form-section[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.coordinate-form-card .form-section-optional-tag {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
 /* Submit button - prominent, twice as big */
 .coordinate-form-card #submitButton.btn {
   background: var(--accent-pink);
