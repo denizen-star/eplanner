@@ -10,7 +10,6 @@
   const SIGNUP_BUTTON_NEW_TEXT = 'Create your Activity';
   const LGBTQ_DOMAIN = 'to-lgbtq.kervinapps.com';
   const LGBTQ_ALIAS_DOMAIN = 'to.lgbtq-hub.com';
-  const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/Fea7OmKCL338wVUsWEajzr';
   const LGBTQ_FAVICON = 'assets/images/to-logbtqicon.png';
   const LGBTQ_LOGO_ICON = 'assets/images/to-logbtqicon.png';
 
@@ -255,22 +254,16 @@
   function legacyButtons() {
     const signup = document.getElementById('signup-now-btn');
     if (signup) signup.textContent = SIGNUP_BUTTON_NEW_TEXT;
-    if (isLGBTQDomain()) {
-      applyHeroButtons({
-        hero: {
-          showCtas: true,
-          findGroupUrl: WHATSAPP_GROUP_LINK,
-          learnMoreUrl: 'whatsapp-community.html',
-          learnMoreText: 'Explore Our Community',
-        },
-      });
-    } else {
-      const g = document.getElementById('hero-cta-group');
-      if (g && g.style && g.style.display === 'none') g.style.display = 'none';
-    }
+    // Hero CTA group is hidden by default; tenant-config API enables it with correct URLs.
+    // In legacy fallback mode we leave the group hidden (no WhatsApp funnel).
   }
 
   function runLegacy() {
+    // Fallback config when tenant-config API is unavailable.
+    // Miami coordinates are the eplanner default; lgbtq domain gets Toronto.
+    window._tenantConfig = {
+      defaultMapCenter: isLGBTQDomain() ? [43.6532, -79.3832] : [25.7617, -80.1918],
+    };
     legacyFavicon();
     legacyLogo();
     legacyPageTitle();
@@ -282,6 +275,9 @@
     fetch('/api/tenant-config')
       .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function (config) {
+        // Expose config globally so other scripts (e.g. coordinate.js) can read
+        // tenant-specific values like defaultMapCenter without a second fetch.
+        window._tenantConfig = config;
         applyBranding(config);
       })
       .catch(function () {

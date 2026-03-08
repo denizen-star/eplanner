@@ -1,5 +1,13 @@
 // Version identifier for cache verification
 const VERSION = 'v4.0.0';
+
+// Returns the map center from the tenant config if available, falling back to Miami.
+// window._tenantConfig is set by domain-variant.js after fetching /api/tenant-config.
+function getDefaultMapCenter() {
+  return (window._tenantConfig && Array.isArray(window._tenantConfig.defaultMapCenter))
+    ? window._tenantConfig.defaultMapCenter
+    : MIAMI_COORDINATES;
+}
 console.log(`%c[COORDINATE] Page loaded - ${VERSION}`, 'color: #2563eb; font-weight: bold; font-size: 14px;');
 console.log('[COORDINATE] Timestamp:', new Date().toISOString());
 
@@ -60,20 +68,20 @@ function initializeMapWhenReady() {
   const mapContainer = document.getElementById('locationMap');
   
   // Check if all dependencies are loaded
-  const dependenciesReady = typeof L !== 'undefined' && 
-                            typeof initMap === 'function' && 
+  const dependenciesReady = typeof L !== 'undefined' &&
+                            typeof initMap === 'function' &&
                             typeof MIAMI_COORDINATES !== 'undefined';
-  
+
   if (mapContainer && dependenciesReady) {
     try {
-      initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+      initMap('locationMap', null, null, false, getDefaultMapCenter());
       console.log('[COORDINATE] Map initialized successfully');
     } catch (error) {
       console.error('[COORDINATE] Error initializing map:', error);
       // Retry once after a delay
       setTimeout(() => {
         try {
-          initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+          initMap('locationMap', null, null, false, getDefaultMapCenter());
         } catch (retryError) {
           console.error('[COORDINATE] Map initialization failed after retry:', retryError);
         }
@@ -220,13 +228,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (locationText.length > 3) {
         locationUpdateTimeout = setTimeout(() => {
           if (typeof updateMapForLocationWithValidation === 'function') {
-            updateMapForLocationWithValidation('locationMap', locationText, false, MIAMI_COORDINATES);
+            updateMapForLocationWithValidation('locationMap', locationText, false, getDefaultMapCenter());
           }
         }, 500);
       } else {
         const mapContainer = document.getElementById('locationMap');
         if (mapContainer && typeof initMap === 'function') {
-          initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+          initMap('locationMap', null, null, false, getDefaultMapCenter());
         }
       }
     });
@@ -430,9 +438,9 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       throw new Error('Please wait for the address to be validated or enter a valid location');
     }
 
-    const plannerName = document.getElementById('pacerName').value.trim();
-    if (!plannerName) {
-      throw new Error('Please enter a planner name');
+    const organizerName = document.getElementById('organizerName').value.trim();
+    if (!organizerName) {
+      throw new Error('Please enter an organizer name');
     }
 
     const coordinatorEmailInput = document.getElementById('coordinatorEmail');
@@ -566,7 +574,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     const formData = {
       location: locationToSave,
       coordinates: validatedCoordinates,
-      plannerName: plannerName,
+      // TODO: rename DB column pacer_name → organizer_name when ready to migrate
+      plannerName: organizerName,
       coordinatorEmail: coordinatorEmail,
       title: runTitle || null,
       dateTime: dateTime,
@@ -605,7 +614,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     
     console.log('[COORDINATE] Form Data being sent:', {
       hasLocation: !!formData.location,
-      hasPlannerName: !!formData.plannerName,
+      hasOrganizerName: !!formData.plannerName,
       hasCoordinatorEmail: !!formData.coordinatorEmail,
       hasDateTime: !!formData.dateTime,
       hasEndTime: !!formData.endTime,
@@ -717,9 +726,9 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
       const signupLinkEscaped = signupLink.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       const manageLinkEscaped = manageLink.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       
-      // Create event object for WhatsApp message generation
+      // Create event object for share message generation
       const runForMessage = {
-        pacerName: plannerName,
+        organizerName: organizerName,
         title: runTitle || null,
         location: locationToSave,
         dateTime: formData.dateTime
@@ -734,7 +743,7 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
           <p><strong>Signup Link:</strong></p>
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
             <a href="${signupLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${signupLink}">${signupLink}</a>
-            <button onclick="copyToClipboard('signupLink')" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_signup_link_click">Copy</button>
+            <button onclick="copyToClipboard('signupLink', this)" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_signup_link_click">Copy</button>
           </div>
           <input type="text" id="signupLink" value="${signupLinkEscaped}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
         </div>
@@ -742,14 +751,14 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
           <p><strong>Management Link:</strong></p>
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
             <a href="${manageLink}" target="_blank" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; background: #fff; color: var(--primary-color); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${manageLink}">${manageLink}</a>
-            <button onclick="copyToClipboard('manageLink')" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_manage_link_click">Copy</button>
+            <button onclick="copyToClipboard('manageLink', this)" class="button" style="white-space: nowrap; min-width: 60px;" data-track-cta="copy_manage_link_click">Copy</button>
           </div>
           <input type="text" id="manageLink" value="${manageLinkEscaped}" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
         </div>
         <div style="margin-bottom: 16px; padding: 16px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd;">
-          <p style="margin-bottom: 8px;"><strong>WhatsApp Message:</strong></p>
+          <p style="margin-bottom: 8px;"><strong>Share Message:</strong></p>
           <div style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 8px; white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.5;">${whatsappMessage.replace(/\n/g, '<br>')}</div>
-          <button onclick="copyToClipboard('whatsappMessage')" class="button button-primary" style="width: 100%;" data-track-cta="copy_whatsapp_message_click">Copy WhatsApp Message</button>
+          <button onclick="copyToClipboard('whatsappMessage', this)" class="button button-primary" style="width: 100%;" data-track-cta="copy_share_message_click">Copy Share Message</button>
           <textarea id="whatsappMessage" readonly style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">${whatsappMessageEscaped}</textarea>
         </div>
         <p style="font-size: 14px; color: var(--text-gray);">Share the signup link with participants. Keep the management link private to view and manage signups.</p>
@@ -781,8 +790,8 @@ document.getElementById('coordinateForm').addEventListener('submit', async (e) =
     validatedAddressComponents = null;
     document.getElementById('locationValidation').style.display = 'none';
     
-    // Reset map to Miami
-    initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+    // Reset map to tenant default center
+    initMap('locationMap', null, null, false, getDefaultMapCenter());
     
     // Reset datetime to tomorrow at 5:00 PM, end 1 hour later
     const tomorrow = new Date();
@@ -871,13 +880,13 @@ function formatDateForWhatsApp(dateString, timezone = null) {
 
 // Generate WhatsApp message template
 function generateWhatsAppMessage(run, signupLink, timezone = null) {
-  const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
+  const organizerName = run.organizerName && typeof run.organizerName === 'string' && run.organizerName.trim() ? run.organizerName.trim() : '';
   const runTitle = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
   const city = extractCity(run.location || '');
   const dateFormatted = formatDateForWhatsApp(run.dateTime, timezone);
-  
+
   let message = 'Hi Participants, \n';
-  message += `🎉 ${pacerName} here! I am hosting an event`;
+  message += `🎉 ${organizerName} here! I am hosting an event`;
   
   if (runTitle) {
     message += `\n${runTitle}`;
@@ -893,15 +902,28 @@ function generateWhatsAppMessage(run, signupLink, timezone = null) {
   return message;
 }
 
-function copyToClipboard(elementId) {
+// Copy text to clipboard and show inline "Copied!" feedback on the button.
+// btn is the triggering button element (passed via onclick="copyToClipboard('id', this)").
+function copyToClipboard(elementId, btn) {
   const element = document.getElementById(elementId);
   const text = element.value || element.textContent;
   navigator.clipboard.writeText(text).then(() => {
-    const message = elementId === 'whatsappMessage' ? 'WhatsApp message copied to clipboard!' : 'Link copied to clipboard';
-    alert(message);
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.disabled = false;
+      }, 2000);
+    }
   }).catch(err => {
     console.error('Failed to copy:', err);
-    alert('Failed to copy');
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
   });
 }
 

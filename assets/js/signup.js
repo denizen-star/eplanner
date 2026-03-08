@@ -154,13 +154,14 @@ function updateOpenGraphTags(run, runTitle) {
   const baseUrl = window.location.origin;
   const currentUrl = window.location.href;
   
-  // Build title (event name, no " - Gay Run Club")
-  const pacerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
-  let title = 'Sign Up for Run';
+  // Build title — use event title if set, otherwise fall back to organizer name
+  // Note: API returns run.pacerName (DB column pacer_name); rename deferred as tech debt
+  const organizerName = run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim() ? run.pacerName.trim() : '';
+  let title = 'Sign Up for Event';
   if (runTitle) {
     title = runTitle;
-  } else if (pacerName) {
-    title = `Run with ${pacerName}`;
+  } else if (organizerName) {
+    title = `Event by ${organizerName}`;
   }
   
   // Build description: Join us!. Date: <date>. Location: <location>. Organized by: <organizer>
@@ -178,7 +179,7 @@ function updateOpenGraphTags(run, runTitle) {
   const parts = ['Join us!.'];
   if (formattedDate) parts.push(`Date: ${formattedDate}.`);
   if (run.location) parts.push(`Location: ${run.location}.`);
-  if (pacerName) parts.push(`Organized by: ${pacerName}.`);
+  if (organizerName) parts.push(`Organized by: ${organizerName}.`);
   const statusLabel = run.status && typeof run.status === 'string'
     ? run.status.charAt(0).toUpperCase() + run.status.slice(1).toLowerCase()
     : 'Active';
@@ -212,28 +213,29 @@ async function loadRun() {
     document.getElementById('runLocation').textContent = run.location;
     
     const runTitleElement = document.getElementById('runTitle');
-    const pacerNameElement = document.getElementById('runPacerName');
+    // Note: element renamed from runPacerName → runOrganizerName to match HTML; API field run.pacerName retained (DB tech debt)
+    const organizerNameElement = document.getElementById('runOrganizerName');
     const runTitleDisplay = run.title && typeof run.title === 'string' && run.title.trim() ? run.title.trim() : '';
-    
+
     if (run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim()) {
-      const pacerName = run.pacerName.trim();
+      const organizerName = run.pacerName.trim();
       if (runTitleDisplay) {
-        runTitleElement.textContent = `${runTitleDisplay} - ${pacerName}`;
-        document.title = `${runTitleDisplay} - ${pacerName}`;
+        runTitleElement.textContent = `${runTitleDisplay} - ${organizerName}`;
+        document.title = `${runTitleDisplay} - ${organizerName}`;
       } else {
-        runTitleElement.textContent = `Run with ${pacerName}`;
-        document.title = `Run with ${pacerName}`;
+        runTitleElement.textContent = `Event by ${organizerName}`;
+        document.title = `Event by ${organizerName}`;
       }
-      if (pacerNameElement) pacerNameElement.textContent = pacerName;
+      if (organizerNameElement) organizerNameElement.textContent = organizerName;
     } else {
       if (runTitleDisplay) {
         runTitleElement.textContent = runTitleDisplay;
         document.title = runTitleDisplay;
       } else {
-        runTitleElement.textContent = 'Sign Up for Run';
-        document.title = 'Sign Up for Run';
+        runTitleElement.textContent = 'Sign Up for Event';
+        document.title = 'Sign Up for Event';
       }
-      if (pacerNameElement) pacerNameElement.textContent = '-';
+      if (organizerNameElement) organizerNameElement.textContent = '-';
     }
     
     // Format date using stored timezone if available, otherwise use browser timezone
@@ -336,7 +338,7 @@ async function loadRun() {
       if (runTitleDisplay) {
         heroTitle.textContent = runTitleDisplay;
       } else if (run.pacerName && typeof run.pacerName === 'string' && run.pacerName.trim()) {
-        heroTitle.textContent = `Run with ${run.pacerName.trim()}`;
+        heroTitle.textContent = `Event by ${run.pacerName.trim()}`;
       } else {
         heroTitle.textContent = 'Join Us';
       }
