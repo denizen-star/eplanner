@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  const SIGNUP_BUTTON_NEW_TEXT = 'Create your Activity';
+  const SIGNUP_BUTTON_NEW_TEXT = 'Host an Event';
   const LGBTQ_DOMAIN = 'to-lgbtq.kervinapps.com';
   const LGBTQ_ALIAS_DOMAIN = 'to.lgbtq-hub.com';
   const LGBTQ_FAVICON = 'assets/images/to-logbtqicon.png';
