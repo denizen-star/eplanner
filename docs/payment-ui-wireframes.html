@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment UI - 5 Wireframe Options</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f1eb;
+            padding: 40px;
+            color: #2c2c2c;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .intro { margin-bottom: 32px; color: #5a5a5a; font-size: 14px; }
+        .option-block {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+        .option-title {
+            background: #e8e4de;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .option-concept {
+            padding: 12px 20px;
+            font-size: 13px;
+            color: #5a5a5a;
+            border-bottom: 1px solid #eee;
+        }
+        .wireframe {
+            padding: 24px;
+            min-height: 200px;
+        }
+        /* Wireframe elements */
+        .wf-section {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .wf-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+        .wf-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .wf-toggle {
+            width: 48px; height: 24px; background: #e0e0e0; border-radius: 12px;
+            position: relative; display: inline-block;
+        }
+        .wf-toggle::after {
+            content: ''; position: absolute; width: 18px; height: 18px;
+            background: #fff; border-radius: 50%; top: 3px; left: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .wf-input {
+            border: 1px solid #ccc; border-radius: 6px;
+            padding: 8px 12px; font-size: 13px;
+            min-width: 180px; background: #fff;
+        }
+        .wf-input.date { min-width: 140px; }
+        .wf-radio { margin-right: 6px; }
+        .wf-pill {
+            padding: 8px 16px; border: 1px solid #ccc; border-radius: 20px;
+            font-size: 13px; background: #fff; cursor: pointer;
+        }
+        .wf-pill.active { background: #2196F3; color: #fff; border-color: #2196F3; }
+        .wf-tab {
+            padding: 8px 20px; border: 1px solid #ccc; border-radius: 6px;
+            font-size: 13px; background: #f9f9f9;
+        }
+        .wf-tab.active { background: #E3F2FD; border-color: #2196F3; font-weight: 500; }
+        .wf-helper { font-size: 12px; color: #8a8a8a; margin-top: 6px; }
+        .wf-divider { border-top: 1px solid #e0e0e0; margin: 12px 0; }
+        .wf-box {
+            background: #E3F2FD; border: 1px solid #2196F3;
+            border-radius: 8px; padding: 16px;
+        }
+        .wf-sidebar {
+            display: grid; grid-template-columns: 90px 1fr; gap: 12px;
+            align-items: start;
+        }
+        .wf-sidebar-label { font-size: 12px; color: #1976D2; font-weight: 500; }
+        .wf-disclaimer {
+            padding: 10px 14px; background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px;
+            font-size: 12px; margin-top: 12px;
+        }
+        .wf-disclaimer-muted {
+            font-size: 12px; color: #8a8a8a; margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Payment Information - 5 Wireframe Options</h1>
+    <p class="intro">Five layout concepts for the coordinate form. Pick one to implement.</p>
+
+    <!-- Option A -->
+    <div class="option-block">
+        <div class="option-title">Option A: Minimal Card with Stepped Flow</div>
+        <div class="option-concept">Single blue-tinted card, generous padding. Cost type and options on one line. Inputs full-width. Subtle divider. Disclaimer as light banner.</div>
+        <div class="wireframe">
+            <div class="wf-section">
+                <div class="wf-label">PAYMENT INFORMATION</div>
+                <div class="wf-row">
+                    <span>Free Event</span>
+                    <div class="wf-toggle"></div>
+                    <span>Paid Event</span>
+                </div>
+            </div>
+            <div class="wf-box">
+                <div class="wf-row">
+                    <span class="wf-label">Cost type</span>
+                    <label><input type="radio" class="wf-radio" name="a"> Fixed Cost</label>
+                    <label><input type="radio" class="wf-radio" name="a" checked> Split Cost</label>
+                </div>
+                <div style="margin-top: 12px;">
+                    <input type="text" class="wf-input" placeholder="Total cost of event" style="width: 100%; max-width: 100%;">
+                    <div class="wf-helper">The app will display the estimated cost per person based on the current number of sign-ups.</div>
+                </div>
+                <div class="wf-divider"></div>
+                <div class="wf-label">Collection date (optional)</div>
+                <input type="date" class="wf-input date" style="margin-top: 6px;">
+                <div class="wf-helper">Date participants should expect to pay the coordinator</div>
+            </div>
+            <div class="wf-disclaimer-muted">Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.</div>
+        </div>
+    </div>
+
+    <!-- Option B -->
+    <div class="option-block">
+        <div class="option-title">Option B: Inline Compact (Horizontal Dense)</div>
+        <div class="option-concept">Everything on 2–3 lines. Toggle and cost type share top row. Amount and collection contextually. No blue box. Very compact.</div>
+        <div class="wireframe">
+            <div class="wf-section">
+                <div class="wf-label">PAYMENT INFORMATION</div>
+                <div class="wf-row" style="margin-bottom: 8px;">
+                    <span>Free</span>
+                    <div class="wf-toggle"></div>
+                    <span>Paid</span>
+                    <span style="margin-left: 24px;">Cost:</span>
+                    <label><input type="radio" class="wf-radio" name="b"> Fixed</label>
+                    <label><input type="radio" class="wf-radio" name="b" checked> Split</label>
+                </div>
+                <div class="wf-row" style="margin-bottom: 8px;">
+                    <span>Amount:</span>
+                    <input type="text" class="wf-input" placeholder="Amount" style="min-width: 120px;">
+                    <span style="margin-left: 12px;">or</span>
+                    <span>Collection:</span>
+                    <input type="date" class="wf-input date">
+                </div>
+                <div class="wf-helper">The app will display the estimated cost per person based on the current number of sign-ups.</div>
+            </div>
+            <div class="wf-disclaimer-muted">Kervinapps does not facilitate or process payments.</div>
+        </div>
+    </div>
+
+    <!-- Option C -->
+    <div class="option-block">
+        <div class="option-title">Option C: Pill Segments + Floating Inputs</div>
+        <div class="option-concept">Cost type as large pill buttons. Inputs align right. Single card. Disclaimer as subtle footer, not a warning box.</div>
+        <div class="wireframe">
+            <div class="wf-section">
+                <div class="wf-label">PAYMENT INFORMATION</div>
+                <div class="wf-row" style="margin-bottom: 16px;">
+                    <span>Free Event</span>
+                    <div class="wf-toggle"></div>
+                    <span>Paid Event</span>
+                </div>
+                <div class="wf-row" style="gap: 8px; margin-bottom: 16px;">
+                    <span class="wf-pill">Fixed Cost</span>
+                    <span class="wf-pill active">Split Cost</span>
+                </div>
+                <div class="wf-row" style="justify-content: flex-end;">
+                    <input type="text" class="wf-input" placeholder="Total cost" style="min-width: 140px;">
+                    <input type="date" class="wf-input date" placeholder="Collection date">
+                </div>
+            </div>
+            <div class="wf-disclaimer-muted">Kervinapps does not facilitate or process payments. You are responsible for communicating your payment methods and collecting funds from participants directly.</div>
+        </div>
+    </div>
+
+    <!-- Option D -->
+    <div class="option-block">
+        <div class="option-title">Option D: Tab + Rows</div>
+        <div class="option-concept">Tab-style for Free/Paid. Blue box has 3 rows. Row 2 shows amount and collection on one line when Split. Less vertical stacking.</div>
+        <div class="wireframe">
+            <div class="wf-section">
+                <div class="wf-label">PAYMENT INFORMATION</div>
+                <div class="wf-row" style="margin-bottom: 16px; gap: 8px;">
+                    <span class="wf-tab">Free Event</span>
+                    <span class="wf-tab active">Paid Event</span>
+                </div>
+                <div class="wf-box">
+                    <div class="wf-row" style="margin-bottom: 12px;">
+                        <span class="wf-label">Cost Type</span>
+                        <label><input type="radio" class="wf-radio" name="d"> Fixed</label>
+                        <label><input type="radio" class="wf-radio" name="d" checked> Split</label>
+                    </div>
+                    <div class="wf-row" style="margin-bottom: 8px;">
+                        <input type="text" class="wf-input" placeholder="Amount / Total" style="flex: 1; min-width: 120px;">
+                        <input type="date" class="wf-input date" placeholder="Collection">
+                    </div>
+                    <div class="wf-helper">Helper text in one line, smaller.</div>
+                </div>
+            </div>
+            <div class="wf-disclaimer-muted">Kervinapps does not facilitate or process payments.</div>
+        </div>
+    </div>
+
+    <!-- Option E -->
+    <div class="option-block">
+        <div class="option-title">Option E: Sidebar Label + Content</div>
+        <div class="option-concept">Left column for labels (Cost Type, Collection). Right column for inputs. Table-like structure. Clear hierarchy.</div>
+        <div class="wireframe">
+            <div class="wf-section">
+                <div class="wf-label">PAYMENT INFORMATION</div>
+                <div class="wf-row" style="margin-bottom: 16px;">
+                    <span>Free Event</span>
+                    <div class="wf-toggle"></div>
+                    <span>Paid Event</span>
+                </div>
+                <div class="wf-box">
+                    <div class="wf-sidebar" style="margin-bottom: 12px;">
+                        <span class="wf-sidebar-label">Cost Type</span>
+                        <div>
+                            <label><input type="radio" class="wf-radio" name="e"> Fixed Cost</label>
+                            <label><input type="radio" class="wf-radio" name="e" checked> Split Cost</label>
+                        </div>
+                    </div>
+                    <div class="wf-sidebar" style="margin-bottom: 12px;">
+                        <span class="wf-sidebar-label"></span>
+                        <input type="text" class="wf-input" placeholder="Total cost of event" style="width: 100%;">
+                    </div>
+                    <div class="wf-sidebar" style="margin-bottom: 6px;">
+                        <span class="wf-sidebar-label"></span>
+                        <div class="wf-helper">The app will display the estimated cost per person based on the current number of sign-ups.</div>
+                    </div>
+                    <div class="wf-divider"></div>
+                    <div class="wf-sidebar">
+                        <span class="wf-sidebar-label">Collection (opt)</span>
+                        <div>
+                            <input type="date" class="wf-input date">
+                            <div class="wf-helper">Date participants should expect to pay the coordinator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wf-disclaimer-muted">Kervinapps does not facilitate or process payments.</div>
+        </div>
+    </div>
+
+    <p style="margin-top: 32px; font-size: 13px; color: #8a8a8a;">Pick one to implement, or combine elements from multiple options.</p>
+</body>
+</html>

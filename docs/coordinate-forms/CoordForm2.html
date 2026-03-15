@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoordForm2 - Card-Based Sectioned</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #F7F3ED;
+            --text-primary: #2C2C2C;
+            --text-secondary: #5A5A5A;
+            --text-tertiary: #8A8A8A;
+            --border-primary: #E5E0D8;
+            --accent-pink: #FFB6C1;
+            --accent-pink-hover: #FFC0CB;
+            --accent-pink-light: #FFE4E9;
+            --white: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-secondary); color: var(--text-primary); line-height: 1.5; font-size: 14px; }
+        .main { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+        .hero { background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200') center/cover; padding: 40px 24px; margin-bottom: -20px; }
+        .hero h1 { color: var(--white); font-size: 20px; font-weight: 600; }
+        .hero p { color: rgba(255,255,255,0.9); font-size: 12px; margin-top: 4px; }
+        .section { background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+        .section-title { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+        .row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 140px; }
+        .field { margin-bottom: 12px; }
+        .field:last-child { margin-bottom: 0; }
+        .field label { display: block; font-size: 11px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+        .field input, .field textarea { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid var(--border-primary); border-radius: 6px; background: var(--white); font-family: inherit; }
+        .field textarea { rows: 2; resize: vertical; min-height: 52px; }
+        .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent-pink); box-shadow: 0 0 0 2px var(--accent-pink-light); }
+        .radio-row { display: flex; gap: 10px; margin-top: 8px; }
+        .radio-opt { flex: 1; padding: 10px 12px; border: 1px solid var(--border-primary); border-radius: 6px; cursor: pointer; }
+        .radio-opt input { display: none; }
+        .radio-opt .t { font-size: 12px; font-weight: 600; }
+        .radio-opt .d { font-size: 10px; color: var(--text-tertiary); margin-top: 1px; }
+        .btn { background: var(--accent-pink); color: var(--white); border: none; padding: 10px 28px; font-size: 13px; font-weight: 500; border-radius: 20px; cursor: pointer; margin-top: 16px; }
+        .btn:hover { background: var(--accent-pink-hover); }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <section class="hero">
+            <h1>Coordinate an Event</h1>
+            <p>Community event management</p>
+        </section>
+        <form>
+            <div class="section">
+                <div class="section-title">Basics</div>
+                <div class="row">
+                    <div class="col">
+                        <div class="field">
+                            <label>Planner Name *</label>
+                            <input type="text" placeholder="John Smith" required>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="field">
+                            <label>Coordinator Email *</label>
+                            <input type="email" placeholder="coordinator@example.com" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="field" style="margin-top: 12px;">
+                    <label>Event Title</label>
+                    <input type="text" placeholder="e.g., Morning Beach Event">
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">When & Where</div>
+                <div class="row">
+                    <div class="col">
+                        <div class="field">
+                            <label>Date & Start *</label>
+                            <input type="datetime-local" step="1800" required>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="field">
+                            <label>End Time</label>
+                            <input type="datetime-local" step="1800">
+                        </div>
+                    </div>
+                </div>
+                <div class="field" style="margin-top: 12px;">
+                    <label>Max Participants *</label>
+                    <input type="number" min="1" value="10" style="max-width: 100px;" required>
+                </div>
+                <div class="field" style="margin-top: 12px;">
+                    <label>Location *</label>
+                    <input type="text" placeholder="Address or place name" required>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Details</div>
+                <div class="field">
+                    <label>Description</label>
+                    <textarea placeholder="Add details..."></textarea>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Visibility</div>
+                <div class="radio-row">
+                    <label class="radio-opt">
+                        <input type="radio" name="v" checked>
+                        <span class="t">Public</span>
+                        <span class="d">In calendar & search</span>
+                    </label>
+                    <label class="radio-opt">
+                        <input type="radio" name="v">
+                        <span class="t">Private</span>
+                        <span class="d">Signup link only</span>
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn">Create Event</button>
+        </form>
+    </main>
+</body>
+</html>

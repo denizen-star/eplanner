@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoordForm1 - Minimal Compact</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #F7F3ED;
+            --text-primary: #2C2C2C;
+            --text-secondary: #5A5A5A;
+            --text-tertiary: #8A8A8A;
+            --border-primary: #E5E0D8;
+            --accent-pink: #FFB6C1;
+            --accent-pink-hover: #FFC0CB;
+            --accent-pink-light: #FFE4E9;
+            --white: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-secondary); color: var(--text-primary); line-height: 1.5; font-size: 11px; }
+        .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+        .hero { background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200') center/cover; padding: 48px 24px; margin-bottom: -24px; }
+        .hero h1 { color: var(--white); font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .hero p { color: rgba(255,255,255,0.9); font-size: 11px; }
+        .card { background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .intro { color: var(--text-secondary); font-size: 11px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border-primary); }
+        .form-section { margin-bottom: 20px; padding: 16px; background: rgba(247,243,237,0.5); border: 1px solid var(--border-primary); border-radius: 8px; }
+        .form-section-head { font-size: 11px; font-weight: 400; color: var(--text-secondary); margin-bottom: 12px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+        .field { margin-bottom: 10px; }
+        .field-align-left { display: flex; flex-direction: column; align-items: flex-start; }
+        .field-align-left input { width: 100%; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { display: none; }
+        .field input, .field textarea, .field select { width: 100%; padding: 7px 10px; font-size: 11px; border: 1px solid var(--border-primary); border-radius: 6px; background: var(--white); font-family: inherit; }
+        .field input::placeholder, .field textarea::placeholder { color: var(--text-tertiary); }
+        .field input[type="file"] { padding: 5px; font-size: 10px; }
+        .field textarea { rows: 2; resize: vertical; min-height: 50px; }
+        .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent-pink); box-shadow: 0 0 0 2px var(--accent-pink-light); }
+        .field small { display: block; font-size: 9px; color: var(--text-tertiary); margin-top: 2px; }
+        .section-title { font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 10px; padding-top: 14px; border-top: 1px solid var(--border-primary); }
+        .section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+        .vis-row { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+        .vis-desc { flex: 1; min-width: 200px; font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+        .radio-row { display: flex; gap: 10px; }
+        .radio-card { flex: 1; padding: 10px; border: 1px solid var(--border-primary); border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .radio-card:hover { border-color: var(--accent-pink); }
+        .radio-card:has(input:checked) { background: #E3F2FD; border-color: #2196F3; box-shadow: 0 0 0 1px #2196F3; }
+        .radio-card:has(input:checked) .title { color: #1976D2; }
+        .radio-card input { display: none; }
+        .radio-card .title { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+        .radio-card .desc { font-size: 10px; color: var(--text-tertiary); margin-top: 1px; }
+        .time-label { font-size: 9px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+        .btn { background: var(--accent-pink); color: var(--white); border: none; padding: 8px 20px; font-size: 11px; font-weight: 500; border-radius: 20px; cursor: pointer; margin-top: 16px; }
+        .btn:hover { background: var(--accent-pink-hover); }
+        .btn-secondary { background: var(--white); color: var(--text-primary); border: 1px solid var(--border-primary); margin-top: 8px; }
+        .btn-secondary:hover { background: var(--bg-secondary); }
+        .location-map { height: 200px; width: 100%; border-radius: 8px; border: 1px solid var(--border-primary); overflow: hidden; background: #f0f0f0; margin-top: 8px; }
+        .pic-preview { max-height: 120px; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-primary); display: none; }
+        .pic-preview img { width: 100%; height: auto; object-fit: contain; }
+        .pic-preview.visible { display: block; }
+        .checkbox-inline { display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 6px; margin-bottom: 0; }
+        .checkbox-inline input { width: auto; flex-shrink: 0; }
+        .checkbox-inline label { margin: 0; text-transform: none; display: inline; font-size: 10px; }
+        .payment-section { padding: 12px; border: 1px solid var(--border-primary); border-radius: 8px; background: var(--white); }
+        .payment-row-1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+        #paymentCostTypeOptions { display: flex; gap: 12px; align-items: center; }
+        .payment-type { display: flex; align-items: center; gap: 8px; }
+        .payment-type span { font-size: 11px; font-weight: 500; color: var(--text-secondary); }
+        .payment-toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+        .payment-toggle input { opacity: 0; width: 0; height: 0; }
+        .payment-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #e5e7eb; border-radius: 22px; transition: 0.2s; }
+        .payment-toggle-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: var(--white); border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .payment-toggle input:checked + .payment-toggle-slider { background: #2196F3; }
+        .payment-toggle input:checked + .payment-toggle-slider::before { transform: translateX(18px); }
+        .payment-cost-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+        .payment-cost-inline { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+        .payment-cost-row label { display: flex; align-items: center; gap: 6px; font-size: 10px; cursor: pointer; }
+        .payment-cost-row input[type="number"], .payment-cost-row input[type="date"] { padding: 5px 8px; font-size: 11px; border: 1px solid var(--border-primary); border-radius: 4px; width: 90px; }
+        .payment-disclaimer { font-size: 9px; color: #991b1b; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-primary); }
+        .validated-addr { font-size: 10px; padding: 6px 8px; background: rgba(117,7,135,0.08); border: 1px solid #750787; border-radius: 4px; color: #750787; margin-top: 6px; display: none; }
+        .validated-addr.visible { display: block; }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <section class="hero">
+            <h1>Coordinate an Event</h1>
+            <p>Create and manage community events</p>
+        </section>
+        <div class="card">
+            <p class="intro">Complete the form. You'll receive signup and management links after submission.</p>
+            <form id="coordinateForm">
+                <div class="form-section">
+                    <div class="form-section-head">Basics</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <input type="text" id="pacerName" name="pacerName" placeholder="Planner Name *" required>
+                        </div>
+                        <div class="field">
+                            <input type="email" id="coordinatorEmail" name="coordinatorEmail" placeholder="Coordinator Email *" required>
+                        </div>
+                        <div class="field full">
+                            <input type="text" id="runTitle" name="runTitle" placeholder="Event Title (optional)">
+                        </div>
+                        <div class="field full">
+                            <textarea id="eventDescription" name="eventDescription" placeholder="Description (optional)"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-head">When</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <div class="time-label">From</div>
+                            <input type="datetime-local" id="dateTime" name="dateTime" step="1800" required>
+                        </div>
+                        <div class="field">
+                            <div class="time-label">To</div>
+                            <input type="datetime-local" id="endTime" name="endTime" step="1800">
+                        </div>
+                        <div class="field">
+                            <div class="time-label">Max participants</div>
+                            <input type="number" id="maxParticipants" name="maxParticipants" min="1" value="10" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-head">Social</div>
+                    <div class="form-grid">
+                        <div class="field field-align-left">
+                            <input type="url" id="eventWebsite" name="eventWebsite" placeholder="Event Website (optional)">
+                            <div class="checkbox-inline">
+                                <input type="checkbox" id="externalSignupEnabled" name="externalSignupEnabled">
+                                <label for="externalSignupEnabled">Use website for external signups</label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <input type="text" id="eventInstagram" name="eventInstagram" placeholder="Event Instagram (optional)">
+                        </div>
+                        <div class="field full">
+                            <input type="file" id="eventPicture" name="eventPicture" accept="image/*">
+                            <div id="picturePreview" class="pic-preview">
+                                <img id="previewImage" src="" alt="Preview">
+                                <button type="button" id="removePicture" class="btn btn-secondary">Remove Picture</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-head">Location</div>
+                    <div class="form-grid">
+                        <div class="field full">
+                            <input type="text" id="location" name="location" placeholder="Address * (map appears when found)" required>
+                            <div id="locationValidation" class="validated-addr"><strong>Validated:</strong> <span id="validatedAddress"></span></div>
+                            <div id="locationMap" class="location-map"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-head">Payment</div>
+                    <input type="hidden" name="paymentType" id="paymentTypeHidden" value="free">
+                    <div class="payment-section">
+                        <div class="payment-row-1">
+                            <div class="payment-type">
+                                <span>Free</span>
+                                <label class="payment-toggle">
+                                    <input type="checkbox" id="paymentTypeToggle" name="paymentTypeToggle" value="paid">
+                                    <span class="payment-toggle-slider"></span>
+                                </label>
+                                <span>Paid</span>
+                            </div>
+                            <div id="paymentCostTypeOptions" style="display: none; gap: 12px; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 10px; cursor: pointer;"><input type="radio" name="paymentMode" value="fixed_amount">Fixed</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 10px; cursor: pointer;"><input type="radio" name="paymentMode" value="split_cost">Split</label>
+                            </div>
+                        </div>
+                        <div id="paymentDetailsCard" style="display: none;">
+                            <div class="payment-cost-row" id="fixedAmountWrap" style="display: none;">
+                                <label><span style="font-weight:500;">Amount</span> <input type="number" id="amountPerPerson" name="amountPerPerson" placeholder="Per person" step="0.01" min="0"></label>
+                            </div>
+                            <div class="payment-cost-inline" id="splitCostWrap" style="display: none;">
+                                <label><span style="font-weight:500;">Total</span> <input type="number" id="totalEventCostInput" name="totalEventCost" placeholder="Total cost" step="0.01" min="0"></label>
+                                <label><span style="font-weight:500;">Collection</span> <input type="date" id="paymentDueDate" name="paymentDueDate"></label>
+                            </div>
+                        </div>
+                        <div class="payment-disclaimer">Kervinapps does not process payments. You collect funds from participants directly.</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-head">Event Visibility</div>
+                    <div class="vis-row">
+                        <div class="radio-row">
+                            <label class="radio-card">
+                                <input type="radio" name="eventVisibility" value="public" checked required>
+                                <span class="title">Public</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="eventVisibility" value="private" required>
+                                <span class="title">Private</span>
+                            </label>
+                        </div>
+                        <div id="visDesc" class="vis-desc">Shown in calendar, searchable, newsletter emails</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="submitButton">Create Event</button>
+            </form>
+        </div>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="../../assets/js/map-utils.js"></script>
+    <script>
+        (function() {
+            var locInput = document.getElementById('location');
+            var mapEl = document.getElementById('locationMap');
+            var validatedEl = document.getElementById('locationValidation');
+            var validatedAddr = document.getElementById('validatedAddress');
+            var debounce = null;
+            if (locInput && mapEl && typeof geocodeLocation === 'function' && typeof initMap === 'function') {
+                locInput.addEventListener('input', function() {
+                    clearTimeout(debounce);
+                    debounce = setTimeout(function() {
+                        var q = locInput.value.trim();
+                        if (q.length >= 3) {
+                            mapEl.innerHTML = '';
+                            mapEl.style.display = 'block';
+                            geocodeLocation(q).then(function(r) {
+                                validatedAddr.textContent = r.address;
+                                validatedEl.classList.add('visible');
+                                initMap('locationMap', r.coordinates, r.address, false, typeof MIAMI_COORDINATES !== 'undefined' ? MIAMI_COORDINATES : [25.7617,-80.1918], r.placeName);
+                            }).catch(function() {
+                                validatedEl.classList.remove('visible');
+                                initMap('locationMap', null, null, false, typeof MIAMI_COORDINATES !== 'undefined' ? MIAMI_COORDINATES : [25.7617,-80.1918]);
+                            });
+                        } else {
+                            validatedEl.classList.remove('visible');
+                            if (typeof MIAMI_COORDINATES !== 'undefined') initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+                            else mapEl.innerHTML = '<div style="padding:20px;text-align:center;color:#8A8A8A;font-size:12px;">Map appears when location is entered</div>';
+                        }
+                    }, 500);
+                });
+                if (typeof MIAMI_COORDINATES !== 'undefined') {
+                    initMap('locationMap', null, null, false, MIAMI_COORDINATES);
+                }
+            } else if (mapEl) {
+                mapEl.style.display = 'flex';
+                mapEl.style.alignItems = 'center';
+                mapEl.style.justifyContent = 'center';
+                mapEl.style.color = '#8A8A8A';
+                mapEl.style.fontSize = '12px';
+                mapEl.innerHTML = 'Map appears when location is entered';
+            }
+            var picInput = document.getElementById('eventPicture');
+            var preview = document.getElementById('picturePreview');
+            var previewImg = document.getElementById('previewImage');
+            var removeBtn = document.getElementById('removePicture');
+            if (picInput && preview && previewImg && removeBtn) {
+                picInput.addEventListener('change', function() {
+                    var f = picInput.files[0];
+                    if (f && f.type.startsWith('image/')) {
+                        var r = new FileReader();
+                        r.onload = function() { previewImg.src = r.result; preview.classList.add('visible'); };
+                        r.readAsDataURL(f);
+                    }
+                });
+                removeBtn.addEventListener('click', function() {
+                    picInput.value = ''; previewImg.src = ''; preview.classList.remove('visible');
+                });
+            }
+            var payToggle = document.getElementById('paymentTypeToggle');
+            var payDetails = document.getElementById('paymentDetailsCard');
+            var costOpts = document.getElementById('paymentCostTypeOptions');
+            var fixedWrap = document.getElementById('fixedAmountWrap');
+            var splitWrap = document.getElementById('splitCostWrap');
+            if (payToggle && payDetails) {
+                payToggle.addEventListener('change', function() {
+                    var on = payToggle.checked;
+                    payDetails.style.display = on ? 'block' : 'none';
+                    if (costOpts) costOpts.style.display = on ? 'flex' : 'none';
+                    if (on) { if (fixedWrap) fixedWrap.style.display = 'none'; if (splitWrap) splitWrap.style.display = 'none'; }
+                });
+            }
+            function syncPaymentMode() {
+                var c = document.querySelector('input[name="paymentMode"]:checked');
+                if (!c) return;
+                if (fixedWrap) fixedWrap.style.display = c.value === 'fixed_amount' ? 'flex' : 'none';
+                if (splitWrap) splitWrap.style.display = c.value === 'split_cost' ? 'flex' : 'none';
+            }
+            if (costOpts) {
+                costOpts.addEventListener('change', syncPaymentMode);
+                document.querySelectorAll('input[name="paymentMode"]').forEach(function(r) { r.addEventListener('change', syncPaymentMode); });
+            }
+            var visRadios = document.querySelectorAll('input[name="eventVisibility"]');
+            var visDesc = document.getElementById('visDesc');
+            if (visDesc && visRadios.length) {
+                function updateVisDesc() {
+                    var c = document.querySelector('input[name="eventVisibility"]:checked');
+                    visDesc.textContent = c && c.value === 'public' ? 'Shown in calendar, searchable, newsletter emails' : 'Via signup link only';
+                }
+                visRadios.forEach(function(r) { r.addEventListener('change', updateVisDesc); });
+                updateVisDesc();
+            }
+        })();
+    </script>
+</body>
+</html>

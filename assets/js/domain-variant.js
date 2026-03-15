@@ -131,31 +131,13 @@
     if (findBtn && show && findUrl) {
       findBtn.setAttribute('href', findUrl);
       findBtn.href = findUrl;
-      findBtn.setAttribute('target', '_blank');
-      findBtn.setAttribute('rel', 'noopener noreferrer');
-      findBtn.setAttribute('title', 'Find your group in WhatsApp');
-      if (!findBtn.querySelector('img')) {
-        const img = document.createElement('img');
-        img.src = 'assets/images/wAppII.png';
-        img.alt = 'WhatsApp';
-        img.style.width = '22px';
-        img.style.height = '22px';
-        img.style.verticalAlign = 'middle';
-        img.style.marginRight = '8px';
-        img.style.display = 'inline-block';
-        findBtn.innerHTML = '';
-        findBtn.appendChild(img);
-        findBtn.appendChild(document.createTextNode(' - Find your group'));
-      }
-      findBtn.href = findUrl;
-      findBtn.setAttribute('href', findUrl);
     }
     const learnBtn = document.querySelector('a[data-track-cta="hero_learn_more_click"]');
     if (learnBtn && show && learnUrl) {
       learnBtn.setAttribute('href', learnUrl);
       learnBtn.href = learnUrl;
       if (learnText) learnBtn.textContent = learnText;
-      learnBtn.setAttribute('title', 'Discover our WhatsApp community groups and activities');
+      if (learnText) learnBtn.setAttribute('title', learnText);
     }
   }
 
